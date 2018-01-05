@@ -203,7 +203,7 @@ A design principle for data structure API function calls is that functions that 
 - binary file - reads and writes binary files (linux and unix-like OS only) [Binary_File](documentation/Binary_File.md)
 - directory - create, delete, list directories (linux and unix-like OS only) [Directory](documentation/Directory.md)
 - input file reader - reads lines from text file, parses into tokens  (linux and unix-like OS only) [Input_File_Reader](documentation/Input_File_Reader.md)
-- raw buffer - reads and writes basic types of different sizes and endinness to and from a byte array [Raw_Buffer](documentation/Raw_Buffer.md)
+- raw buffer - reads and writes basic types of different sizes and endianness to and from a byte array [Raw_Buffer](documentation/Raw_Buffer.md)
 
 ###Protocols
 
