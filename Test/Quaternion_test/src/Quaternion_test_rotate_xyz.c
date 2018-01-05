@@ -1,0 +1,136 @@
+/**
+ @file Quaternion_test_rotate_xyz.c
+ @author Greg Lee
+ @version 1.0.0
+ @brief: "tests for Quaternion_make"
+ @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
+
+ @section License
+ 
+ Copyright 2018 Greg Lee
+ Licensed under the Eiffel Forum License, Version 2 (EFL-2.0)
+ 
+ @section Description
+
+ Unit tests for Quaternion_make.
+
+*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "CUnit/Basic.h"
+
+#include "f_Quaternion.h"
+#include "d_Quaternion.h"
+
+int
+add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
+
+/**
+   test_rotate_xyz_1
+*/
+
+void test_rotate_xyz_1( void )
+{
+   f_quaternion_t *fq = NULL;
+   float32_t *array = NULL;
+
+   fq = f_quaternion_make_from_roll_pitch_yaw( 0.0, 0.0, 0.0 );
+   array = f_quaternion_rotate_xyz( fq, 1.0, 0.0, 0.0 );
+
+   CU_ASSERT( fq != NULL );
+   CU_ASSERT( array != NULL );
+   CU_ASSERT( fabs( array[0] - 1.0 ) < 0.00001 );
+   CU_ASSERT( fabs( array[1] ) < 0.00001 );
+   CU_ASSERT( fabs( array[2] ) < 0.00001 );
+
+   free( array );
+   f_quaternion_dispose( fq );
+
+   fq = f_quaternion_make_from_roll_pitch_yaw( 0.0, M_PI/2.0, 0.0);
+   array = f_quaternion_rotate_xyz( fq, 1.0, 0.0, 0.0 );
+
+   CU_ASSERT( fq != NULL );
+   CU_ASSERT( array != NULL );
+   CU_ASSERT( fabs( array[0] ) < 0.00001 );
+   CU_ASSERT( fabs( array[1] ) < 0.00001 );
+   CU_ASSERT( fabs( array[2] + 1.0 ) < 0.00001 );
+
+   free( array );
+   f_quaternion_dispose( fq );
+
+   return;
+}
+
+/**
+   test_rotate_xyz_2
+*/
+void test_rotate_xyz_2( void )
+{
+   d_quaternion_t *dq = NULL;
+   float64_t *array = NULL;
+
+   dq = d_quaternion_make_from_roll_pitch_yaw( 0.0, 0.0, 0.0 );
+   array = d_quaternion_rotate_xyz( dq, 1.0, 0.0, 0.0 );
+
+   CU_ASSERT( dq != NULL );
+   CU_ASSERT( array != NULL );
+   CU_ASSERT( fabs( array[0] - 1.0 ) < 0.00001 );
+   CU_ASSERT( fabs( array[1] ) < 0.00001 );
+   CU_ASSERT( fabs( array[2] ) < 0.00001 );
+
+   free( array );
+   d_quaternion_dispose( dq );
+
+   dq = d_quaternion_make_from_roll_pitch_yaw( 0.0, M_PI/2.0, 0.0);
+   array = d_quaternion_rotate_xyz( dq, 1.0, 0.0, 0.0 );
+
+   CU_ASSERT( dq != NULL );
+   CU_ASSERT( array != NULL );
+   CU_ASSERT( fabs( array[0] ) < 0.00001 );
+   CU_ASSERT( fabs( array[1] ) < 0.00001 );
+   CU_ASSERT( fabs( array[2] + 1.0 ) < 0.00001 );
+
+   free( array );
+   d_quaternion_dispose( dq );
+
+   return;
+}
+
+
+int
+add_test_rotate_xyz( void )
+{
+   CU_pSuite p_suite = NULL;
+
+   // add a suite for these tests to the registry
+   p_suite = CU_add_suite("suite_test_rotate_xyz", NULL, NULL);
+   if (NULL == p_suite)
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   // add the tests to the suite
+
+   // test_rotate_xyz_1
+   add_test_to_suite( p_suite, test_rotate_xyz_1, "test_rotate_xyz_1" );
+
+   // test_rotate_xyz_2
+   add_test_to_suite( p_suite, test_rotate_xyz_2, "test_rotate_xyz_2" );
+
+   return CUE_SUCCESS;
+
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+/* End of file */
+
