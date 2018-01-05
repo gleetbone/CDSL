@@ -16,7 +16,7 @@ This project is a library of data structures and related utilities written in C.
 
 ###Quick Start
 
-If you're like me, you may want to just get to the code and start working. Begin with singly linked lists - look at the Slist and Test/SList_test/src directories and see how int_SList.c and int_SList.h are constructed. See how the SList data structure is used in the test files. Come back to this readme file when you're ready for more information.
+If you're like me, you may want to just get to the code and start working. Begin with singly linked lists - look at the SList and Test/SList_test/src directories and see how int_SList.c and int_SList.h are constructed. See how the SList data structure is used in the test files. Come back to this readme file when you're ready for more information.
 
 ###License
 
