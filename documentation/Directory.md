@@ -1,7 +1,7 @@
-#Directory
+# Directory
 
 This data structure has a function API for working with directories.
 
-###Protocols Supported
+### Protocols Supported
 
 none
