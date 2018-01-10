@@ -1,4 +1,0 @@
-tipc_type_id 300
-tipc_instance_id 1000
-component_id 100
-
