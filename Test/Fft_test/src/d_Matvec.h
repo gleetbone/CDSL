@@ -23,7 +23,10 @@
 extern "C" {
 #endif
 
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix d
 #define Type double

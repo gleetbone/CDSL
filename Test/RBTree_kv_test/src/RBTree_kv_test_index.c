@@ -1,7 +1,7 @@
 /**
  @file RBTree_kv_test_index.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_kv_forth"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_kv_forth.
+ Unit tests for RBTree_kv_t
 
 */
 
@@ -36,28 +36,28 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_index_1( void )
 {
-   ii_rbtree_kv_t *list = NULL;
+   ii_rbtree_kv_t *rbtree = NULL;
 
-   list = ii_rbtree_kv_make();
+   rbtree = ii_rbtree_kv_make();
    
-   ii_rbtree_kv_put( list, 240, 24 );
-   ii_rbtree_kv_put( list, 130, 13 );
+   ii_rbtree_kv_put( rbtree, 240, 24 );
+   ii_rbtree_kv_put( rbtree, 130, 13 );
 
-   CU_ASSERT( ii_rbtree_kv_index( list ) == -1 );
+   CU_ASSERT( ii_rbtree_kv_index( rbtree ) == -1 );
 
-   ii_rbtree_kv_start( list );
+   ii_rbtree_kv_start( rbtree );
 
-   CU_ASSERT( ii_rbtree_kv_index( list ) == 0 );
+   CU_ASSERT( ii_rbtree_kv_index( rbtree ) == 0 );
 
-   ii_rbtree_kv_forth( list );
+   ii_rbtree_kv_forth( rbtree );
    
-   CU_ASSERT( ii_rbtree_kv_index( list ) == 1 );
+   CU_ASSERT( ii_rbtree_kv_index( rbtree ) == 1 );
 
-   ii_rbtree_kv_forth( list );
+   ii_rbtree_kv_forth( rbtree );
 
-   CU_ASSERT( ii_rbtree_kv_index( list ) == -1 );
+   CU_ASSERT( ii_rbtree_kv_index( rbtree ) == -1 );
 
-   ii_rbtree_kv_dispose( list );
+   ii_rbtree_kv_dispose( &rbtree );
 
    return;
 }

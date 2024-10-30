@@ -1,8 +1,8 @@
 /**
  @file raw_buffer_test_read_string_zero_terminated.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for soa_node_iterator_make_str"
+ @version 2.0.0
+ @brief: "tests for raw_buffer_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_iterator_make_str.
+ Unit tests for raw_buffer_t
 
 */
 
@@ -43,8 +43,8 @@ void test_read_string_zero_terminated_1( void )
 
    CU_ASSERT( string_is_equal_cstring( value, "" ) == 1 );
       
-   raw_buffer_dispose_with_contents( raw_buffer );
-   string_dispose_with_contents( value );
+   raw_buffer_deep_dispose( &raw_buffer );
+   string_deep_dispose( &value );
 
    return;
 }
@@ -66,8 +66,8 @@ void test_read_string_zero_terminated_2( void )
 
    CU_ASSERT( string_is_equal_cstring( value, "ABC" ) == 1 );
    
-   raw_buffer_dispose_with_contents( raw_buffer );
-   string_dispose_with_contents( value );
+   raw_buffer_deep_dispose( &raw_buffer );
+   string_deep_dispose( &value );
 
    return;
 }

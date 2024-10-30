@@ -1,7 +1,7 @@
 /**
  @file Queue_test_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Queue_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -44,7 +44,7 @@ void test_make_1( void )
    CU_ASSERT( int_queue_count( queue ) == 0 );
    CU_ASSERT( int_queue_is_empty( queue ) == 1 );
  
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }

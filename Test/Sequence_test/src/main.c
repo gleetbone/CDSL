@@ -1,5 +1,5 @@
 /*
-   Tests for sequence
+   Tests for Sequence_t
 */
 
 #include <stdlib.h>
@@ -26,7 +26,7 @@ int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
 add_test_item( void );
@@ -71,13 +71,25 @@ int
 add_test_deep_clone( void );
 
 int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
 add_test_as_array( void );
 
 int
 add_test_protocol( void );
 
 int
-add_test_p_clonable( void );
+add_test_p_basic( void );
 
 int
 add_test_p_indexable( void );
@@ -86,7 +98,7 @@ add_test_p_indexable( void );
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name )
 {
-   // add the test to the suite
+   // add the test to the suitemain
 
    // test_make_1
    CU_pTest p_test = CU_add_test( p_suite, name, test );
@@ -125,7 +137,7 @@ int main()
    add_test_make_n();
    add_test_make_from_array();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_deep_dispose();
    add_test_item();
    add_test_count();
    add_test_capacity();
@@ -140,9 +152,13 @@ int main()
    add_test_set_capacity();
    add_test_clone();
    add_test_deep_clone();
+   add_test_copy();
+   add_test_deep_copy();
+   add_test_is_equal();
+   add_test_is_deep_equal();
    add_test_as_array();
    add_test_protocol();
-   add_test_p_clonable();
+   add_test_p_basic();
    add_test_p_indexable();
 
 

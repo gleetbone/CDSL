@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_index.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_forth"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_forth.
+ Unit tests for RBTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_RBTree.h"
+#include "s_RBTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,28 +37,63 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_index_1( void )
 {
-   i_rbtree_t *list = NULL;
+   i_rbtree_t *tree = NULL;
 
-   list = i_rbtree_make();
+   tree = i_rbtree_make();
    
-   i_rbtree_put( list, 24 );
-   i_rbtree_put( list, 13 );
+   i_rbtree_put( tree, 24 );
+   i_rbtree_put( tree, 13 );
 
-   CU_ASSERT( i_rbtree_index( list ) == -1 );
+   CU_ASSERT( i_rbtree_index( tree ) == -1 );
 
-   i_rbtree_start( list );
+   i_rbtree_start( tree );
 
-   CU_ASSERT( i_rbtree_index( list ) == 0 );
+   CU_ASSERT( i_rbtree_index( tree ) == 0 );
 
-   i_rbtree_forth( list );
+   i_rbtree_forth( tree );
    
-   CU_ASSERT( i_rbtree_index( list ) == 1 );
+   CU_ASSERT( i_rbtree_index( tree ) == 1 );
 
-   i_rbtree_forth( list );
+   i_rbtree_forth( tree );
 
-   CU_ASSERT( i_rbtree_index( list ) == -1 );
+   CU_ASSERT( i_rbtree_index( tree ) == -1 );
 
-   i_rbtree_dispose( list );
+   i_rbtree_dispose( &tree );
+
+   return;
+}
+
+/**
+   test_index_2
+*/
+
+void test_index_2( void )
+{
+   s_rbtree_t *rbtree = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   rbtree = s_rbtree_make();
+   
+   s_rbtree_put( rbtree, s2 );
+   s_rbtree_put( rbtree, s1 );
+
+   CU_ASSERT( s_rbtree_index( rbtree ) == -1 );
+
+   s_rbtree_start( rbtree );
+
+   CU_ASSERT( s_rbtree_index( rbtree ) == 0 );
+
+   s_rbtree_forth( rbtree );
+   
+   CU_ASSERT( s_rbtree_index( rbtree ) == 1 );
+
+   s_rbtree_forth( rbtree );
+
+   CU_ASSERT( s_rbtree_index( rbtree ) == -1 );
+
+   s_rbtree_deep_dispose( &rbtree );
 
    return;
 }
@@ -79,6 +115,9 @@ add_test_index( void )
 
    // test_index_1
    add_test_to_suite( p_suite, test_index_1, "test_index_1" );
+
+   // test_index_2
+   add_test_to_suite( p_suite, test_index_2, "test_index_2" );
 
    return CUE_SUCCESS;
 

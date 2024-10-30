@@ -1,17 +1,17 @@
 /**
  @file Cable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Character strings implemented as a binary search tree of substrings"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque cable_t type.
@@ -54,8 +54,6 @@ extern "C" {
 /**
    defines
 */
-
-#define CABLE_TYPE 0xA5000501
 
 /**
    Additional "hidden" API functions
@@ -108,8 +106,8 @@ cable_capacity( cable_t *cable );
 
 enum rbcolor
 {
-    red,
-    black
+   red,
+   black
 };
 
 typedef enum rbcolor rbcolor_t;
@@ -158,8 +156,8 @@ typedef struct cable_cursor_struct cable_cursor_t;
 
 struct cable_struct
 {
-   int32_t type;
-   
+   int32_t _type;
+
    node_t root;   // pseudo root, helps avoid complexity in code
    int32_t count;
    int32_t str_count;
@@ -183,7 +181,11 @@ struct cable_cursor_struct
 };
 
 /**
-   local function redo_indices
+   local functions
+*/
+
+/**
+   redo_indices
 */
 
 static
@@ -192,17 +194,22 @@ redo_indices( cable_t *cable );
 
 /**
    black_path_count
+
+   counts number of black nodes in path to root
+
+   @param node the node to start from
+   @return count of black nodes
 */
 
 static
-int
+int32_t
 black_path_count( node_t *node )
 {
    int32_t result = 0;
    node_t *n = NULL;
-   
+
    n = node;
-   
+
    while( n != &null_node )
    {
       if ( (*n).color == black )
@@ -211,12 +218,17 @@ black_path_count( node_t *node )
       }
       n = (*n).parent;
    }
-   
+
    return ( result - 1 );
 }
 
 /**
    node_make
+
+   create a new cable node
+
+   @param cable the tree of nodes
+   @return the new node
 */
 
 static
@@ -225,6 +237,7 @@ node_make( cable_t *cable )
 {
    // allocate node
    node_t *node = ( node_t * ) calloc( 1, sizeof( node_t ) );
+   CHECK( "node allocated correctly", node != NULL );
 
    // set values
    (*node).index = 0;
@@ -239,6 +252,7 @@ node_make( cable_t *cable )
 
    // allocate string storage
    (*node).str = ( char_t * ) calloc( (*cable).str_length + 1, sizeof( char_t ) );
+   CHECK( "(*node).str allocated correctly", (*node).str != NULL );
 
    POSTCONDITION( "node not null", node != NULL );
    POSTCONDITION( "node str not null", (*node).str != NULL );
@@ -252,6 +266,12 @@ node_make( cable_t *cable )
 
 /**
    node_make_from
+
+   make a new node from an existing one
+
+   @param cable the tree of nodes
+   @param n the node to make the new one from
+   @return the new node
 */
 
 static
@@ -260,6 +280,7 @@ node_make_from( cable_t *cable, node_t *n )
 {
    // allocate node
    node_t *node = ( node_t * ) calloc( 1, sizeof( node_t ) );
+   CHECK( "node allocated correctly", node != NULL );
 
    // set values
    (*node).index = (*n).index;
@@ -274,6 +295,7 @@ node_make_from( cable_t *cable, node_t *n )
 
    // allocate string storage
    (*node).str = ( char_t * ) calloc( (*cable).str_length + 1, sizeof( char_t ) );
+   CHECK( "(*node).str allocated correctly", (*node).str != NULL );
 
    // copy string contents
    memcpy( (*node).str, (*n).str, (*cable).str_length );
@@ -290,6 +312,10 @@ node_make_from( cable_t *cable, node_t *n )
 
 /**
    node_dispose
+
+   dispose of a node
+
+   @param node the node to dispose
 */
 
 static
@@ -311,7 +337,7 @@ node_dispose( node_t *node )
    (*node).left = NULL;
    (*node).right = NULL;
    (*node).str = NULL;
-   
+
    // free node
    free( node );
 
@@ -319,20 +345,30 @@ node_dispose( node_t *node )
 }
 
 
+/**
+   node_has_index
+
+   does this node contain the desired index?
+
+   @param node the node to look at
+   @param index the desired indes
+   @return 1 if index is in node, 0 otherwise
+*/
+
 static
 int32_t
 node_has_index( node_t *n, int32_t index )
 {
    int32_t result = 0;
 
-   if ( 
-         ( index >= (*n).index ) 
-         && 
-         (
-            ( index < ( (*n).index + (*n).count ) )
-            ||
-            ( (*n).count ) == 0 )
-      )
+   if (
+      ( index >= (*n).index )
+      &&
+      (
+         ( index < ( (*n).index + (*n).count ) )
+         ||
+         ( (*n).count ) == 0 )
+   )
    {
       result = 1;
    }
@@ -342,6 +378,12 @@ node_has_index( node_t *n, int32_t index )
 
 /**
    node_for_index_recurse
+
+   look for the node that contains index, recursive
+
+   @param node the node to start looking at
+   @param index the desired index
+   @return the node with the desired index, NULL otherwise
 */
 
 static
@@ -389,6 +431,7 @@ node_for_index_recurse( node_t *node, int32_t index )
 
    @param cable cable_t instance
    @param index the index to query for
+   @return the node with the index or NULL if none
 */
 
 static
@@ -417,6 +460,7 @@ node_for_index( cable_t *cable, int32_t index )
    Return contents in node as cstring, not a copy
 
    @param cable cable_t instance
+   @return the entire string held in the cable as a C string
 */
 
 static
@@ -436,88 +480,102 @@ node_as_cstring( node_t *node )
 
 /**
    tree_rotate_left
+
    perform left rotation starting at node
+
+   @param cable the tree of nodes
+   @param node the node to rotate around
 */
 static
 void
 tree_rotate_left( cable_t *cable, node_t *node )
 {
-    node_t *child = NULL;
+   node_t *child = NULL;
 
-    // adjust tree so that node and child exchange levels and side
-    // node goes to left
+   // adjust tree so that node and child exchange levels and side
+   // node goes to left
 
-    if ( (*node).right != &null_node )
-    {
-       child = (*node).right;
-       (*node).right = (*child).left;
-   
-       if ( (*child).left != &null_node )
-       {
-           (*(*child).left).parent = node;
-       }
-   
-       (*child).parent = (*node).parent;
-   
-       if ( node == (*(*node).parent).left )
-       {
-          (*(*node).parent).left = child;
-       }
-       else
-       {
-          (*(*node).parent).right = child;
-       }
-   
-       (*child).left = node;
-       (*node).parent = child;
-    }
+   if ( (*node).right != &null_node )
+   {
+      child = (*node).right;
+      (*node).right = (*child).left;
 
-    return;
+      if ( (*child).left != &null_node )
+      {
+         ( *(*child).left ).parent = node;
+      }
+
+      (*child).parent = (*node).parent;
+
+      if ( node == ( *(*node).parent ).left )
+      {
+         ( *(*node).parent ).left = child;
+      }
+      else
+      {
+         ( *(*node).parent ).right = child;
+      }
+
+      (*child).left = node;
+      (*node).parent = child;
+   }
+
+   return;
 }
 
 /**
    tree_rotate_right
+
    perform right rotation starting at node
+
+   @param cable the tree of nodes
+   @param node the node to rotate around
 */
 static void
 tree_rotate_right( cable_t *cable, node_t *node )
 {
-    node_t *child = NULL;
+   node_t *child = NULL;
 
-    // adjust tree so that node and child exchange levels and side
-    // node goes to right
+   // adjust tree so that node and child exchange levels and side
+   // node goes to right
 
-    if ( (*node).left != &null_node )
-    {
-       child = (*node).left;
-       (*node).left = (*child).right;
-   
-       if ( (*child).right != &null_node )
-       {
-           (*(*child).right).parent = node;
-       }
-   
-       (*child).parent = (*node).parent;
-   
-       if ( node == (*(*node).parent).left )
-       {
-          (*(*node).parent).left = child;
-       }
-       else
-       {
-          (*(*node).parent).right = child;
-       }
-   
-       (*child).right = node;
-       (*node).parent = child;
-    }
-    
-    return;
+   if ( (*node).left != &null_node )
+   {
+      child = (*node).left;
+      (*node).left = (*child).right;
+
+      if ( (*child).right != &null_node )
+      {
+         ( *(*child).right ).parent = node;
+      }
+
+      (*child).parent = (*node).parent;
+
+      if ( node == ( *(*node).parent ).left )
+      {
+         ( *(*node).parent ).left = child;
+      }
+      else
+      {
+         ( *(*node).parent ).right = child;
+      }
+
+      (*child).right = node;
+      (*node).parent = child;
+   }
+
+   return;
 }
 
 
 /**
    tree_has_recurse
+
+   does the tree contain a node, recursive
+
+   @param node the node to start looking at
+   @param nx the node to look for
+   @return 1 if found, 0 otherwise
 */
 static
 int32_t
@@ -554,6 +612,7 @@ tree_has_recurse( node_t *node, node_t *nx )
 
    @param cable cable_t instance
    @param nx the node to query for
+   @return 1 if found, 0 otherwise
 */
 
 static
@@ -577,31 +636,40 @@ tree_has( cable_t *cable, node_t *nx )
 
 /**
    tree_sibling_of
+
    find sibling of node, if it exists
+
+   @param node the node to start with
+   @return the sibling, or NULL if not found
 */
-static 
+static
 node_t *
 tree_sibling_of( node_t *node )
 {
    node_t *result = NULL;
-   
+
    if ( (*node).parent != &null_node )
    {
-      if ( node == (*(*node).parent).left )
+      if ( node == ( *(*node).parent ).left )
       {
-         result = (*(*node).parent).right;
+         result = ( *(*node).parent ).right;
       }
       else
       {
-         result = (*(*node).parent).left;
+         result = ( *(*node).parent ).left;
       }
    }
-   
+
    return result;
 }
 
 /**
   tree_repair_put
+
+  fix up the red-black balanced binary search tree in cable after a put
+
+  @param cable the tree of nodes
+  @param node the node just added
 */
 
 static
@@ -609,82 +677,87 @@ void
 tree_repair_put( cable_t *cable, node_t *node )
 {
    node_t *n = NULL;
-   
+
    n = node;
-   
+
    // color the node red
    if ( n != &null_node )
    {
       (*n).color = red;
    }
-   
+
    // correct double red issues, if they exist
-   if ( 
-         ( n != &null_node ) 
-         && 
-         ( n != (*cable).root.left ) 
-         && 
-         ( (*(*n).parent).color == red ) 
-      ) 
+   if (
+      ( n != &null_node )
+      &&
+      ( n != (*cable).root.left )
+      &&
+      ( ( *(*n).parent ).color == red )
+   )
    {
-   
+
       // recolor up if more work needed
-      if ( (* tree_sibling_of( (*n).parent ) ).color == red ) 
+      if ( ( * tree_sibling_of( (*n).parent ) ).color == red )
       {
-         (*(*n).parent).color = black;
-         (* tree_sibling_of( (*n).parent ) ).color = black;
-         if ( (*(*n).parent).parent != &null_node )
+         ( *(*n).parent ).color = black;
+         ( * tree_sibling_of( (*n).parent ) ).color = black;
+         if ( ( *(*n).parent ).parent != &null_node )
          {
-            (*(*(*n).parent).parent).color = red;
-            tree_repair_put( cable, (*(*n).parent).parent );
+            ( *( *(*n).parent ).parent ).color = red;
+            tree_repair_put( cable, ( *(*n).parent ).parent );
          }
       }
-   
+
       // restructure for a parent who is the left child of the
       // grandparent. requires a single right rotation if n is
       // also a left child, or a left-right rotation otherwise
-      else if ( (*n).parent == (*(*(*n).parent).parent).left  ) 
+      else if ( (*n).parent == ( *( *(*n).parent ).parent ).left  )
       {
-         if ( n == (*(*n).parent).right ) 
+         if ( n == ( *(*n).parent ).right )
          {
             n = (*n).parent;
             tree_rotate_left( cable, n );
          }
-         (*(*n).parent).color = black ;
-         if ( (*(*n).parent).parent != &null_node )
+         ( *(*n).parent ).color = black ;
+         if ( ( *(*n).parent ).parent != &null_node )
          {
-            (*(*(*n).parent).parent).color = red;
-            tree_rotate_right( cable, (*(*n).parent).parent );
+            ( *( *(*n).parent ).parent ).color = red;
+            tree_rotate_right( cable, ( *(*n).parent ).parent );
          }
       }
-   
+
       // restructure for a parent who is the right child of the
       // grandparent. requires a single left rotation if n is
       // also a right child, or a right-left rotation otherwise
-      else if ( (*n).parent == (*(*(*n).parent).parent).right ) 
+      else if ( (*n).parent == ( *( *(*n).parent ).parent ).right )
       {
-         if ( n == (*(*n).parent).left  ) 
+         if ( n == ( *(*n).parent ).left  )
          {
             n = (*n).parent;
             tree_rotate_right( cable, n );
          }
-         (*(*n).parent).color = black;
-         if ( (*(*n).parent).parent != &null_node )
+         ( *(*n).parent ).color = black;
+         if ( ( *(*n).parent ).parent != &null_node )
          {
-            (*(*(*n).parent).parent).color = red;
-            tree_rotate_left( cable, (*(*n).parent).parent );
+            ( *( *(*n).parent ).parent ).color = red;
+            tree_rotate_left( cable, ( *(*n).parent ).parent );
          }
       }
    }
-   
+
    // color the root black
-   (*(*cable).root.left).color = black;
-   
+   ( *(*cable).root.left ).color = black;
+
    return;
 }
 
 /**
    tree_put
+
+   put a node into the tree of nodes
+
+   @param cable the tree of nodes
+   @param n the node to add
 */
 
 static
@@ -722,10 +795,10 @@ tree_put( cable_t *cable, node_t *n )
 
    // adjust its parent node
    if (
-         ( parent == &(*cable).root )
-         ||
-         ( (*n).index < (*parent).index )
-      )
+      ( parent == &(*cable).root )
+      ||
+      ( (*n).index < (*parent).index )
+   )
    {
       (*parent).left = n;
       tree_repair_put( cable, n );
@@ -737,7 +810,7 @@ tree_put( cable_t *cable, node_t *n )
    }
 
    // ensure tree root is black
-   (*(*cable).root.left).color = black;
+   ( *(*cable).root.left ).color = black;
 
    // increment count
    (*cable).count = (*cable).count + 1;
@@ -750,7 +823,10 @@ tree_put( cable_t *cable, node_t *n )
 
    repair the tree after a node has been deleted by rotating and repainting
    colors to restore the red-black tree's properties
- */
+
+   @param cable the tree of nodes
+   @param node the node where another node was just removed
+*/
 static
 void
 tree_repair_remove( cable_t *cable, node_t *node )
@@ -759,91 +835,91 @@ tree_repair_remove( cable_t *cable, node_t *node )
    node_t *sibling = NULL;
 
    n = node;
-   
+
    // while node is not tree root and is black
    while ( ( n != (*cable).root.left ) && ( (*n).color == black ) )
    {
-      if ( n == (*(*n).parent).left ) 
+      if ( n == ( *(*n).parent ).left )
       {
          // Pulled up node is a left child
-         sibling = (*(*n).parent).right;
-         if ( (*sibling).color == red ) 
+         sibling = ( *(*n).parent ).right;
+         if ( (*sibling).color == red )
          {
             if ( sibling != &null_node )
             {
                (*sibling).color = black;
             }
-            (*(*n).parent).color = red;
+            ( *(*n).parent ).color = red;
             tree_rotate_left( cable, (*n).parent );
-            sibling = (*(*n).parent).right;
+            sibling = ( *(*n).parent ).right;
          }
-          
-         if ( ( (*(*sibling).left).color == black ) && ( (*(*sibling).right).color == black ) ) 
+
+         if ( ( ( *(*sibling).left ).color == black ) && ( ( *(*sibling).right ).color == black ) )
          {
             if ( sibling != &null_node )
             {
                (*sibling).color = red;
             }
             n = (*n).parent;
-         } 
-         else 
+         }
+         else
          {
-            if ( (*(*sibling).right).color == black ) 
+            if ( ( *(*sibling).right ).color == black )
             {
-               (*(*sibling).left).color = black;
+               ( *(*sibling).left ).color = black;
                (*sibling).color = red;
                tree_rotate_right( cable, sibling );
-               sibling = (*(*n).parent).right;
+               sibling = ( *(*n).parent ).right;
             }
-              
-            (*sibling).color = (*(*n).parent).color;
-            (*(*n).parent).color = black;
-            (*(*sibling).right).color = black;
+
+            (*sibling).color = ( *(*n).parent ).color;
+            ( *(*n).parent ).color = black;
+            ( *(*sibling).right ).color = black;
             tree_rotate_left( cable, (*n).parent );
             n = (*cable).root.left;
          }
-      } 
-      else 
+      }
+      else
       {
          // pulled up node is a right child
-         sibling = (*(*n).parent).left;
-         if ( (*sibling).color == red ) 
+         sibling = ( *(*n).parent ).left;
+         if ( (*sibling).color == red )
          {
             (*sibling).color = black ;
-            (*(*n).parent).color = red;
+            ( *(*n).parent ).color = red;
             tree_rotate_right( cable, (*n).parent );
-            sibling = (*(*n).parent).left;
+            sibling = ( *(*n).parent ).left;
          }
-          
-         if ( ( (*(*sibling).left).color == black ) && ( (*(*sibling).right).color == black ) ) 
+
+         if ( ( ( *(*sibling).left ).color == black ) && ( ( *(*sibling).right ).color == black ) )
          {
             if ( sibling != &null_node )
             {
                (*sibling).color = red;
             }
             n = (*n).parent;
-         } 
-         else 
+         }
+         else
          {
-            if ( (*(*sibling).left).color == black ) 
+            if ( ( *(*sibling).left ).color == black )
             {
-               (*(*sibling).right).color = black;
+               ( *(*sibling).right ).color = black;
                (*sibling).color = red;
                tree_rotate_left( cable, sibling );
-               sibling = (*(*n).parent).left;
+               sibling = ( *(*n).parent ).left;
             }
-              
-            (*sibling).color = (*(*n).parent).color;
-            (*(*n).parent).color = black;
-            (*(*sibling).left).color = black;
+
+            (*sibling).color = ( *(*n).parent ).color;
+            ( *(*n).parent ).color = black;
+            ( *(*sibling).left ).color = black;
             tree_rotate_right( cable, (*n).parent );
             n = (*cable).root.left;
          }
       }
    }
-        
+
    (*n).color = black;
-   
+
    return;
 }
 
@@ -851,6 +927,10 @@ tree_repair_remove( cable_t *cable, node_t *node )
    tree_predecessor
 
    returns the node before node, or nil if none.
+
+   @param cable the tree of nodes
+   @param the node to start with
+   @return the predecessor of the node if any, NULL otherwise
 */
 static
 node_t *
@@ -868,37 +948,37 @@ tree_predecessor( cable_t *cable, node_t *node )
          result = (*result).right;
       }
    }
-   
+
 
    // in this file, the only time predecessor() is called occurs when "node"
    // is guaranteed to have a left child, so the following code would never
    // be executed. that's why it's commented out.
-/*   
-   else // node has no left child, move up until we find it or hit the root
-   {
-
-      node_t *n = NULL;
-      
-      result = (*node).parent;
-   
-      n = node;
-      
-      // walk up the tree looking for right child
-      while( n == (*result).left )
+   /*
+      else // node has no left child, move up until we find it or hit the root
       {
-         n = result;
-         result = (*result).parent;
-      }
 
-      // if we stopped at the pseudo root, return null
-      if ( result == &(*cable).root )
-      {
-         result = &null_node;
-      }
+         node_t *n = NULL;
 
-   }
-*/
-   
+         result = (*node).parent;
+
+         n = node;
+
+         // walk up the tree looking for right child
+         while( n == (*result).left )
+         {
+            n = result;
+            result = (*result).parent;
+         }
+
+         // if we stopped at the pseudo root, return null
+         if ( result == &(*cable).root )
+         {
+            result = &null_node;
+         }
+
+      }
+   */
+
    return( result );
 }
 
@@ -916,6 +996,11 @@ cursor_item( cable_cursor_t *cursor );
 
 /**
    tree_remove
+
+   remove a node from the tree
+
+   @param cable the tree of nodes
+   @param n the node to remove
 */
 static
 void
@@ -934,7 +1019,7 @@ tree_remove( cable_t *cable, node_t *n )
    rbcolor_t p_color = 0;
    node_t *p_left = NULL;
    node_t *p_right = NULL;
-   
+
    // get the node to be removed
    node = n;
 
@@ -942,7 +1027,7 @@ tree_remove( cable_t *cable, node_t *n )
    if ( node != &null_node )
    {
       // move cursor forth if pointing to this node
-      if ( (*(*cable).cursor).item == node )
+      if ( ( *(*cable).cursor ).item == node )
       {
          cursor_forth( (*cable).cursor );
       }
@@ -955,7 +1040,7 @@ tree_remove( cable_t *cable, node_t *n )
 
          // swap nodes pre and node in tree
          n_parent = (*node).parent;
-         if ( (*(*node).parent).left == node )
+         if ( ( *(*node).parent ).left == node )
          {
             n_is_parents_left = 1;
          }
@@ -963,13 +1048,13 @@ tree_remove( cable_t *cable, node_t *n )
          {
             n_is_parents_left = 0;
          }
-         
+
          n_color = (*node).color;
          n_left = (*node).left;
          n_right = (*node).right;
-         
+
          p_parent = (*pre).parent;
-         if ( (*(*pre).parent).left == pre )
+         if ( ( *(*pre).parent ).left == pre )
          {
             p_is_parents_left = 1;
          }
@@ -977,74 +1062,77 @@ tree_remove( cable_t *cable, node_t *n )
          {
             p_is_parents_left = 0;
          }
-         
+
          p_color = (*pre).color;
          p_left = (*pre).left;
          p_right = (*pre).right;
-         
+
          (*node).parent = p_parent;
          (*node).left = p_left;
          (*node).right = p_right;
          (*node).color = p_color;
-         
+
          if ( n_is_parents_left == 1 )
          {
-            (*n_parent).left = pre;
+            ( *n_parent ).left = pre;
          }
          else
          {
-            (*n_parent).right = pre;
+            ( *n_parent ).right = pre;
          }
 
-         (*n_left).parent = pre;
-         (*n_right).parent = pre;
-         
+         ( *n_left ).parent = pre;
+         ( *n_right ).parent = pre;
+
          (*pre).parent = n_parent;
          (*pre).left = n_left;
          (*pre).right = n_right;
          (*pre).color = n_color;
-         
+
          if ( p_parent == node )
          {
             (*node).parent = pre;
             (*pre).left = node;
-            
+
             if ( p_left != &null_node )
             {
-               (*p_left).parent = node;
+               ( *p_left ).parent = node;
             }
-            
-            if ( p_right != &null_node )
-            {
-               (*p_right).parent = node;
-            }
-            
+
+// the following commented out bit of code is never called when the tree invariants are true
+//            if ( p_right != &null_node )
+//            {
+//               (*p_right).parent = node;
+//            }
+
          }
          else
          {
-            if ( p_is_parents_left == 1 )
+// the following commented out bit of code is never called when the tree invariants are true
+//            if ( p_is_parents_left == 1 )
+//            {
+//               (*p_parent).left = node;
+//            }
+//            else
             {
-               (*p_parent).left = node;
+               ( *p_parent ).right = node;
             }
-            else
-            {
-               (*p_parent).right = node;
-            }
-   
+
             if ( p_left != &null_node )
             {
-               (*p_left).parent = node;
+               ( *p_left ).parent = node;
             }
-            
-            if ( p_right != &null_node )
-            {
-               (*p_right).parent = node;
-            }
-         
+
+// the following commented out bit of code is never called when the tree invariants are true
+//            if ( p_right != &null_node )
+//            {
+//               (*p_right).parent = node;
+//            }
+
          }
 
       }
-      
+
       // get the pull_up node
       if ( (*node).left != &null_node )
       {
@@ -1054,31 +1142,31 @@ tree_remove( cable_t *cable, node_t *n )
       {
          pull_up = (*node).right;
       }
-      
+
       // node has zero or one child
       if ( pull_up != &null_node )
       {
          // eliminate node from tree, adjust if pull_up is double black
-         
+
          if ( node == (*cable).root.left )
          {
             // eliminate tree root
             (*cable).root.left = pull_up;
-            (*pull_up).parent = &( (*cable).root );
+            ( *pull_up ).parent = &( (*cable).root );
          }
-         else if ( (*(*node).parent).left == node )
+         else if ( ( *(*node).parent ).left == node )
          {
-            // eliminate node parent's left 
-            (*(*node).parent).left = pull_up;
-            (*pull_up).parent = (*node).parent;
+            // eliminate node parent's left
+            ( *(*node).parent ).left = pull_up;
+            ( *pull_up ).parent = (*node).parent;
          }
          else
          {
             // eliminate node parent's right
-            (*(*node).parent).right = pull_up;
-            (*pull_up).parent = (*node).parent;
+            ( *(*node).parent ).right = pull_up;
+            ( *pull_up ).parent = (*node).parent;
          }
-         
+
          if ( (*node).color == black )
          {
             tree_repair_remove( cable, pull_up );
@@ -1096,37 +1184,42 @@ tree_remove( cable_t *cable, node_t *n )
          {
             tree_repair_remove( cable, node );
          }
-         
+
          // eliminate the node from the tree
          if ( (*node).parent != &null_node )
          {
-            if ( (*(*node).parent).left == node )
+            if ( ( *(*node).parent ).left == node )
             {
-               (*(*node).parent).left = &null_node;
+               ( *(*node).parent ).left = &null_node;
             }
-            else if ( (*(*node).parent).right == node )
+            else if ( ( *(*node).parent ).right == node )
             {
-               (*(*node).parent).right = &null_node;
+               ( *(*node).parent ).right = &null_node;
             }
             (*node).parent = &null_node;
          }
       }
-      
+
       // decrement count
       (*cable).count = (*cable).count - 1;
    }
 
    // dispose of node
    node_dispose( node );
-   
+
    return;
 }
 
 /**
    tree_count_recurse
+
+   get the node count of the tree, recursive
+
+   @param node the node to start with
+   @return the count of nodes
 */
 static
-int
+int32_t
 tree_count_recurse( node_t *node )
 {
    int32_t result = 0;
@@ -1135,7 +1228,7 @@ tree_count_recurse( node_t *node )
 
    if ( node == &null_node )
    {
-       result = 0;
+      result = 0;
    }
    else
    {
@@ -1151,9 +1244,14 @@ tree_count_recurse( node_t *node )
 
 /**
    tree_count
+
+   get the node count of the tree, recursive
+
+   @param cable the tree of nodes
+   @return the count of nodes
 */
 static
-int
+int32_t
 tree_count( cable_t *cable )
 {
    int32_t result = 0;
@@ -1173,6 +1271,10 @@ tree_count( cable_t *cable )
 
 /**
    cursor_finish
+
+   put the cursor at the end of the cable
+
+   @param cursor the cursor
 */
 static
 void
@@ -1181,7 +1283,7 @@ cursor_finish( cable_cursor_t *cursor )
    node_t *node = NULL;
 
    // set node from the cable root
-   node = (*(*cursor).cable).root.left;
+   node = ( *(*cursor).cable ).root.left;
 
    // walk to the rightmost node from the tree root
    while ( (*node).right != &null_node )
@@ -1197,6 +1299,10 @@ cursor_finish( cable_cursor_t *cursor )
 
 /**
    cursor_start
+
+   put the cursor at the start of the cable
+
+   @param cursor the cursor
 */
 static
 void
@@ -1205,7 +1311,7 @@ cursor_start( cable_cursor_t *cursor )
    node_t *node = NULL;
 
    // set node from the cable root
-   node = (*(*cursor).cable).root.left;
+   node = ( *(*cursor).cable ).root.left;
 
    // walk to the leftmost node from the tree root
    while ( (*node).left != &null_node )
@@ -1221,6 +1327,11 @@ cursor_start( cable_cursor_t *cursor )
 
 /**
    cursor_item
+
+   return the current node
+
+   @param cursor the cursor
+   @return the cursor's current node
 */
 static
 node_t *
@@ -1233,6 +1344,10 @@ cursor_item( cable_cursor_t *cursor )
 
 /**
    cursor_forth
+
+   put the cursor at the next node in the tree
+
+   @param cursor the cursor
 */
 static
 void
@@ -1278,6 +1393,11 @@ cursor_forth( cable_cursor_t *cursor )
 
 /**
    cursor_off
+
+   test to see if the cursor is at the end of the tree
+
+   @param cursor the cursor
+   @return 1 if at end, 0 otherwise
 */
 static
 int32_t
@@ -1287,10 +1407,10 @@ cursor_off(  cable_cursor_t *cursor )
 
    // cursor item is null_node or root == off
    if (
-         ( (*cursor).item == &(*(*cursor).cable).root )
-         ||
-         ( (*cursor).item == &null_node )
-      )
+      ( (*cursor).item == &( *(*cursor).cable ).root )
+      ||
+      ( (*cursor).item == &null_node )
+   )
    {
       result = 1;
    }
@@ -1300,6 +1420,13 @@ cursor_off(  cable_cursor_t *cursor )
 
 /**
    subcable_from_bounds
+
+   return a new cable made from an existing cable between a start and end index
+
+   @param cable the tree of nodes
+   @param start_index index of desired start of new cable
+   @param end_index index of desired end of new cable
+   @return a new cable starting at start_index and ending at end_index
 */
 
 static
@@ -1356,7 +1483,7 @@ subcable_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
       tree_put( result, n );
 
       // copy characters into new nodes
-      for ( i=start_index; i<=end_index; i++ )
+      for ( i = start_index; i <= end_index; i++ )
       {
 
          // get character in cable
@@ -1415,6 +1542,10 @@ subcable_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
 
 /**
    redo_indices
+
+   recalculate the start indices for each node in the cable
+
+   @param cable the cable
 */
 
 static
@@ -1449,6 +1580,12 @@ redo_indices( cable_t *cable )
 }
 /**
    remove_from_bounds
+
+   remove part of a cable between start_index and end_index
+
+   @param cable the tree of nodes
+   @param start_index index where to start removing characters
+   @param end_index index where to end removing characters
 */
 
 static
@@ -1483,7 +1620,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
       cp = (*n1).str;
 
       // move the chars after end_index up to start_index
-      for ( i = 0; i<n_to_move; i++ )
+      for ( i = 0; i < n_to_move; i++ )
       {
          cp[i + start_index - (*n1).index ] = cp[ i + end_index - (*n1).index + 1 ];
       }
@@ -1500,15 +1637,15 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
             (*cable).first = (*n1).next;
             if ( (*n1).next != NULL )
             {
-               (*(*n1).next).prev = NULL;
+               ( *(*n1).next ).prev = NULL;
             }
          }
          else
          {
-            (*(*n1).prev).next = (*n1).next;
+            ( *(*n1).prev ).next = (*n1).next;
             if ( (*n1).next != NULL )
             {
-               (*(*n1).next).prev = (*n1).prev;
+               ( *(*n1).next ).prev = (*n1).prev;
             }
          }
          tree_remove( cable, n1 );
@@ -1528,7 +1665,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
       (*n2).count = (*n2).count - length1;
 
       redo_indices( cable );
-         
+
       // now see if n1 and/or n2 is now empty; if so, remove
       if ( ( (*cable).str_count > 0 ) && ( (*n1).count == 0 ) && ( (*n2).count == 0 ) )
       {
@@ -1538,21 +1675,21 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
             (*cable).first = (*n2).next;
             if ( (*n2).next != NULL )
             {
-               (*(*n2).next).prev = NULL;
+               ( *(*n2).next ).prev = NULL;
             }
          }
          else
          {
-            (*(*n1).prev).next = (*n2).next;
+            ( *(*n1).prev ).next = (*n2).next;
             if ( (*n2).next != NULL )
             {
-               (*(*n2).next).prev = (*n1).prev;
+               ( *(*n2).next ).prev = (*n1).prev;
             }
          }
          tree_remove( cable, n1 );
          tree_remove( cable, n2 );
          redo_indices( cable );
-      }      
+      }
       else if ( ( (*cable).str_count == 0 ) && ( (*n1).count == 0 ) && ( (*n2).count == 0 ) )
       {
          // cable is empty, both n1 and n2 are empty, remove n2
@@ -1560,7 +1697,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
          (*n1).next = NULL;
          tree_remove( cable, n2 );
          redo_indices( cable );
-      }      
+      }
       else if ( ( (*cable).str_count > 0 ) && ( (*n1).count ==  0 ) )
       {
          if ( n1 == (*cable).first )
@@ -1570,10 +1707,10 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
          }
          else
          {
-            (*(*n1).prev).next = (*n1).next;
+            ( *(*n1).prev ).next = (*n1).next;
             if ( (*n1).next != NULL )
             {
-               (*(*n1).next).prev = (*n1).prev;
+               ( *(*n1).next ).prev = (*n1).prev;
             }
          }
          tree_remove( cable, n1 );
@@ -1584,7 +1721,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
          (*n1).next = (*n2).next;
          if ( (*n2).next != NULL )
          {
-            (*(*n2).next).prev = n1;
+            ( *(*n2).next ).prev = n1;
          }
          tree_remove( cable, n2 );
          redo_indices( cable );
@@ -1595,7 +1732,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
    // not neighbor nodes
    else
    {
-	  // delete nodes between n1 and n2
+      // delete nodes between n1 and n2
       node = (*n1).next;
       while( node != n2 )
       {
@@ -1629,10 +1766,10 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
          }
          else
          {
-            (*(*n1).prev).next = (*n1).next;
+            ( *(*n1).prev ).next = (*n1).next;
             if ( (*n1).next != NULL )
             {
-               (*(*n1).next).prev = (*n1).prev;
+               ( *(*n1).next ).prev = (*n1).prev;
             }
             nx = (*n1).prev;
          }
@@ -1648,7 +1785,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
             (*cable).first = (*n2).next;
             if ( (*n2).next != NULL )
             {
-               (*(*n2).next).prev = NULL;
+               ( *(*n2).next ).prev = NULL;
             }
          }
          else
@@ -1656,7 +1793,7 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
             (*n1).next = (*n2).next;
             if ( (*n2).next != NULL )
             {
-               (*(*n2).next).prev = n1;
+               ( *(*n2).next ).prev = n1;
             }
          }
          tree_remove( cable, n2 );
@@ -1670,6 +1807,12 @@ remove_from_bounds( cable_t *cable, int32_t start_index, int32_t end_index )
 
 /**
    insert_at_index
+
+   insert count characters at index in a cable
+
+   @param cable the tree of nodes
+   @param index where to insert new characters
+   @param how many (zero-valued) characters to insert at index
 */
 
 static
@@ -1723,17 +1866,17 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
          tree_put( cable, node );
          node1 = node;
       }
-      
-         // remove node with zero count, if any
-         if ( (*nodex).count == 0 )
-         {
-            (*cable).first = (*nodex).next;
-            (*(*cable).first).prev = NULL;
-            
-            // remove from tree and dispose of node
-            tree_remove( cable, nodex );
-            
-         }
+
+      // remove node with zero count, if any
+      if ( (*nodex).count == 0 )
+      {
+         (*cable).first = (*nodex).next;
+         ( *(*cable).first ).prev = NULL;
+
+         // remove from tree and dispose of node
+         tree_remove( cable, nodex );
+
+      }
    }
    else
    {
@@ -1744,7 +1887,7 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
          cp1 = (*n1).str;
          n2 = (*n1).next;
       }
-   
+
       // see if count chars will fit in n1
       if ( ( (*n1).count + count ) <= (*cable).str_length )
       {
@@ -1754,7 +1897,7 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
             memmove( (*n1).str, &(  (*n1).str[ (*n1).start ] ), (*n1).count );
             (*n1).start = 0;
          }
-   
+
          // and move chars after (*n1).count
          memmove
          (
@@ -1762,10 +1905,10 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
             &( (*n1).str[ index - (*n1).index ] ),
             (*n1).count - ( index - (*n1).index )
          );
-   
+
          // adjust node count
          (*n1).count = (*n1).count + count;
-   
+
          redo_indices( cable );
       }
       // add new node(s) to hold new chars
@@ -1774,17 +1917,17 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
          // first, split n1 into two nodes at index
          node = node_make( cable );
          cp = (*node).str;
-   
+
          // adjust pointers
          (*node).next = (*n1).next;
          (*node).prev = n1;
          (*n1).next = node;
-   
+
          if ( (*node).next != NULL )
          {
-            (*(*node).next).prev = node;
+            ( *(*node).next ).prev = node;
          }
-   
+
          // move chars after index to new node
          memmove
          (
@@ -1792,15 +1935,15 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
             &( cp1[ (*n1).start + index - (*n1).index ] ),
             (*n1).count - ( index - (*n1).index + (*n1).start )
          );
-   
+
          (*node).count = (*n1).count - ( index - (*n1).index + (*n1).start );
          (*n1).count = index - (*n1).index - (*n1).start;
-   
+
          // haven't added any chars yet, now do so one node at a time
          length = 0;
          node1 = node;
          nodex = n1;
-   
+
          while ( count - length > 0 )
          {
             node = node_make( cable );
@@ -1824,13 +1967,13 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
             }
             nodex = node;
          }
-   
+
          redo_indices( cable );
-            
+
          // remove nodes with zero count, if any
          node1 = (*cable).first;
          nodex = (*node1).next;
-         
+
          while ( (*node1).count == 0 )
          {
             // update n1 if it has count of 0
@@ -1838,17 +1981,17 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
             {
                n1 = (*node1).next;
             }
-            
+
             (*nodex).prev = NULL;
             (*cable).first = nodex;
-            
+
             // remove from tree and dispose of node
             tree_remove( cable, node1 );
-            
+
             node1 = (*cable).first;
             nodex = (*node1).next;
          }
-         
+
          while( nodex != n2 )
          {
             if ( (*nodex).count == 0 )
@@ -1858,17 +2001,17 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
                {
                   n1 = (*nodex).next;
                }
-               
+
                // take nodex out of linked list
                (*node1).next = (*nodex).next;
                if ( (*nodex).next != NULL )
                {
-                  (*(*nodex).next).prev = node1;
+                  ( *(*nodex).next ).prev = node1;
                }
-   
+
                // remove from tree and dispose of node
                tree_remove( cable, nodex );
-   
+
                // prepare for next iteration
                nodex = (*node1).next;
             }
@@ -1879,13 +2022,13 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
                nodex = (*nodex).next;
             }
          }
-   
+
          // redo indices
          redo_indices( cable );
-   
+
          // put new nodes into tree
          node = n1;
-   
+
          while( node != n2 )
          {
             if ( tree_has( cable, node ) == 0 )
@@ -1896,12 +2039,21 @@ insert_at_index( cable_t *cable, int32_t index, int32_t count )
          }
       }
    }
-   
+
    return;
 }
 
 /**
    substring_index_in_bounds
+
+   checks to see if characters in other are the same as the characters in cable
+   from start_index to end_index
+
+   @param cable the cable to compare to
+   @param other the cable to compare
+   @param start_index where to start comparing
+   @param end_index where to end comparint
+   @return -1 if match not found, >= 0 otherwise
 */
 static
 int32_t
@@ -1955,7 +2107,7 @@ substring_index_in_bounds
       result = -1;
 
       // see if this spot in cable is equal to other
-      for ( i=start_index; i<=end_index; i++ )
+      for ( i = start_index; i <= end_index; i++ )
       {
          // cable access starting at index i
          nodex = node;
@@ -1971,7 +2123,7 @@ substring_index_in_bounds
          count1 = (*node1).count;
 
          // compare other to this spot in cable
-         for ( j=0; j<length1; j++ )
+         for ( j = 0; j < length1; j++ )
          {
             // get character in cable
             c = cpx[ i - indexx + j ];
@@ -2037,6 +2189,15 @@ substring_index_in_bounds
 
 /**
    substring_index_in_bounds_cstring
+
+   checks to see if characters in other are the same as the characters in cable
+   from start_index to end_index
+
+   @param cable the cable to compare to
+   @param other the cstring to compare
+   @param start_index where to start comparing
+   @param end_index where to end comparint
+   @return -1 if match not found, >= 0 otherwise
 */
 static
 int32_t
@@ -2087,7 +2248,7 @@ substring_index_in_bounds_cstring
       result = -1;
 
       // see if this spot in cable is equal to other
-      for ( i=start_index; i<=end_index; i++ )
+      for ( i = start_index; i <= end_index; i++ )
       {
          // cable access starting at index i
          nodex = node;
@@ -2097,7 +2258,7 @@ substring_index_in_bounds_cstring
          flag = 1;
 
          // compare other to this spot in cable
-         for ( j=0; j<length1; j++ )
+         for ( j = 0; j < length1; j++ )
          {
             // get character in cable
             c = cpx[ i - indexx + j ];
@@ -2153,6 +2314,12 @@ substring_index_in_bounds_cstring
 
 /**
    replace_at_index
+
+   replace contents of cable with contents of other at start_index
+
+   @param cable the tree of nodes
+   @param other the other cable
+   @param start_index where to replace contents of cable with other
 */
 static
 void
@@ -2195,7 +2362,7 @@ replace_at_index
    count1 = (*node1).count;
 
    // write over cable with other's contents
-   for ( i=start_index, j=0; i<=start_index + length1 - 1; i++, j++ )
+   for ( i = start_index, j = 0; i <= start_index + length1 - 1; i++, j++ )
    {
       // get character in other
       c = cp1[ j - index1 ];
@@ -2234,6 +2401,12 @@ replace_at_index
 
 /**
    replace_at_index_cstring
+
+   replace contents of cable with contents of other at start_index
+
+   @param cable the tree of nodes
+   @param other the other cstring
+   @param start_index where to replace contents of cable with other
 */
 static
 void
@@ -2267,7 +2440,7 @@ replace_at_index_cstring
    count = (*node).count;
 
    // write over cable with other's contents
-   for ( i=start_index, j=0; i<=start_index + length1 - 1; i++, j++ )
+   for ( i = start_index, j = 0; i <= start_index + length1 - 1; i++, j++ )
    {
       // get character in other
       c = other[ j ];
@@ -2357,14 +2530,14 @@ in_order_recurse( node_t *node )
 
    if ( (*node).left != &null_node )
    {
-      result = ( (*(*node).left).index < (*node).index );
+      result = ( ( *(*node).left ).index < (*node).index );
    }
 
    if ( result == 1 )
    {
       if ( (*node).right != &null_node )
       {
-         result = ( (*node).index < (*(*node).right).index );
+         result = ( (*node).index < ( *(*node).right ).index );
       }
    }
 
@@ -2409,7 +2582,7 @@ root_is_black( cable_t *p )
 
    if ( (*p).root.left != &null_node )
    {
-      result = ( (*(*p).root.left).color == black );
+      result = ( ( *(*p).root.left ).color == black );
    }
 
    return result;
@@ -2559,7 +2732,7 @@ sequence_ok( cable_t *p )
    result = ( node1 == node2 );
 
    // loop to compare each node in both iterations
-   for ( i=1; ( i<(*p).count ) && ( result == 1 ); i++ )
+   for ( i = 1; ( i < (*p).count ) && ( result == 1 ); i++ )
    {
       node1 = (*node1).next;
       cursor_forth( cursor );
@@ -2618,27 +2791,27 @@ node_colors_ok_recurse( node_t *node )
    {
       if ( (*node).left != &null_node )
       {
-         result = ( (*(*node).left).color == black );
+         result = ( ( *(*node).left ).color == black );
       }
       if ( result == 1 )
       {
          if ( (*node).right != &null_node )
          {
-            result = ( (*(*node).right).color == black );
+            result = ( ( *(*node).right ).color == black );
          }
       }
    }
-   
+
    if ( ( result == 1 ) && ( (*node).left != &null_node ) )
    {
       result = node_colors_ok_recurse( (*node).left );
    }
-   
+
    if ( ( result == 1 ) && ( (*node).right != &null_node ) )
    {
       result = node_colors_ok_recurse( (*node).right );
    }
-   
+
    return result;
 }
 
@@ -2686,12 +2859,12 @@ path_black_count_ok_recurse( node_t *node, int32_t *the_count )
    {
       result = path_black_count_ok_recurse( (*node).left, the_count );
    }
-   
+
    if ( ( result == 1 ) && ( (*node).right != &null_node ) )
    {
       result = path_black_count_ok_recurse( (*node).right, the_count );
    }
-   
+
    return result;
 }
 
@@ -2713,19 +2886,19 @@ path_black_count_ok( cable_t *p )
 static
 void invariant( cable_t *p )
 {
-   assert(((void) "nonnegative count", nonnegative_count( p ) ));
-   assert(((void) "valid count", valid_count( p ) ));
-   assert(((void) "cursor not null", cursor_not_null( p ) ));
-   assert(((void) "cable in order", in_order( p ) ));
-   assert(((void) "root is black", root_is_black( p ) ));
-   assert(((void) "null node ok", null_node_ok( p ) ));
-   assert(((void) "nonnegative string count", nonnegative_str_count( p ) ));
-   assert(((void) "valid string count", valid_str_count( p ) ));
-   assert(((void) "indices ok", indices_ok( p ) ));
-   assert(((void) "sequence ok", sequence_ok( p ) ));
-   assert(((void) "links ok", links_ok( p ) ));
-   assert(((void) "node colors ok", node_colors_ok( p ) ));
-   assert(((void) "path black count ok", path_black_count_ok( p ) ));
+   assert( ( ( void ) "nonnegative count", nonnegative_count( p ) ) );
+   assert( ( ( void ) "valid count", valid_count( p ) ) );
+   assert( ( ( void ) "cursor not null", cursor_not_null( p ) ) );
+   assert( ( ( void ) "cable in order", in_order( p ) ) );
+   assert( ( ( void ) "root is black", root_is_black( p ) ) );
+   assert( ( ( void ) "null node ok", null_node_ok( p ) ) );
+   assert( ( ( void ) "nonnegative string count", nonnegative_str_count( p ) ) );
+   assert( ( ( void ) "valid string count", valid_str_count( p ) ) );
+   assert( ( ( void ) "indices ok", indices_ok( p ) ) );
+   assert( ( ( void ) "sequence ok", sequence_ok( p ) ) );
+   assert( ( ( void ) "links ok", links_ok( p ) ) );
+   assert( ( ( void ) "node colors ok", node_colors_ok( p ) ) );
+   assert( ( ( void ) "path black count ok", path_black_count_ok( p ) ) );
    return;
 }
 
@@ -2739,7 +2912,7 @@ static
 void
 init_null_node( void )
 {
-   
+
    // set null node - self referencing
    if ( null_node_initialized == 0 )
    {
@@ -2749,7 +2922,7 @@ init_null_node( void )
       null_node.color = black;
       null_node_initialized = 1;
    }
-   
+
    return;
 }
 
@@ -2761,54 +2934,55 @@ cable_t *
 cable_make( void )
 {
    // allocate cable struct
-   cable_t * cable
-      = ( cable_t * ) calloc( 1, sizeof( cable_t ) );
+   cable_t * result = ( cable_t * ) calloc( 1, sizeof( cable_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set null node - self referencing
    init_null_node();
 
    // set type
-   (*cable).type = CABLE_TYPE;
-   
+   (*result)._type = CABLE_TYPE;
+
    // set string length
-   (*cable).str_length = DEFAULT_STRING_LENGTH;
+   (*result).str_length = DEFAULT_STRING_LENGTH;
 
    // set pseudo root node
-   (*cable).root.left = &null_node;
-   (*cable).root.right = &null_node;
-   (*cable).root.parent = &null_node;
-   (*cable).root.color = black;
+   (*result).root.left = &null_node;
+   (*result).root.right = &null_node;
+   (*result).root.parent = &null_node;
+   (*result).root.color = black;
 
    // count is zero
-   (*cable).count = 0;
-   (*cable).str_count = 0;
+   (*result).count = 0;
+   (*result).str_count = 0;
 
    // set built-in cursor
    // allocate cursor struct
    cable_cursor_t *cursor
       =  ( cable_cursor_t * )
          calloc( 1, sizeof( cable_cursor_t ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
 
    // set cable
-   (*cursor).cable = cable;
+   (*cursor).cable = result;
 
    // set item to NULL - cursor is "off"
    (*cursor).item = &null_node;
 
    // set cable built-in cursor
-   (*cable).cursor = cursor;
+   (*result).cursor = cursor;
 
    // make first node, empty
-   node_t *node = node_make( cable );
-   tree_put( cable, node );
-   (*cable).first = node;
+   node_t *node = node_make( result );
+   tree_put( result, node );
+   (*result).first = node;
 
    // init mutex
-   MULTITHREAD_MUTEX_INIT( (*cable).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( cable );
+   INVARIANT( result );
 
-   return cable;
+   return result;
 }
 
 /**
@@ -2819,54 +2993,55 @@ cable_t *
 cable_make_capacity( int32_t capacity )
 {
    // allocate cable struct
-   cable_t * cable
-      = ( cable_t * ) calloc( 1, sizeof( cable_t ) );
+   cable_t * result = ( cable_t * ) calloc( 1, sizeof( cable_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set null node - self referencing
    init_null_node();
 
    // set type
-   (*cable).type = CABLE_TYPE;
-   
+   (*result)._type = CABLE_TYPE;
+
    // set string length
-   (*cable).str_length = capacity;
+   (*result).str_length = capacity;
 
    // set pseudo root node
-   (*cable).root.left = &null_node;
-   (*cable).root.right = &null_node;
-   (*cable).root.parent = &null_node;
-   (*cable).root.color = black;
+   (*result).root.left = &null_node;
+   (*result).root.right = &null_node;
+   (*result).root.parent = &null_node;
+   (*result).root.color = black;
 
    // count is zero
-   (*cable).count = 0;
-   (*cable).str_count = 0;
+   (*result).count = 0;
+   (*result).str_count = 0;
 
    // set built-in cursor
    // allocate cursor struct
    cable_cursor_t *cursor
       =  ( cable_cursor_t * )
          calloc( 1, sizeof( cable_cursor_t ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
 
    // set cable
-   (*cursor).cable = cable;
+   (*cursor).cable = result;
 
    // set item to NULL - cursor is "off"
    (*cursor).item = &null_node;
 
    // set cable built-in cursor
-   (*cable).cursor = cursor;
+   (*result).cursor = cursor;
 
    // make first node, empty
-   node_t *node = node_make( cable );
-   tree_put( cable, node );
-   (*cable).first = node;
+   node_t *node = node_make( result );
+   tree_put( result, node );
+   (*result).first = node;
 
    // init mutex
-   MULTITHREAD_MUTEX_INIT( (*cable).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( cable );
+   INVARIANT( result );
 
-   return cable;
+   return result;
 }
 
 /**
@@ -2946,18 +3121,18 @@ cable_make_from_cstring( char_t *str )
    cable_t *result = cable_make();
 
    // set type
-   (*result).type = CABLE_TYPE;
-   
+   (*result)._type = CABLE_TYPE;
+
    // copy string into result
    n = strlen( str );
 
-   for( i=0; i<n; i=i+(*result).str_length )
+   for( i = 0; i < n; i = i + (*result).str_length )
    {
       if ( i == 0 )
       {
          node = (*result).first;
          s = (*node).str;
-         for( j=0; ( (j<n) && (j<(*result).str_length) ); j++ )
+         for( j = 0; ( ( j < n ) && ( j < (*result).str_length ) ); j++ )
          {
             s[j] = str[j];
          }
@@ -2972,9 +3147,9 @@ cable_make_from_cstring( char_t *str )
       {
          node = node_make( result );
          s = (*node).str;
-         for( j=0; ( (j<(n-i)) && (j<(*result).str_length) ); j++ )
+         for( j = 0; ( ( j < ( n - i ) ) && ( j < (*result).str_length ) ); j++ )
          {
-            s[j] = str[i+j];
+            s[j] = str[i + j];
          }
          (*node).index = i;
          (*node).start = 0;
@@ -3020,18 +3195,18 @@ cable_make_capacity_from_cstring( char_t *str, int32_t capacity )
    cable_t *result = cable_make_capacity( capacity );
 
    // set type
-   (*result).type = CABLE_TYPE;
-   
+   (*result)._type = CABLE_TYPE;
+
    // copy string into result
    n = strlen( str );
 
-   for( i=0; i<n; i=i+(*result).str_length )
+   for( i = 0; i < n; i = i + (*result).str_length )
    {
       if ( i == 0 )
       {
          node = (*result).first;
          s = (*node).str;
-         for( j=0; ( (j<n) && (j<(*result).str_length) ); j++ )
+         for( j = 0; ( ( j < n ) && ( j < (*result).str_length ) ); j++ )
          {
             s[j] = str[j];
          }
@@ -3046,9 +3221,9 @@ cable_make_capacity_from_cstring( char_t *str, int32_t capacity )
       {
          node = node_make( result );
          s = (*node).str;
-         for( j=0; ( (j<(n-i)) && (j<(*result).str_length) ); j++ )
+         for( j = 0; ( ( j < ( n - i ) ) && ( j < (*result).str_length ) ); j++ )
          {
-            s[j] = str[i+j];
+            s[j] = str[i + j];
          }
          (*node).index = i;
          (*node).start = 0;
@@ -3078,33 +3253,37 @@ cable_make_capacity_from_cstring( char_t *str, int32_t capacity )
 */
 
 void
-cable_dispose( cable_t *cable )
+cable_dispose( cable_t **cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
-   LOCK( (*cable).mutex );
-   INVARIANT( cable );
+   PRECONDITION( "cable not null", *cable != NULL );
+   PRECONDITION( "cable type OK", (**cable)._type == CABLE_TYPE );
+   LOCK( (**cable).mutex );
+   INVARIANT(*cable);
 
    node_t *node = NULL;
    node_t *n = NULL;
 
    // delete nodes
-   node = (*cable).first;
+   node = (**cable).first;
    while ( node != NULL )
    {
       n = (*node).next;
-      tree_remove( cable, node );
+      tree_remove( *cable, node );
       node = n;
    }
 
    // delete cursor
-   free( (*cable).cursor );
-   
+   free( (**cable).cursor );
+
    // dispose of mutex
-   MULTITHREAD_MUTEX_DESTROY( (*cable).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**cable).mutex );
 
    // delete cable struct
-   free( cable );
+   free(*cable);
+
+   // set to NULL
+   *cable = NULL;
 
    return;
 }
@@ -3117,7 +3296,7 @@ char_t
 cable_item( cable_t *cable, int32_t index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < (*cable).str_count ) ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -3140,7 +3319,7 @@ char_t *
 cable_as_cstring( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -3150,6 +3329,7 @@ cable_as_cstring( cable_t *cable )
 
    // allocate result
    result = ( char_t * ) calloc( (*cable).str_count + 1, sizeof( char_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // walk through nodes, appending contents onto result
    node = (*cable).first;
@@ -3175,7 +3355,7 @@ int32_t
 cable_count( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -3195,11 +3375,11 @@ int32_t
 cable_capacity( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
-   int32_t result = (*cable ).str_length;
+   int32_t result = (*cable).str_length;
 
    INVARIANT( cable );
    UNLOCK( (*cable).mutex );
@@ -3215,7 +3395,7 @@ int32_t
 cable_is_empty( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -3235,7 +3415,7 @@ int32_t
 cable_valid_index( cable_t *cable, int32_t index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -3254,7 +3434,7 @@ int32_t
 cable_has( cable_t *cable, char_t c )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -3299,7 +3479,7 @@ int32_t
 cable_hash_code( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -3317,7 +3497,7 @@ cable_hash_code( cable_t *cable )
       cp = node_as_cstring( node );
 
       // compute hash
-      for ( i=0; i<(*node).count; i++ )
+      for ( i = 0; i < (*node).count; i++ )
       {
          result = ( ( result % HASH_PRIME_NUMBER ) << 8 ) + ( uint32_t ) cp[i];
       }
@@ -3341,9 +3521,9 @@ int32_t
 cable_is_equal( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -3385,7 +3565,7 @@ cable_is_equal( cable_t *cable, cable_t *other )
 
       result = 1;
 
-      for ( i=0; i<length; i++ )
+      for ( i = 0; i < length; i++ )
       {
          // get character in cable
          c = cp[ i - index ];
@@ -3440,7 +3620,7 @@ int32_t
 cable_is_equal_cstring( cable_t *cable, char_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -3473,7 +3653,7 @@ cable_is_equal_cstring( cable_t *cable, char_t *other )
 
       result = 1;
 
-      for ( i=0; i<length; i++ )
+      for ( i = 0; i < length; i++ )
       {
          // get character in cable
          c = cp[ i - index ];
@@ -3515,9 +3695,9 @@ int32_t
 cable_is_less_than( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -3560,7 +3740,7 @@ cable_is_less_than( cable_t *cable, cable_t *other )
 
    result = 0;
 
-   for ( i=0; i<n; i++ )
+   for ( i = 0; i < n; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -3630,7 +3810,7 @@ int32_t
 cable_is_less_than_cstring( cable_t *cable, char_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -3664,7 +3844,7 @@ cable_is_less_than_cstring( cable_t *cable, char_t *other )
 
    result = 0;
 
-   for ( i=0; i<n; i++ )
+   for ( i = 0; i < n; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -3722,9 +3902,9 @@ int32_t
 cable_is_greater_than( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -3767,7 +3947,7 @@ cable_is_greater_than( cable_t *cable, cable_t *other )
 
    result = 0;
 
-   for ( i=0; i<n; i++ )
+   for ( i = 0; i < n; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -3837,7 +4017,7 @@ int32_t
 cable_is_greater_than_cstring( cable_t *cable, char_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -3871,7 +4051,7 @@ cable_is_greater_than_cstring( cable_t *cable, char_t *other )
 
    result = 0;
 
-   for ( i=0; i<n; i++ )
+   for ( i = 0; i < n; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -3929,9 +4109,9 @@ int32_t
 cable_has_substring( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -3963,7 +4143,7 @@ int32_t
 cable_has_substring_cstring( cable_t *cable, char_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -3994,9 +4174,9 @@ int32_t
 cable_starts_with( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -4028,7 +4208,7 @@ int32_t
 cable_starts_with_cstring( cable_t *cable, char_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -4059,9 +4239,9 @@ int32_t
 cable_ends_with( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -4093,7 +4273,7 @@ int32_t
 cable_ends_with_cstring( cable_t *cable, char_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -4135,9 +4315,9 @@ cable_substring_index
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
    INVARIANT( cable );
@@ -4164,7 +4344,7 @@ cable_substring_index_cstring
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -4191,10 +4371,10 @@ cable_substring_index_in_bounds
    int32_t end_index
 )
 {
-   PRECONDITION( "cable not null", cable != NULL );   
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable not null", cable != NULL );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -4226,7 +4406,7 @@ cable_substring_index_in_bounds_cstring
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
@@ -4253,7 +4433,7 @@ cable_t **
 cable_split( cable_t *cable, char_t *separators, int32_t *result_count )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "separators not null", separators != NULL );
    PRECONDITION( "result_count not null", result_count != NULL );
    LOCK( (*cable).mutex );
@@ -4278,7 +4458,9 @@ cable_split( cable_t *cable, char_t *separators, int32_t *result_count )
 
    // prepare result array
    result = ( cable_t ** ) calloc( size, sizeof( cable_t * ) );
-   (*result_count) = 0;
+   CHECK( "result allocated correctly", result != NULL );
+
+   ( *result_count ) = 0;
 
    length = (*cable).str_count;
    length1 = strlen( separators );
@@ -4290,14 +4472,14 @@ cable_split( cable_t *cable, char_t *separators, int32_t *result_count )
    start_index = 0;
 
    // walk through cable to find separator characters
-   for ( i=0; i<length; i++ )
+   for ( i = 0; i < length; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
 
       // check for separator character
       flag = 0;
-      for ( j=0; j<length1; j++ )
+      for ( j = 0; j < length1; j++ )
       {
          if ( c == separators[j]  )
          {
@@ -4322,9 +4504,11 @@ cable_split( cable_t *cable, char_t *separators, int32_t *result_count )
          // resize the result array if necessary
          else
          {
-            result = ( cable_t ** ) realloc( result, 2*size*sizeof( cable_t * ) );
-            memset( &result[size], 0, size*sizeof( char_t * ) );
-            size = 2*size;
+            result = ( cable_t ** ) realloc( result, 2 * size * sizeof( cable_t * ) );
+            CHECK( "result allocated correctly", result != NULL );
+
+            memset( &result[size], 0, size * sizeof( char_t * ) );
+            size = 2 * size;
             result[i_result] = x;
             i_result = i_result + 1;
          }
@@ -4360,9 +4544,11 @@ cable_split( cable_t *cable, char_t *separators, int32_t *result_count )
       // resize the result array if necessary
       else
       {
-         result = ( cable_t ** ) realloc( result, 2*size*sizeof( cable_t * ) );
-         memset( &result[size], 0, size*sizeof( char_t * ) );
-         size = 2*size;
+         result = ( cable_t ** ) realloc( result, 2 * size * sizeof( cable_t * ) );
+         CHECK( "result allocated correctly", result != NULL );
+
+         memset( &result[size], 0, size * sizeof( char_t * ) );
+         size = 2 * size;
          result[i_result] = x;
          i_result = i_result + 1;
       }
@@ -4372,7 +4558,7 @@ cable_split( cable_t *cable, char_t *separators, int32_t *result_count )
    UNLOCK( (*cable).mutex );
 
    // set count of result array and return array
-   (*result_count) = i_result;
+   ( *result_count ) = i_result;
 
    return result;
 }
@@ -4389,7 +4575,7 @@ cable_as_lower
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -4417,7 +4603,7 @@ cable_as_lower
    count = (*node).count;
 
    // see if this spot in cable is equal to other
-   for ( i=0; i<=length; i++ )
+   for ( i = 0; i <= length; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -4459,7 +4645,7 @@ cable_as_upper
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -4487,7 +4673,7 @@ cable_as_upper
    count = (*node).count;
 
    // see if this spot in cable is equal to other
-   for ( i=0; i<=length; i++ )
+   for ( i = 0; i <= length; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -4522,7 +4708,7 @@ void
 cable_put( cable_t *cable, char_t c, int32_t index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < (*cable).str_count ) ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -4551,8 +4737,8 @@ cable_replace
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
@@ -4616,7 +4802,7 @@ cable_replace_cstring
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
@@ -4677,14 +4863,14 @@ cable_replace_all
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "substring_original not null", substring_original != NULL );
-   PRECONDITION( "substring_original type OK", (*substring_original).type == CABLE_TYPE );
+   PRECONDITION( "substring_original type OK", ( *substring_original )._type == CABLE_TYPE );
    PRECONDITION( "substring_new not null", substring_new != NULL );
-   PRECONDITION( "substring_new type OK", (*substring_new).type == CABLE_TYPE );
+   PRECONDITION( "substring_new type OK", ( *substring_new )._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
-   LOCK( (*substring_original).mutex );
-   LOCK( (*substring_new).mutex );
+   LOCK( ( *substring_original ).mutex );
+   LOCK( ( *substring_new ).mutex );
    INVARIANT( cable );
 
    int32_t i = 0;
@@ -4705,13 +4891,13 @@ cable_replace_all
       {
          // we found it, replace it with substring_new
          start_index = i;
-         end_index = i + (*substring_original).str_count - 1;
+         end_index = i + ( *substring_original ).str_count - 1;
 
          // get length of area to replace
          length = end_index - start_index + 1;
 
          // get difference between length and size of substring_new
-         delta = length - (*substring_new).str_count;
+         delta = length - ( *substring_new ).str_count;
 
          if ( delta == 0 )
          {
@@ -4739,14 +4925,14 @@ cable_replace_all
          }
 
          // update i
-         i = start_index + (*substring_new).str_count;
+         i = start_index + ( *substring_new ).str_count;
       }
 
    }
 
    INVARIANT( cable );
-   UNLOCK( (*substring_new).mutex );
-   UNLOCK( (*substring_original).mutex );
+   UNLOCK( ( *substring_new ).mutex );
+   UNLOCK( ( *substring_original ).mutex );
    UNLOCK( (*cable).mutex );
 
    return;
@@ -4765,7 +4951,7 @@ cable_replace_all_cstring
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "substring_original not null", substring_original != NULL );
    PRECONDITION( "substring_new not null", substring_new != NULL );
    LOCK( (*cable).mutex );
@@ -4842,9 +5028,9 @@ void
 cable_append( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    PRECONDITION( "cable and other same node string length", (*cable).str_length == (*other).str_length );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
@@ -4896,9 +5082,9 @@ void
 cable_append_destructive( cable_t *cable, cable_t **other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (**other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (**other)._type == CABLE_TYPE );
    PRECONDITION( "cable and other same node string length", (*cable).str_length == (**other).str_length );
    LOCK( (*cable).mutex );
    LOCK( (**other).mutex );
@@ -4935,7 +5121,7 @@ cable_append_destructive( cable_t *cable, cable_t **other )
    free( (**other).cursor );
    free( (*other) );
    (*other) = NULL;
-    
+
    INVARIANT( cable );
    UNLOCK( (*cable).mutex );
 
@@ -4950,7 +5136,7 @@ void
 cable_append_cstring( cable_t *cable, char_t *other_cstring )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other_cstring not null", other_cstring != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5011,9 +5197,9 @@ void
 cable_prepend( cable_t *cable, cable_t *other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    PRECONDITION( "cable and other same node string length", (*cable).str_length == (*other).str_length );
    LOCK( (*cable).mutex );
    LOCK( (*other).mutex );
@@ -5072,9 +5258,9 @@ void
 cable_prepend_destructive( cable_t *cable, cable_t **other )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (**other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (**other)._type == CABLE_TYPE );
    PRECONDITION( "cable and other same node string length", (*cable).str_length == (**other).str_length );
    LOCK( (*cable).mutex );
    LOCK( (**other).mutex );
@@ -5118,7 +5304,7 @@ cable_prepend_destructive( cable_t *cable, cable_t **other )
    free( (**other).cursor );
    free( (*other) );
    (*other) = NULL;
-    
+
    INVARIANT( cable );
    UNLOCK( (*cable).mutex );
 
@@ -5133,7 +5319,7 @@ void
 cable_prepend_cstring( cable_t *cable, char_t *other_cstring )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other_cstring not null", other_cstring != NULL );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5200,9 +5386,9 @@ void
 cable_insert( cable_t *cable, cable_t *other, int32_t start_index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (*other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (*other)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "cable and other same node string length", (*cable).str_length == (*other).str_length );
    LOCK( (*cable).mutex );
@@ -5211,10 +5397,10 @@ cable_insert( cable_t *cable, cable_t *other, int32_t start_index )
 
    // insert space for other in cable
    insert_at_index( cable, start_index, (*other).str_count );
-   
+
    // put other into cable
    replace_at_index( cable, other, start_index );
-   
+
    INVARIANT( cable );
    UNLOCK( (*other).mutex );
    UNLOCK( (*cable).mutex );
@@ -5230,9 +5416,9 @@ void
 cable_insert_destructive( cable_t *cable, cable_t **other, int32_t start_index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", (**other).type == CABLE_TYPE );
+   PRECONDITION( "other type OK", (**other)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index <= (*cable).str_count ) ) );
    PRECONDITION( "cable and other same node string length", (*cable).str_length == (**other).str_length );
    LOCK( (*cable).mutex );
@@ -5246,16 +5432,16 @@ cable_insert_destructive( cable_t *cable, cable_t **other, int32_t start_index )
    node_t *first = NULL;
    node_t *last = NULL;
    cable_cursor_t *cursor = NULL;
-   
+
    if ( start_index == 0 )
    {
       // like a prepend
       n1 = NULL;
       n2 = (**other).first;
-      
+
       cursor = (**other).cursor;
       cursor_finish( cursor );
-   
+
       // get last node in other
       n = cursor_item( cursor );
 
@@ -5263,25 +5449,25 @@ cable_insert_destructive( cable_t *cable, cable_t **other, int32_t start_index )
       {
          // get first node in cable
          first = (*cable).first;
-   
+
          // set index, next, prev
          (*n).index = 0;
          (*n).next = first;
          (*n).prev = NULL;
          (*first).prev = n;
-   
+
          // put new node into cable
          (*cable).first = n;
-   
+
          redo_indices( cable );
-   
+
          tree_put( cable, n );
-   
+
          // get prev node in other
          n = (*n).prev;
-         
+
       }
-      
+
    }
    else if ( start_index == (*cable).str_count )
    {
@@ -5289,27 +5475,27 @@ cable_insert_destructive( cable_t *cable, cable_t **other, int32_t start_index )
       // append other's nodes to cable
       cursor = (*cable).cursor;
       n = (**other).first;
-   
+
       while( n != NULL )
       {
          // get next node in other
          n1 = (*n).next;
-   
+
          // set next, prev
          cursor_finish( cursor );
          last = cursor_item( cursor );
          (*last).next = n;
          (*n).prev = last;
          (*n).next = NULL;
-   
+
          redo_indices( cable );
-   
+
          // put new node into cable
          tree_put( cable, n );
-   
+
          // get next node in other
          n = n1;
-   
+
       }
    }
    else
@@ -5331,61 +5517,61 @@ cable_insert_destructive( cable_t *cable, cable_t **other, int32_t start_index )
          (*n1).next = n2;
          if ( (*n2).next != NULL )
          {
-            (*(*n2).next).prev = n2;
+            ( *(*n2).next ).prev = n2;
          }
-         
+
          // copy string contents from start_index to n2
          memcpy
-         ( 
-            (*n2).str, 
-            &( (*n1).str[start_index - (*n1).index] ), 
-            (*n1).count - ( start_index - (*n1).index ) 
+         (
+            (*n2).str,
+            &( (*n1).str[start_index - (*n1).index] ),
+            (*n1).count - ( start_index - (*n1).index )
          );
-         
+
          // adjust counts
          (*n2).count = (*n1).count - ( start_index - (*n1).index );
          (*n1).count = start_index - (*n1).index;
-         
+
          // put new node into cable
          redo_indices( cable );
          tree_put( cable, n2 );
-   
+
       }
-   
+
       // insert other's nodes to cable between n1 and n2
       cursor = (**other).cursor;
       n = (**other).first;
-   
+
       while( n != NULL )
       {
          // get next node in other
          nx = (*n).next;
-   
+
          // set next, prev
          (*n).next = n2;
          (*n).prev = n1;
          (*n1).next = n;
          (*n2).prev = n;
-   
+
          redo_indices( cable );
-   
+
          // put new node into cable
          tree_put( cable, n );
-   
+
          // get next node in other
          n = nx;
-         
+
          // update n1
          n1 = (*n1).next;
-   
+
       }
    }
-   
+
    // destroy other
    free( (**other).cursor );
    free( (*other) );
    (*other) = NULL;
-    
+
    INVARIANT( cable );
    UNLOCK( (*cable).mutex );
 
@@ -5400,7 +5586,7 @@ void
 cable_insert_cstring( cable_t *cable, char_t *other_cstring, int32_t start_index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "other_cstring not null", other_cstring != NULL );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index <= (*cable).str_count ) ) );
    LOCK( (*cable).mutex );
@@ -5408,10 +5594,10 @@ cable_insert_cstring( cable_t *cable, char_t *other_cstring, int32_t start_index
 
    // insert space for other in cable
    insert_at_index( cable, start_index, strlen( other_cstring ) );
-   
+
    // put other into cable
    replace_at_index_cstring( cable, other_cstring, start_index );
-   
+
    INVARIANT( cable );
    UNLOCK( (*cable).mutex );
 
@@ -5426,7 +5612,7 @@ void
 cable_append_character( cable_t *cable, char_t c )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -5455,7 +5641,7 @@ void
 cable_prepend_character( cable_t *cable, char_t c )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -5484,7 +5670,7 @@ void
 cable_insert_character( cable_t *cable, char_t c, int32_t index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -5515,7 +5701,7 @@ cable_to_lower
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -5536,7 +5722,7 @@ cable_to_lower
    count = (*node).count;
 
    // see if this spot in cable is equal to other
-   for ( i=start_index; i<=end_index; i++ )
+   for ( i = start_index; i <= end_index; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -5575,7 +5761,7 @@ cable_to_upper
 )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -5596,7 +5782,7 @@ cable_to_upper
    count = (*node).count;
 
    // see if this spot in cable is equal to other
-   for ( i=start_index; i<=end_index; i++ )
+   for ( i = start_index; i <= end_index; i++ )
    {
       // get character in cable
       c = cp[ i - index ];
@@ -5631,7 +5817,7 @@ cable_t *
 cable_substring( cable_t *cable, int32_t start_index, int32_t end_index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -5656,7 +5842,7 @@ cable_t *
 cable_copy( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -5678,7 +5864,7 @@ void
 cable_remove( cable_t *cable, int32_t index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < (*cable).str_count ) ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5700,7 +5886,7 @@ void
 cable_remove_substring( cable_t *cable, int32_t start_index, int32_t end_index )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "start_index ok", ( ( start_index >= 0 ) && ( start_index < (*cable).str_count ) ) );
    PRECONDITION( "end_index ok", ( ( end_index >= 0 ) && ( end_index < (*cable).str_count ) ) );
    PRECONDITION( "start_index and end_index ok", ( start_index <= end_index ) );
@@ -5724,7 +5910,7 @@ void
 cable_keep_head( cable_t *cable, int32_t count )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "count ok", ( count <= (*cable).str_count ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5752,7 +5938,7 @@ void
 cable_keep_tail( cable_t *cable, int32_t count )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "count ok", ( count <= (*cable).str_count ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5780,7 +5966,7 @@ void
 cable_remove_head( cable_t *cable, int32_t count )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "count ok", ( count <= (*cable).str_count ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5808,7 +5994,7 @@ void
 cable_remove_tail( cable_t *cable, int32_t count )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    PRECONDITION( "count ok", ( count <= (*cable).str_count ) );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
@@ -5836,7 +6022,7 @@ void
 cable_wipe_out( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 
@@ -5867,7 +6053,7 @@ void
 cable_reclaim( cable_t *cable )
 {
    PRECONDITION( "cable not null", cable != NULL );
-   PRECONDITION( "cable type OK", (*cable).type == CABLE_TYPE );
+   PRECONDITION( "cable type OK", (*cable)._type == CABLE_TYPE );
    LOCK( (*cable).mutex );
    INVARIANT( cable );
 

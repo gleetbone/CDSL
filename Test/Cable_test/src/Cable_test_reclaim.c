@@ -1,7 +1,7 @@
 /**
  @file Cable_test_reclaim.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -56,7 +56,7 @@ void test_reclaim_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "axbcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -78,7 +78,7 @@ void test_reclaim_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdexfghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -101,7 +101,7 @@ void test_reclaim_3( void )
 
    cable_reclaim( cable );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

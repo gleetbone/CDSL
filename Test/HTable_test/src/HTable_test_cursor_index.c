@@ -1,7 +1,7 @@
 /**
  @file HTable_test_cursor_index.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HTable_cursor_item_at"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HTable_cursor_item_at.
+ Unit tests for HTable_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_HTable.h"
+#include "ss_HTable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,17 +37,17 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_cursor_index_1( void )
 {
-   ii_htable_t *list = NULL;
+   ii_htable_t *htable = NULL;
 
-   list = ii_htable_make();
+   htable = ii_htable_make();
    
-   ii_htable_cursor_t *cursor = ii_htable_cursor_make( list );
+   ii_htable_cursor_t *cursor = ii_htable_cursor_make( htable );
 
    CU_ASSERT( ii_htable_cursor_off( cursor ) == 1 );
    CU_ASSERT( ii_htable_cursor_index( cursor ) == -1 );
    
-   ii_htable_put( list, 24, 1000 );
-   ii_htable_put( list, 13, 2000 );
+   ii_htable_put( htable, 24, 1000 );
+   ii_htable_put( htable, 13, 2000 );
    
    ii_htable_cursor_start( cursor );
    CU_ASSERT( ii_htable_cursor_index( cursor ) == 0 );
@@ -59,8 +60,49 @@ void test_cursor_index_1( void )
 
    CU_ASSERT( ii_htable_cursor_index( cursor ) == -1 );
 
-   ii_htable_cursor_dispose( cursor );
-   ii_htable_dispose( list );
+   ii_htable_cursor_dispose( &cursor );
+   ii_htable_dispose( &htable );
+
+   return;
+}
+
+/**
+   test_cursor_index_2
+*/
+
+void test_cursor_index_2( void )
+{
+   ss_htable_t *htable = NULL;
+
+   htable = ss_htable_make();
+   
+   string_t *k1 = string_make_from_cstring( "k1" );
+   string_t *v1 = string_make_from_cstring( "v1" );
+   
+   string_t *k2 = string_make_from_cstring( "k2" );
+   string_t *v2 = string_make_from_cstring( "v2" );
+   
+   ss_htable_cursor_t *cursor = ss_htable_cursor_make( htable );
+
+   CU_ASSERT( ss_htable_cursor_off( cursor ) == 1 );
+   CU_ASSERT( ss_htable_cursor_index( cursor ) == -1 );
+   
+   ss_htable_put( htable, v1, k1 );
+   ss_htable_put( htable, v2, k2 );
+   
+   ss_htable_cursor_start( cursor );
+   CU_ASSERT( ss_htable_cursor_index( cursor ) == 0 );
+   
+   ss_htable_cursor_forth( cursor );
+
+   CU_ASSERT( ss_htable_cursor_index( cursor ) == 1 );
+
+   ss_htable_cursor_forth( cursor );
+
+   CU_ASSERT( ss_htable_cursor_index( cursor ) == -1 );
+
+   ss_htable_cursor_dispose( &cursor );
+   ss_htable_deep_dispose( &htable );
 
    return;
 }
@@ -82,6 +124,9 @@ add_test_cursor_index( void )
 
    // test_cursor_index_1
    add_test_to_suite( p_suite, test_cursor_index_1, "test_cursor_index_1" );
+
+   // test_cursor_index_2
+   add_test_to_suite( p_suite, test_cursor_index_2, "test_cursor_index_2" );
 
    return CUE_SUCCESS;
 

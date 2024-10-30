@@ -1,7 +1,7 @@
 /**
  @file HSet_test_forth.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_make.
+ Unit tests for HSet_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -50,7 +51,34 @@ void test_forth_1( void )
    
    CU_ASSERT( i_hset_off( hset ) == 1 );
    
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_forth_2
+*/
+
+void test_forth_2( void )
+{
+   s_hset_t *hset = NULL;
+   
+   hset = s_hset_make();
+   
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   
+   s_hset_put( hset, s1 );
+   
+   s_hset_start( hset );
+   
+   CU_ASSERT( s_hset_off( hset ) == 0 );
+ 
+   s_hset_forth( hset );
+   
+   CU_ASSERT( s_hset_off( hset ) == 1 );
+   
+   s_hset_deep_dispose( &hset );
 
    return;
 }
@@ -72,6 +100,9 @@ add_test_forth( void )
 
    // test_forth_1
    add_test_to_suite( p_suite, test_forth_1, "test_forth_1" );
+
+   // test_forth_2
+   add_test_to_suite( p_suite, test_forth_2, "test_forth_2" );
 
    return CUE_SUCCESS;
    

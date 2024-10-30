@@ -1,5 +1,5 @@
 /*
-   Tests for soa_node
+   Tests for raw_buffer_t
 */
 
 #include <stdlib.h>
@@ -17,22 +17,31 @@ int
 add_test_make( void );
 
 int
-add_test_make_copy_from( void );
+add_test_make_from_pointer( void );
 
 int
-add_test_make_from_pointer( void );
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
 
 int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
-
-int
-add_test_is_same( void );
-
-int
-add_test_copy_from( void );
+add_test_deep_dispose( void );
 
 int
 add_test_subcopy( void );
@@ -197,12 +206,15 @@ int main()
    // add tests for DList_make
 
    add_test_make();
-   add_test_make_copy_from();
    add_test_make_from_pointer();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_is_equal();
+   add_test_is_deep_equal();
+   add_test_copy();
+   add_test_deep_copy();
    add_test_dispose();
-   add_test_dispose_with_contents();
-   add_test_is_same();
-   add_test_copy_from();
+   add_test_deep_dispose();
    add_test_subcopy();
    add_test_clear();
    add_test_append();
@@ -248,7 +260,7 @@ int main()
    // Run all tests using the CUnit Basic interface
 
    // set the test mode to verbose
-   CU_basic_set_mode(CU_BRM_VERBOSE);
+   CU_basic_set_mode( CU_BRM_VERBOSE );
 
    // run the tests
    CU_basic_run_tests();

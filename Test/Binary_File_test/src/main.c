@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "CUnit/Basic.h"
+#include "base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,7 +82,7 @@ int main(int argc, char *argv[] )
    // Run all tests using the CUnit Basic interface
 
    // set the test mode to verbose
-   CU_basic_set_mode(CU_BRM_VERBOSE);
+   CU_basic_set_mode( CU_BRM_VERBOSE );
 
    // run the tests
    CU_basic_run_tests();

@@ -16,14 +16,17 @@
 
 */
 
-#ifndef INT_RBTREE_H_
-#define INT_RBTREE_H_
+#ifndef I_RBTREE_H_
+#define I_RBTREE_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
  
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix i
 #define Type int32_t
@@ -31,13 +34,13 @@ extern "C" {
 #include "RBTree.h"
 
 #undef Prefix
-#undef Value
+#undef Type
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INT_RBTREE_H_ */
+#endif /* I_RBTREE_H_ */
 
 /* End of file */
 

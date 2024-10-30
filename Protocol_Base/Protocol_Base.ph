@@ -39,6 +39,15 @@
 #define PROTOCOL_BASE_PH
 
 /**
+   Defines
+*/
+
+#define PROTOCOL_MASK 0xFF000000
+#define PROTOCOL_VALID_OBJECT 0xA5000000
+#define PROTOCOL_VALID_PROTOCOL 0x5A000000
+
+
+/**
    Includes
 */
 

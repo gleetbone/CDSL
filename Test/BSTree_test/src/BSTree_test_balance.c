@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_balance.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -46,7 +47,7 @@ void test_balance_1( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 1 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -69,7 +70,7 @@ void test_balance_2( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 2 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -92,7 +93,7 @@ void test_balance_3( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 2 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -115,7 +116,7 @@ void test_balance_4( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 2 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -140,7 +141,7 @@ void test_balance_5( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -164,7 +165,7 @@ void test_balance_6( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -191,7 +192,7 @@ void test_balance_7( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 3 );
 
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -199,9 +200,6 @@ void test_balance_7( void )
 /**
    test_balance_8
    
-            4
-         2      6
-                  7   
 */
 
 void test_balance_8( void )
@@ -222,7 +220,43 @@ void test_balance_8( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_balance_9
+   
+*/
+
+void test_balance_9( void )
+{
+   s_bstree_t *bstree = NULL;
+   
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s5 = string_make_from_cstring( "5" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   string_t *s7 = string_make_from_cstring( "7" );
+   
+   bstree = s_bstree_make();
+   
+   s_bstree_put( bstree, s1 );
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s3 );
+   s_bstree_put( bstree, s4 );
+   s_bstree_put( bstree, s5 );
+   s_bstree_put( bstree, s6 );
+   s_bstree_put( bstree, s7 );
+   
+   s_bstree_balance( bstree );
+   
+   CU_ASSERT( s_bstree_height( bstree ) == 3 );
+ 
+   s_bstree_deep_dispose( &bstree );
 
    return;
 }
@@ -265,6 +299,9 @@ add_test_balance( void )
 
    // test_balance_8
    add_test_to_suite( p_suite, test_balance_8, "test_balance_8" );
+
+   // test_balance_9
+   add_test_to_suite( p_suite, test_balance_9, "test_balance_9" );
 
    return CUE_SUCCESS;
    

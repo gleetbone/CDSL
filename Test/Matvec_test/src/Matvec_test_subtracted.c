@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_subtracted.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -60,9 +60,9 @@ void test_subtracted_1( void )
    CU_ASSERT( f_matvec_item( fm, 2, 1 ) == 1.0 );
    CU_ASSERT( f_matvec_item( fm, 2, 2 ) == 1.0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    return;
 }
@@ -93,9 +93,9 @@ void test_subtracted_2( void )
    CU_ASSERT( d_matvec_item( dm, 2, 1 ) == 1.0 );
    CU_ASSERT( d_matvec_item( dm, 2, 2 ) == 1.0 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
-   d_matvec_dispose( dm2 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
+   d_matvec_dispose( &dm2 );
 
    return;
 }
@@ -128,9 +128,9 @@ void test_subtracted_3( void )
    CU_ASSERT( cf_matvec_item( cfm, 2, 1 ) == 1.0 + 1.0*I );
    CU_ASSERT( cf_matvec_item( cfm, 2, 2 ) == 1.0 + 1.0*I );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
-   cf_matvec_dispose( cfm2 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
+   cf_matvec_dispose( &cfm2 );
 
    return;
 }
@@ -162,9 +162,9 @@ void test_subtracted_4( void )
    CU_ASSERT( cd_matvec_item( cdm, 2, 1 ) == 1.0 + 1.0*I );
    CU_ASSERT( cd_matvec_item( cdm, 2, 2 ) == 1.0 + 1.0*I );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
-   cd_matvec_dispose( cdm2 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
+   cd_matvec_dispose( &cdm2 );
 
    return;
 }

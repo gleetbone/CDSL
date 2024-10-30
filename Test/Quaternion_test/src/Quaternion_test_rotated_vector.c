@@ -1,8 +1,8 @@
 /**
  @file Quaternion_test_rotated_vector.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Quaternion_make"
+ @version 2.0.0
+ @brief: "tests for Quaternion_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Quaternion_make.
+ Unit tests for Quaternion_t
 
 */
 
@@ -53,10 +53,10 @@ void test_rotated_vector_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( f_matvec_is_approximately_equal( v2, v1, 0.0001 ) == 1.0 );
 
-   f_matvec_dispose( vector );
-   f_matvec_dispose( v1 );
-   f_matvec_dispose( v2 );
-   f_quaternion_dispose( fq );
+   f_matvec_dispose( &vector );
+   f_matvec_dispose( &v1 );
+   f_matvec_dispose( &v2 );
+   f_quaternion_dispose( &fq );
 
    vector = f_matvec_make_from_args( 3, 1, 3, 1.0, 0.0, 0.0 );
    v1 = f_matvec_make_from_args( 3, 1, 3, 0.0, 0.0, -1.0 );
@@ -69,10 +69,10 @@ void test_rotated_vector_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( f_matvec_is_approximately_equal( v2, v1, 0.0001 ) == 1.0 );
 
-   f_matvec_dispose( vector );
-   f_matvec_dispose( v1 );
-   f_matvec_dispose( v2 );
-   f_quaternion_dispose( fq );
+   f_matvec_dispose( &vector );
+   f_matvec_dispose( &v1 );
+   f_matvec_dispose( &v2 );
+   f_quaternion_dispose( &fq );
 
    return;
 }
@@ -98,10 +98,10 @@ void test_rotated_vector_2( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( d_matvec_is_approximately_equal( v2, v1, 0.0001 ) == 1.0 );
 
-   d_matvec_dispose( vector );
-   d_matvec_dispose( v1 );
-   d_matvec_dispose( v2 );
-   d_quaternion_dispose( dq );
+   d_matvec_dispose( &vector );
+   d_matvec_dispose( &v1 );
+   d_matvec_dispose( &v2 );
+   d_quaternion_dispose( &dq );
 
    vector = d_matvec_make_from_args( 3, 1, 3, 1.0, 0.0, 0.0 );
    v1 = d_matvec_make_from_args( 3, 1, 3, 0.0, 0.0, -1.0 );
@@ -114,10 +114,10 @@ void test_rotated_vector_2( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( d_matvec_is_approximately_equal( v2, v1, 0.0001 ) == 1.0 );
 
-   d_matvec_dispose( vector );
-   d_matvec_dispose( v1 );
-   d_matvec_dispose( v2 );
-   d_quaternion_dispose( dq );
+   d_matvec_dispose( &vector );
+   d_matvec_dispose( &v1 );
+   d_matvec_dispose( &v2 );
+   d_quaternion_dispose( &dq );
 
    return;
 }

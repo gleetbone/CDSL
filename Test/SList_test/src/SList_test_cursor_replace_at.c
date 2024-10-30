@@ -1,7 +1,7 @@
 /**
  @file SList_test_cursor_replace_at.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_item_at.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -52,7 +53,7 @@ void test_cursor_replace_at_1( void )
 
    CU_ASSERT( int_slist_count( list ) == 1 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -98,7 +99,66 @@ void test_cursor_replace_at_2( void )
 
    CU_ASSERT( int_slist_count( list ) == 3 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_cursor_replace_at_3
+*/
+
+void test_cursor_replace_at_3( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s5 = string_make_from_cstring( "5" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   
+   list = s_slist_make();
+   
+   s_slist_put_last( list, s1 );
+   s_slist_put_last( list, s2 );
+   s_slist_put_last( list, s3 );
+
+   s_slist_cursor_t *cursor = s_slist_cursor_make( list );
+
+   s_slist_cursor_go( cursor, 2 );
+
+   s_slist_cursor_replace_at( cursor, s6 );
+
+   s_slist_cursor_go( cursor, 1 );
+
+   s_slist_cursor_replace_at( cursor, s5 );
+
+   s_slist_cursor_go( cursor, 0 );
+
+   s_slist_cursor_replace_at( cursor, s4 );
+
+   s_slist_cursor_start( cursor );
+
+   CU_ASSERT( s_slist_cursor_item_at( cursor ) == s4 );
+
+   s_slist_cursor_forth( cursor );
+
+   CU_ASSERT( s_slist_cursor_item_at( cursor ) == s5 );
+
+   s_slist_cursor_forth( cursor );
+
+   CU_ASSERT( s_slist_cursor_item_at( cursor ) == s6 );
+
+   CU_ASSERT( s_slist_count( list ) == 3 );
+
+   string_deep_dispose( &s1 );
+   string_deep_dispose( &s2 );
+   string_deep_dispose( &s3 );
+   
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -123,6 +183,9 @@ add_test_cursor_replace_at( void )
 
    // test_cursor_replace_at_2
    add_test_to_suite( p_suite, test_cursor_replace_at_2, "test_cursor_replace_at_2" );
+
+   // test_cursor_replace_at_3
+   add_test_to_suite( p_suite, test_cursor_replace_at_3, "test_cursor_replace_at_3" );
 
    return CUE_SUCCESS;
 

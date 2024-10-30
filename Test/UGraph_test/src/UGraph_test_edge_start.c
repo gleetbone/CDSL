@@ -1,7 +1,7 @@
 /**
  @file UGraph_test_edge_start.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for UGraph_make_Depth"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for UGraph_make_depth.
+ Unit tests for UGraph_t
 
 */
 
@@ -37,40 +37,151 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 void test_edge_start_1( void )
 {
    ii_ugraph_t *ugraph = NULL;
-   ii_ugraph_vertex_t *v_from = NULL;
-   ii_ugraph_vertex_t *v_to = NULL;
-   int32_t flag1 = 0;
-   int32_t flag2 = 0;
-   int32_t flag3 = 0;
-   int32_t flag4 = 0;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t e = 0;
 
-   ugraph = ii_ugraph_make_depth();
-   v_from = ii_ugraph_vertex_make( 13 );
-   ii_ugraph_put( ugraph, v_from );
-   v_to = ii_ugraph_vertex_make( 14 );
-   ii_ugraph_put( ugraph, v_to );
-
-   ii_ugraph_edge_put( ugraph, 23, v_from, v_to );
-   flag1 = ii_ugraph_edge_off( ugraph );
-
+   ugraph = ii_ugraph_make();
+   
+   v1 = ii_ugraph_vertex_add( ugraph, 19 );
+   v2 = ii_ugraph_vertex_add( ugraph, 23 );
+   
+   e = ii_ugraph_edge_add( ugraph, v1, v2, 29 );
+   
+   CU_ASSERT( ii_ugraph_vertex_count( ugraph ) == 2 );
+   CU_ASSERT( ii_ugraph_edge_count( ugraph ) == 1 );
+   
    ii_ugraph_edge_start( ugraph );
-   flag2 = ii_ugraph_edge_off( ugraph );
+   CU_ASSERT( ii_ugraph_edge_off( ugraph ) == 0 );
+   
+   ii_ugraph_dispose( &ugraph );
 
-   ii_ugraph_edge_forth( ugraph );
-   flag3 = ii_ugraph_edge_off( ugraph );
+   return;
+}
 
+/**
+   test_edge_start_2
+*/
+
+void test_edge_start_2( void )
+{
+   ii_ugraph_t *ugraph = NULL;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t v3 = 0;
+   int32_t v4 = 0;
+   int32_t v5 = 0;
+   int32_t e1 = 0;
+   int32_t e2 = 0;
+   int32_t e3 = 0;
+   int32_t e4 = 0;
+
+   ugraph = ii_ugraph_make();
+   
+   v1 = ii_ugraph_vertex_add( ugraph, 19 );
+   v2 = ii_ugraph_vertex_add( ugraph, 23 );
+   v3 = ii_ugraph_vertex_add( ugraph, 29 );
+   v4 = ii_ugraph_vertex_add( ugraph, 31 );
+   v5 = ii_ugraph_vertex_add( ugraph, 37 );
+   
+   CU_ASSERT( ii_ugraph_vertex_count( ugraph ) == 5 );
+   
+   e1 = ii_ugraph_edge_add( ugraph, v1, v2, 2 );
+   e2 = ii_ugraph_edge_add( ugraph, v2, v3, 3 );
+   e3 = ii_ugraph_edge_add( ugraph, v3, v4, 5 );
+   e4 = ii_ugraph_edge_add( ugraph, v4, v5, 7 );
+   
+   CU_ASSERT( ii_ugraph_edge_count( ugraph ) == 4 );
+   
    ii_ugraph_edge_start( ugraph );
-   flag4 = ii_ugraph_edge_off( ugraph );
+   CU_ASSERT( ii_ugraph_edge_off( ugraph ) == 0 );
+   
+   ii_ugraph_dispose( &ugraph );
 
-   CU_ASSERT( ugraph != NULL );
-   CU_ASSERT( v_from != NULL );
-   CU_ASSERT( v_to != NULL );
-   CU_ASSERT( flag1 == 1 );
-   CU_ASSERT( flag2 == 0 );
-   CU_ASSERT( flag3 == 1 );
-   CU_ASSERT( flag4 == 0 );
+   return;
+}
 
-   ii_ugraph_dispose( ugraph );
+/**
+   test_edge_start_3
+*/
+
+void test_edge_start_3( void )
+{
+   ii_ugraph_t *ugraph = NULL;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t v3 = 0;
+   int32_t v4 = 0;
+   int32_t v5 = 0;
+   int32_t e1 = 0;
+   int32_t e2 = 0;
+   int32_t e3 = 0;
+
+   ugraph = ii_ugraph_make();
+   
+   v1 = ii_ugraph_vertex_add( ugraph, 19 );
+   v2 = ii_ugraph_vertex_add( ugraph, 23 );
+   v3 = ii_ugraph_vertex_add( ugraph, 29 );
+   v4 = ii_ugraph_vertex_add( ugraph, 31 );
+   
+   ii_ugraph_vertex_remove( ugraph, v2 );
+   
+   v5 = ii_ugraph_vertex_add( ugraph, 37 );
+   
+   CU_ASSERT( ii_ugraph_vertex_count( ugraph ) == 4 );
+   
+   e1 = ii_ugraph_edge_add( ugraph, v1, v3, 2 );
+   e2 = ii_ugraph_edge_add( ugraph, v3, v4, 3 );
+   e3 = ii_ugraph_edge_add( ugraph, v4, v5, 5 );
+   
+   CU_ASSERT( ii_ugraph_edge_count( ugraph ) == 3 );
+   
+   ii_ugraph_edge_start( ugraph );
+   CU_ASSERT( ii_ugraph_edge_off( ugraph ) == 0 );
+   
+   ii_ugraph_dispose( &ugraph );
+
+   return;
+}
+
+/**
+   test_edge_start_4
+*/
+
+void test_edge_start_4( void )
+{
+   ii_ugraph_t *ugraph = NULL;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t v3 = 0;
+   int32_t v4 = 0;
+   int32_t v5 = 0;
+   int32_t e1 = 0;
+   int32_t e2 = 0;
+   int32_t e3 = 0;
+
+   ugraph = ii_ugraph_make();
+   
+   v1 = ii_ugraph_vertex_add( ugraph, 19 );
+   v2 = ii_ugraph_vertex_add( ugraph, 23 );
+   v3 = ii_ugraph_vertex_add( ugraph, 29 );
+   v4 = ii_ugraph_vertex_add( ugraph, 31 );
+   
+   CU_ASSERT( ii_ugraph_vertex_count( ugraph ) == 4 );
+   
+   e1 = ii_ugraph_edge_add( ugraph, v1, v3, 2 );
+   e2 = ii_ugraph_edge_add( ugraph, v3, v4, 3 );
+   e3 = ii_ugraph_edge_add( ugraph, v4, v5, 5 );
+   
+   CU_ASSERT( ii_ugraph_edge_count( ugraph ) == 3 );
+
+   ii_ugraph_edge_remove( ugraph, e1 );
+      
+   ii_ugraph_edge_start( ugraph );
+   CU_ASSERT( ii_ugraph_edge_off( ugraph ) == 0 );
+   CU_ASSERT( ii_ugraph_edge_id_at( ugraph ) == e2 );
+   
+   ii_ugraph_dispose( &ugraph );
 
    return;
 }
@@ -92,6 +203,15 @@ add_test_edge_start( void )
 
    // test_edge_start_1
    add_test_to_suite( p_suite, test_edge_start_1, "test_edge_start_1" );
+
+   // test_edge_start_2
+   add_test_to_suite( p_suite, test_edge_start_2, "test_edge_start_2" );
+
+   // test_edge_start_3
+   add_test_to_suite( p_suite, test_edge_start_3, "test_edge_start_3" );
+
+   // test_edge_start_4
+   add_test_to_suite( p_suite, test_edge_start_4, "test_edge_start_4" );
 
    return CUE_SUCCESS;
 

@@ -1,7 +1,7 @@
 /**
  @file SList_test_off.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_last"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_last.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -41,7 +42,7 @@ void test_off_1( void )
    list = int_slist_make();
    CU_ASSERT( int_slist_off( list ) == 1 );
    
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -70,7 +71,38 @@ void test_off_2( void )
    
    CU_ASSERT( int_slist_off( list ) == 0 );
    
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_off_3
+*/
+
+void test_off_3( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   
+   list = s_slist_make();
+   
+   CU_ASSERT( s_slist_off( list ) == 1 );
+   
+   s_slist_start( list );
+   
+   CU_ASSERT( s_slist_off( list ) == 1 );
+   
+   s_slist_put_last( list, s1 );
+   
+   CU_ASSERT( s_slist_off( list ) == 1 );
+      
+   s_slist_start( list );
+   
+   CU_ASSERT( s_slist_off( list ) == 0 );
+   
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -95,6 +127,9 @@ add_test_off( void )
 
    // test_off_2
    add_test_to_suite( p_suite, test_off_2, "test_off_2" );
+
+   // test_off_3
+   add_test_to_suite( p_suite, test_off_3, "test_off_3" );
 
    return CUE_SUCCESS;
 

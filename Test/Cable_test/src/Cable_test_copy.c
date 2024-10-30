@@ -1,7 +1,7 @@
 /**
  @file Cable_test_copy.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -58,9 +58,9 @@ void test_copy_1( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "abcd" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -84,9 +84,9 @@ void test_copy_2( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "abcdefghij" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

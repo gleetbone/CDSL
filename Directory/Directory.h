@@ -1,17 +1,17 @@
 /**
  @file Directory.h
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Directories (contains files, links, and other directories"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function declarations for the opaque directory_t type.
@@ -63,7 +63,7 @@ struct directory_struct;
 typedef struct directory_struct directory_t;
 
 
-/**
+/*
    Initialization
 */
 
@@ -89,7 +89,83 @@ directory_make( string_t *name );
 directory_t *
 directory_make_cstring( char_t *name );
 
+/*
+   Basic
+*/
+
 /**
+   directory_clone
+
+   Create and initialize a directory_t instance from another.
+   New directory is not open by default.
+
+   @param other the directory to clone
+   @return pointer to the new data structure
+*/
+directory_t *
+directory_clone( directory_t *other );
+
+/**
+   directory_deep_clone
+
+   Create and initialize a directory_t instance from another.
+   New directory is not open by default.
+
+   @param other the directory to clone
+   @return pointer to the new data structure
+*/
+directory_t *
+directory_deep_clone( directory_t *other );
+
+/**
+   directory_is_equal
+
+   Returns true if both directoryies refer to same directory in file system.
+
+   @param current the directory to compare to
+   @param other the other directory
+   @return returns 1 if both directories refer to the same file system
+           directory, 0 otherwise
+*/
+int32_t
+directory_is_equal( directory_t *current, directory_t *other );
+
+/**
+   directory_is_deep_equal
+
+   Returns true if both directoryies refer to same directory in file system.
+
+   @param current the directory to compare to
+   @param other the other directory
+   @return returns 1 if both directories refer to the same file system
+           directory, 0 otherwise
+*/
+int32_t
+directory_is_deep_equal( directory_t *current, directory_t *other );
+
+/**
+   directory_copy
+
+   Make current refer to the same file system directory as other.
+
+   @param current the directory to copy to
+   @param other the directory to copy from
+*/
+void
+directory_copy( directory_t *current, directory_t *other );
+
+/**
+   directory_deep_copy
+
+   Make current refer to the same file system directory as other.
+
+   @param current the directory to copy to
+   @param other the directory to copy from
+*/
+void
+directory_deep_copy( directory_t *current, directory_t *other );
+
+/*
    Disposal
 */
 
@@ -101,10 +177,20 @@ directory_make_cstring( char_t *name );
    @param directory the directory struct to dispose
 */
 void
-directory_dispose( directory_t *directory );
-
+directory_dispose( directory_t **directory );
 
 /**
+   directory_deep_dispose
+
+   Deallocates a directory_t instance.
+
+   @param directory the directory struct to dispose
+*/
+void
+directory_deep_dispose( directory_t **directory );
+
+
+/*
    Access
 */
 
@@ -159,7 +245,7 @@ directory_last_entry_cstring( directory_t *directory );
    directory_filenames
 
    Returns the array of filename entries in directory. Last
-   entry in array is NULL pointer
+   entry in array is NULL pointer.
 
    @param directory the directory_t instance
    @return pointer to the array of filename entries
@@ -171,7 +257,7 @@ directory_filenames( directory_t *directory );
    directory_filenames_cstring
 
    Returns the array of filename entries in directory. Last
-   entry in array is NULL pointer
+   entry in array is NULL pointer.
 
    @param directory the directory_t instance
    @return pointer to the array of filename entries
@@ -261,7 +347,7 @@ int32_t
 directory_links_count( directory_t *directory );
 
 
-/**
+/*
    Status Report
 */
 
@@ -332,7 +418,7 @@ int32_t
 directory_is_empty( directory_t *directory );
 
 
-/**
+/*
    Basic Operations
 */
 
@@ -426,7 +512,7 @@ void
 directory_recursive_delete( directory_t *directory );
 
 
-/**
+/*
    Input
 */
 

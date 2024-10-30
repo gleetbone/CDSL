@@ -1,7 +1,7 @@
 /**
  @file binary_file_test_read_put.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for ifr_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for binary_file_t
 
 */
 
@@ -23,6 +23,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <endian.h>
 #include "CUnit/Basic.h"
 
 #include "Binary_File.h"
@@ -48,7 +49,7 @@ void test_read_put_1( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -109,8 +110,178 @@ void test_read_put_1( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_1a
+*/
+
+void test_read_put_1a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int8_t arg = 0;
+   int8_t arg1 = 0;
+   int8_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int8_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int8_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int8_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int8_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int8_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int8_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int8_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int8_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_1b
+*/
+
+void test_read_put_1b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int8_t arg = 0;
+   int8_t arg1 = 0;
+   int8_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int8_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int8_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int8_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int8_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int8_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int8_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int8_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int8_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -133,7 +304,7 @@ void test_read_put_2( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -194,8 +365,179 @@ void test_read_put_2( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_2a
+*/
+
+void test_read_put_2a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int16_t arg = 0;
+   int16_t arg1 = 0;
+   int16_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int16_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int16_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int16_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int16_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int16_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int16_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int16_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int16_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_2b
+*/
+
+
+void test_read_put_2b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int16_t arg = 0;
+   int16_t arg1 = 0;
+   int16_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int16_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int16_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int16_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int16_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int16_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int16_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int16_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int16_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -218,7 +560,7 @@ void test_read_put_3( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -279,8 +621,178 @@ void test_read_put_3( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_3a
+*/
+
+void test_read_put_3a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int32_t arg = 0;
+   int32_t arg1 = 0;
+   int32_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int32_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int32_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int32_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int32_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int32_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int32_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int32_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int32_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_3b
+*/
+
+void test_read_put_3b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int32_t arg = 0;
+   int32_t arg1 = 0;
+   int32_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int32_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int32_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int32_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int32_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int32_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int32_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int32_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int32_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -303,7 +815,7 @@ void test_read_put_4( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -364,8 +876,178 @@ void test_read_put_4( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_4a
+*/
+
+void test_read_put_4a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int64_t arg = 0;
+   int64_t arg1 = 0;
+   int64_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int64_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int64_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int64_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int64_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int64_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int64_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int64_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int64_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_4b
+*/
+
+void test_read_put_4b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   int64_t arg = 0;
+   int64_t arg1 = 0;
+   int64_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_int64_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int64_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_int64_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int64_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int64_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_int64_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_int64_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_int64_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -388,7 +1070,7 @@ void test_read_put_5( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -449,8 +1131,178 @@ void test_read_put_5( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_5a
+*/
+
+void test_read_put_5a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint8_t arg = 0;
+   uint8_t arg1 = 0;
+   uint8_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint8_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint8_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint8_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint8_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint8_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint8_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint8_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint8_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_5b
+*/
+
+void test_read_put_5b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint8_t arg = 0;
+   uint8_t arg1 = 0;
+   uint8_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint8_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint8_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint8_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint8_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint8_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint8_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint8_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint8_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -473,7 +1325,7 @@ void test_read_put_6( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -534,8 +1386,178 @@ void test_read_put_6( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_6a
+*/
+
+void test_read_put_6a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint16_t arg = 0;
+   uint16_t arg1 = 0;
+   uint16_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint16_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint16_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint16_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint16_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint16_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint16_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint16_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint16_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_6b
+*/
+
+void test_read_put_6b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint16_t arg = 0;
+   uint16_t arg1 = 0;
+   uint16_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint16_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint16_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint16_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint16_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint16_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint16_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint16_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint16_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -558,7 +1580,7 @@ void test_read_put_7( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -619,8 +1641,178 @@ void test_read_put_7( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_7a
+*/
+
+void test_read_put_7a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint32_t arg = 0;
+   uint32_t arg1 = 0;
+   uint32_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint32_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint32_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint32_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint32_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint32_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint32_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint32_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint32_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_7b
+*/
+
+void test_read_put_7b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint32_t arg = 0;
+   uint32_t arg1 = 0;
+   uint32_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint32_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint32_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint32_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint32_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint32_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint32_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint32_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint32_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -643,7 +1835,7 @@ void test_read_put_8( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -704,8 +1896,178 @@ void test_read_put_8( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_8a
+*/
+
+void test_read_put_8a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint64_t arg = 0;
+   uint64_t arg1 = 0;
+   uint64_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint64_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint64_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint64_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint64_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint64_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint64_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint64_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint64_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_8b
+*/
+
+void test_read_put_8b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   uint64_t arg = 0;
+   uint64_t arg1 = 0;
+   uint64_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_uint64_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint64_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_uint64_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint64_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint64_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_uint64_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_uint64_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_uint64_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -728,7 +2090,7 @@ void test_read_put_9( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -789,8 +2151,178 @@ void test_read_put_9( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_9a
+*/
+
+void test_read_put_9a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   float32_t arg = 0;
+   float32_t arg1 = 0;
+   float32_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_float32_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float32_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_float32_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float32_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float32_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_float32_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float32_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float32_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_9b
+*/
+
+void test_read_put_9b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   float32_t arg = 0;
+   float32_t arg1 = 0;
+   float32_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_float32_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float32_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_float32_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float32_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float32_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_float32_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float32_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float32_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -813,7 +2345,7 @@ void test_read_put_10( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -860,7 +2392,7 @@ void test_read_put_10( void )
 
    binary_file_put_float64( file, arg );
 
-   string_dispose_with_contents( name );
+   string_deep_dispose( &name );
    binary_file_close( file );
 
    binary_file_open_read( file );
@@ -875,7 +2407,177 @@ void test_read_put_10( void )
 
    CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_10a
+*/
+
+void test_read_put_10a( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   float64_t arg = 0;
+   float64_t arg1 = 0;
+   float64_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_float64_be( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float64_be( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_float64_be( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float64_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float64_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_float64_be( file, arg );
+
+   string_deep_dispose( &name );
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float64_be( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float64_be( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_dispose( &file );
+
+   return;
+}
+
+/**
+   test_read_put_10b
+*/
+
+void test_read_put_10b( void )
+{
+   binary_file_t *file = NULL;
+   string_t *name = NULL;
+   float64_t arg = 0;
+   float64_t arg1 = 0;
+   float64_t argx = 0;
+
+   name = string_make();
+
+   string_append_cstring( name, "src/test/cfile.bin" );
+
+   file = binary_file_make( name );
+   binary_file_delete( file );
+   binary_file_dispose( &file );
+
+   file = binary_file_make_open_append( name );
+
+   arg = 13;
+
+   binary_file_put_float64_le( file, arg );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float64_le( file );
+
+   CU_ASSERT( argx == arg );
+   CU_ASSERT( binary_file_count( file ) == sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_append( file );
+
+   arg1 = 29;
+
+   binary_file_put_float64_le( file, arg1 );
+
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float64_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float64_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_close( file );
+
+   binary_file_open_read_write( file );
+
+   arg = 11;
+
+   binary_file_put_float64_le( file, arg );
+
+   string_deep_dispose( &name );
+   binary_file_close( file );
+
+   binary_file_open_read( file );
+
+   argx = binary_file_read_float64_le( file );
+
+   CU_ASSERT( argx == arg );
+
+   argx = binary_file_read_float64_le( file );
+
+   CU_ASSERT( argx == arg1 );
+
+   CU_ASSERT( binary_file_count( file ) == 2*sizeof( arg ) );
+
+   binary_file_dispose( &file );
 
    return;
 }
@@ -898,7 +2600,7 @@ void test_read_put_11( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -923,7 +2625,7 @@ void test_read_put_11( void )
 
    binary_file_put_string( file, arg1 );
 
-   string_dispose_with_contents( argx );
+   string_deep_dispose( &argx );
    binary_file_close( file );
 
    binary_file_open_read( file );
@@ -932,7 +2634,7 @@ void test_read_put_11( void )
 
    CU_ASSERT( string_is_equal( argx, arg ) == 1 );
 
-   string_dispose_with_contents( argx );
+   string_deep_dispose( &argx );
 
    argx = binary_file_read_string( file, string_count( arg1 ) );
 
@@ -949,7 +2651,7 @@ void test_read_put_11( void )
 
    binary_file_put_string( file, arg );
 
-   string_dispose_with_contents( argx );
+   string_deep_dispose( &argx );
    binary_file_close( file );
 
    binary_file_open_read( file );
@@ -958,7 +2660,7 @@ void test_read_put_11( void )
 
    CU_ASSERT( string_is_equal( argx, arg ) == 1 );
 
-   string_dispose_with_contents( argx );
+   string_deep_dispose( &argx );
 
    argx = binary_file_read_string( file, string_count( arg1 ) );
 
@@ -966,12 +2668,12 @@ void test_read_put_11( void )
 
    CU_ASSERT( binary_file_count( file ) == string_count( arg ) + 1 + string_count( arg1 ) + 1 );
 
-   string_dispose_with_contents( arg );
-   string_dispose_with_contents( arg1 );
-   string_dispose_with_contents( argx );
+   string_deep_dispose( &arg );
+   string_deep_dispose( &arg1 );
+   string_deep_dispose( &argx );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -994,7 +2696,7 @@ void test_read_put_12( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -1061,8 +2763,8 @@ void test_read_put_12( void )
    CU_ASSERT( binary_file_count( file ) == strlen( arg ) + 1 + strlen( arg1 ) + 1 );
 
    free( argx );
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -1085,7 +2787,7 @@ void test_read_put_13( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -1120,7 +2822,7 @@ void test_read_put_13( void )
 
    binary_file_put_raw_buffer( file, arg1 );
 
-   raw_buffer_dispose_with_contents( argx );
+   raw_buffer_deep_dispose( &argx );
    binary_file_close( file );
 
    binary_file_open_read( file );
@@ -1132,7 +2834,7 @@ void test_read_put_13( void )
    CU_ASSERT( raw_buffer_read_uint8( argx, 2 ) == raw_buffer_read_uint8( arg, 2 ) );
    CU_ASSERT( raw_buffer_read_uint8( argx, 3 ) == raw_buffer_read_uint8( arg, 3 ) );
 
-   raw_buffer_dispose_with_contents( argx );
+   raw_buffer_deep_dispose( &argx );
 
    argx = binary_file_read_raw_buffer( file, raw_buffer_count( arg1 ) );
 
@@ -1142,7 +2844,7 @@ void test_read_put_13( void )
 
    CU_ASSERT( binary_file_count( file ) == raw_buffer_count( arg ) + raw_buffer_count( arg1 ) );
 
-   raw_buffer_dispose_with_contents( argx );
+   raw_buffer_deep_dispose( &argx );
    binary_file_close( file );
 
    binary_file_open_read_write( file );
@@ -1165,7 +2867,7 @@ void test_read_put_13( void )
    CU_ASSERT( raw_buffer_read_uint8( argx, 2 ) == raw_buffer_read_uint8( arg, 2 ) );
    CU_ASSERT( raw_buffer_read_uint8( argx, 3 ) == raw_buffer_read_uint8( arg, 3 ) );
 
-   raw_buffer_dispose_with_contents( argx );
+   raw_buffer_deep_dispose( &argx );
 
    argx = binary_file_read_raw_buffer( file, raw_buffer_count( arg1 ) );
 
@@ -1175,12 +2877,12 @@ void test_read_put_13( void )
 
    CU_ASSERT( binary_file_count( file ) == raw_buffer_count( arg ) + raw_buffer_count( arg1 ) );
 
-   raw_buffer_dispose_with_contents( arg );
-   raw_buffer_dispose_with_contents( arg1 );
-   raw_buffer_dispose_with_contents( argx );
+   raw_buffer_deep_dispose( &arg );
+   raw_buffer_deep_dispose( &arg1 );
+   raw_buffer_deep_dispose( &argx );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -1203,7 +2905,7 @@ void test_read_put_14( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -1297,8 +2999,8 @@ void test_read_put_14( void )
 
    free( arg1 );
    free( argx );
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -1321,7 +3023,7 @@ void test_read_put_15( void )
 
    file = binary_file_make( name );
    binary_file_delete( file );
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    file = binary_file_make_open_append( name );
 
@@ -1420,8 +3122,8 @@ void test_read_put_15( void )
    free( arg );
    free( arg1 );
    free( argx );
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -1445,32 +3147,92 @@ add_test_read_put( void )
    // test_read_put_1
    add_test_to_suite( p_suite, test_read_put_1, "test_read_put_1" );
 
+   // test_read_put_1a
+   add_test_to_suite( p_suite, test_read_put_1a, "test_read_put_1a" );
+
+   // test_read_put_1b
+   add_test_to_suite( p_suite, test_read_put_1b, "test_read_put_1b" );
+
    // test_read_put_2
    add_test_to_suite( p_suite, test_read_put_2, "test_read_put_2" );
+
+   // test_read_put_2a
+   add_test_to_suite( p_suite, test_read_put_2a, "test_read_put_2a" );
+
+   // test_read_put_2b
+   add_test_to_suite( p_suite, test_read_put_2b, "test_read_put_2b" );
 
    // test_read_put_3
    add_test_to_suite( p_suite, test_read_put_3, "test_read_put_3" );
 
+   // test_read_put_3a
+   add_test_to_suite( p_suite, test_read_put_3a, "test_read_put_3a" );
+
+   // test_read_put_3b
+   add_test_to_suite( p_suite, test_read_put_3b, "test_read_put_3b" );
+
    // test_read_put_4
    add_test_to_suite( p_suite, test_read_put_4, "test_read_put_4" );
+
+   // test_read_put_4a
+   add_test_to_suite( p_suite, test_read_put_4a, "test_read_put_4a" );
+
+   // test_read_put_4b
+   add_test_to_suite( p_suite, test_read_put_4b, "test_read_put_4b" );
 
    // test_read_put_5
    add_test_to_suite( p_suite, test_read_put_5, "test_read_put_5" );
 
+   // test_read_put_5a
+   add_test_to_suite( p_suite, test_read_put_5a, "test_read_put_5a" );
+
+   // test_read_put_5b
+   add_test_to_suite( p_suite, test_read_put_5b, "test_read_put_5b" );
+
    // test_read_put_6
    add_test_to_suite( p_suite, test_read_put_6, "test_read_put_6" );
+
+   // test_read_put_6a
+   add_test_to_suite( p_suite, test_read_put_6a, "test_read_put_6a" );
+
+   // test_read_put_6b
+   add_test_to_suite( p_suite, test_read_put_6b, "test_read_put_6b" );
 
    // test_read_put_7
    add_test_to_suite( p_suite, test_read_put_7, "test_read_put_7" );
 
+   // test_read_put_7a
+   add_test_to_suite( p_suite, test_read_put_7a, "test_read_put_7a" );
+
+   // test_read_put_7b
+   add_test_to_suite( p_suite, test_read_put_7b, "test_read_put_7b" );
+
    // test_read_put_8
    add_test_to_suite( p_suite, test_read_put_8, "test_read_put_8" );
+
+   // test_read_put_8a
+   add_test_to_suite( p_suite, test_read_put_8a, "test_read_put_8a" );
+
+   // test_read_put_8b
+   add_test_to_suite( p_suite, test_read_put_8b, "test_read_put_8b" );
 
    // test_read_put_9
    add_test_to_suite( p_suite, test_read_put_9, "test_read_put_9" );
 
+   // test_read_put_9a
+   add_test_to_suite( p_suite, test_read_put_9a, "test_read_put_9a" );
+
+   // test_read_put_9b
+   add_test_to_suite( p_suite, test_read_put_9b, "test_read_put_9b" );
+
    // test_read_put_10
    add_test_to_suite( p_suite, test_read_put_10, "test_read_put_10" );
+
+   // test_read_put_10a
+   add_test_to_suite( p_suite, test_read_put_10a, "test_read_put_10a" );
+
+   // test_read_put_10b
+   add_test_to_suite( p_suite, test_read_put_10b, "test_read_put_10b" );
 
    // test_read_put_11
    add_test_to_suite( p_suite, test_read_put_11, "test_read_put_11" );

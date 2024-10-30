@@ -1,7 +1,7 @@
 /**
  @file AVLTree_test_p_iterable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree P_Iterable"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_t
 
 */
 
@@ -38,18 +38,16 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_p_iterable_1( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
    
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
    
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   CU_ASSERT( i_iterable_dispose_f( pb_list ) == i_avltree_dispose );
-
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
  
    return;
 }
@@ -60,18 +58,16 @@ void test_p_iterable_1( void )
 
 void test_p_iterable_2( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   CU_ASSERT( i_iterable_dispose_with_contents_f( pb_list ) == i_avltree_dispose_with_contents );
-
-   i_iterable_dispose_with_contents( pb_list );
+   i_avltree_deep_dispose( &tree );
 
    return;
 }
@@ -82,21 +78,20 @@ void test_p_iterable_2( void )
 
 void test_p_iterable_3( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   i_avltree_put( list, 24 );
+   i_avltree_put( tree, 24 );
 
-   CU_ASSERT( i_iterable_count_f( pb_list ) == i_avltree_count );
-   CU_ASSERT( i_iterable_count( pb_list ) == 1 );
+   CU_ASSERT( i_iterable_count( pb ) == 1 );
 
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
 
    return;
 }
@@ -107,22 +102,21 @@ void test_p_iterable_3( void )
 
 void test_p_iterable_4( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   i_avltree_put( list, 24 );
-   i_avltree_start( list );
+   i_avltree_put( tree, 24 );
+   i_avltree_start( tree );
 
-   CU_ASSERT( i_iterable_item_f( pb_list ) == i_avltree_item_at );
-   CU_ASSERT( i_iterable_item( pb_list) == 24 );
+   CU_ASSERT( i_iterable_item( pb) == 24 );
 
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
 
    return;
 }
@@ -133,21 +127,20 @@ void test_p_iterable_4( void )
 
 void test_p_iterable_5( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   i_avltree_put( list, 24 );
+   i_avltree_put( tree, 24 );
 
-   CU_ASSERT( i_iterable_off_f( pb_list ) == i_avltree_off );
-   CU_ASSERT( i_iterable_off( pb_list ) == 1 );
+   CU_ASSERT( i_iterable_off( pb ) == 1 );
 
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
 
    return;
 }
@@ -158,19 +151,18 @@ void test_p_iterable_5( void )
 
 void test_p_iterable_6( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   CU_ASSERT( i_iterable_is_empty_f( pb_list ) == i_avltree_is_empty );
-   CU_ASSERT( i_iterable_is_empty( pb_list ) == 1 );
+   CU_ASSERT( i_iterable_is_empty( pb ) == 1 );
 
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
 
    return;
 }
@@ -181,22 +173,21 @@ void test_p_iterable_6( void )
 
 void test_p_iterable_7( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   i_avltree_put( list, 24 );
-   i_iterable_start( pb_list );
+   i_avltree_put( tree, 24 );
+   i_iterable_start( pb );
 
-   CU_ASSERT( i_iterable_item_f( pb_list ) == i_avltree_item_at );
-   CU_ASSERT( i_iterable_item( pb_list) == 24 );
+   CU_ASSERT( i_iterable_item( pb) == 24 );
 
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
 
    return;
 }
@@ -207,25 +198,24 @@ void test_p_iterable_7( void )
 
 void test_p_iterable_8( void )
 {
-   i_avltree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_avltree_t *tree = NULL;
+   protocol_base_t *pb = NULL;
 
-   list = i_avltree_make();
-   pb_list = ( protocol_base_t * ) list;
+   tree = i_avltree_make();
+   pb = ( protocol_base_t * ) tree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb != NULL );
 
-   i_avltree_put( list, 24 );
-   i_avltree_put( list, 13 );
+   i_avltree_put( tree, 24 );
+   i_avltree_put( tree, 13 );
 
-   i_avltree_start( list );
-   i_iterable_forth( pb_list );
+   i_avltree_start( tree );
+   i_iterable_forth( pb );
 
-   CU_ASSERT( i_iterable_forth_f( pb_list ) == i_avltree_forth );
-   CU_ASSERT( i_iterable_item( pb_list) == 24 );
+   CU_ASSERT( i_iterable_item( pb) == 24 );
 
-   i_iterable_dispose( pb_list );
+   i_avltree_dispose( &tree );
 
    return;
 }

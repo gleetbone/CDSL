@@ -1,8 +1,8 @@
 /**
  @file raw_buffer_test_append.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for soa_node_iterator_make_str"
+ @version 2.0.0
+ @brief: "tests for raw_buffer_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_iterator_make_str.
+ Unit tests for raw_buffer_t
 
 */
 
@@ -44,8 +44,8 @@ void test_append_1( void )
    
    CU_ASSERT( raw_buffer_count( raw_buffer1 ) == 32 );
    
-   raw_buffer_dispose_with_contents( raw_buffer1 );
-   raw_buffer_dispose_with_contents( raw_buffer2 );
+   raw_buffer_deep_dispose( &raw_buffer1 );
+   raw_buffer_deep_dispose( &raw_buffer2 );
 
    return;
 }
@@ -74,8 +74,8 @@ void test_append_2( void )
    CU_ASSERT( raw_buffer_read_int32( raw_buffer1, 16 ) == 7654321 );
    CU_ASSERT( raw_buffer_read_int32( raw_buffer1, 24 ) == 1234567 );
    
-   raw_buffer_dispose_with_contents( raw_buffer1 );
-   raw_buffer_dispose_with_contents( raw_buffer2 );
+   raw_buffer_deep_dispose( &raw_buffer1 );
+   raw_buffer_deep_dispose( &raw_buffer2 );
 
    return;
 }

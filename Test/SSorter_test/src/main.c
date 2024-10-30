@@ -14,6 +14,18 @@ extern "C" {
 // test suite declarations
 
 int
+add_test_make( void );
+
+int
+add_test_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_is_equal( void );
+
+int
 add_test_sort( void );
 
 int
@@ -56,6 +68,10 @@ int main()
 
    // add tests for path utilites
 
+   add_test_make();
+   add_test_clone();
+   add_test_copy();
+   add_test_is_equal();
    add_test_sort();
    add_test_all();
    

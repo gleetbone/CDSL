@@ -1,7 +1,7 @@
 /**
  @file Svd_test_set_singular_value_threshold.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Svd_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -51,7 +51,7 @@ void test_set_singular_value_threshold_1( void )
 
    CU_ASSERT( fsvd != NULL );
 
-   f_svd_dispose_with_contents( fsvd );
+   f_svd_deep_dispose( &fsvd );
 
    return;
 }
@@ -68,7 +68,7 @@ void test_set_singular_value_threshold_2( void )
 
    CU_ASSERT( dsvd != NULL );
 
-   d_svd_dispose_with_contents( dsvd );
+   d_svd_deep_dispose( &dsvd );
 
    return;
 }
@@ -87,7 +87,7 @@ void test_set_singular_value_threshold_3( void )
 
    CU_ASSERT( cfsvd != NULL );
 
-   cf_svd_dispose_with_contents( cfsvd );
+   cf_svd_deep_dispose( &cfsvd );
 
    return;
 }
@@ -105,7 +105,7 @@ void test_set_singular_value_threshold_4( void )
 
    CU_ASSERT( cdsvd != NULL );
 
-   cd_svd_dispose_with_contents( cdsvd );
+   cd_svd_deep_dispose( &cdsvd );
 
    return;
 }

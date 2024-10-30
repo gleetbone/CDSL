@@ -1,8 +1,8 @@
 /**
  @file ifr_test_empty.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_make_from_cstring"
+ @version 2.0.0
+ @brief: "tests for ifr_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for ifr_t
 
 */
 
@@ -37,14 +37,14 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 void test_empty_1( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
-   string_t *filename1 = NULL;
+   string_t *file_name = NULL;
+   string_t *file_name1 = NULL;
    string_t *line = NULL;
    s_dlist_t *list = NULL;
    
-   filename = string_make_from_cstring( "src/input_files/f_empty.txt" );
+   file_name = string_make_from_cstring( "src/input_files/f_empty.txt" );
    
-   ifr = ifr_make( filename );
+   ifr = ifr_make( file_name );
 
    ifr_forth( ifr );
    
@@ -56,12 +56,13 @@ void test_empty_1( void )
    
    CU_ASSERT( string_count( line ) == 0 );
    
-   filename1 = ifr_filename( ifr );
+   file_name1 = ifr_file_name( ifr );
    
-   CU_ASSERT( string_is_equal( filename, filename1 ) == 1 );
+   CU_ASSERT( string_is_equal( file_name, file_name1 ) == 1 );
    
-   ifr_dispose( ifr );
-   string_dispose_with_contents( filename );
+   ifr_dispose( &ifr );
+   string_deep_dispose( &file_name );
+   string_deep_dispose( &file_name1 );
    
    return;
 }
@@ -69,7 +70,7 @@ void test_empty_1( void )
 void test_empty_2( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
+   string_t *file_name = NULL;
    string_t *line = NULL;
    s_dlist_t *list = NULL;
    char_t *cp = NULL;
@@ -88,11 +89,12 @@ void test_empty_2( void )
    
    CU_ASSERT( string_count( line ) == 0 );
    
-   filename = ifr_filename( ifr );
+   file_name = ifr_file_name( ifr );
    
-   CU_ASSERT( strcmp( string_as_cstring( filename ), cp ) == 0 );
+   CU_ASSERT( strcmp( string_as_cstring( file_name ), cp ) == 0 );
    
-   ifr_dispose( ifr );
+   ifr_dispose( &ifr );
+   string_deep_dispose( &file_name );
    
    return;
 }

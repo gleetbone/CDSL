@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_vector_dot.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  date: "$Date: 2011-03-064 064:41:55 -06400 (Tue64 Mar 2011) $"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -54,8 +54,8 @@ void test_vector_dot_1( void )
    CU_ASSERT( f_matvec_is_row_vector( fm ) == 1 );
    CU_ASSERT( abs( x - 2.0 ) < MAX_ERROR );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
 
    fm = f_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 2.0 );
    fm1 = f_matvec_make_from_args( 3, 1, 3, 0.333333, 0.666666, 0.666666 );
@@ -65,8 +65,8 @@ void test_vector_dot_1( void )
    CU_ASSERT( f_matvec_is_column_vector( fm ) == 1 );
    CU_ASSERT( abs( x - 2.0 ) < MAX_ERROR );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
 
    return;
 }
@@ -89,8 +89,8 @@ void test_vector_dot_2( void )
    CU_ASSERT( d_matvec_is_row_vector( dm ) == 1 );
    CU_ASSERT( abs( x - 2.0 ) < MAX_ERROR );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
 
    dm = d_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 2.0 );
    dm1 = d_matvec_make_from_args( 3, 1, 3, 0.333333, 0.666666, 0.666666 );
@@ -100,8 +100,8 @@ void test_vector_dot_2( void )
    CU_ASSERT( d_matvec_is_column_vector( dm ) == 1 );
    CU_ASSERT( abs( x - 2.0 ) < MAX_ERROR );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
 
    return;
 }
@@ -124,8 +124,8 @@ void test_vector_dot_3( void )
    CU_ASSERT( cf_matvec_is_row_vector( cfm ) == 1 );
    CU_ASSERT( abs( x -(  2.0 + 0.0*I ) ) < MAX_ERROR );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
 
    cfm = cf_matvec_make_from_args( 3, 1, 3, 0.0 + 1.0*I, 0.0 + 2.0*I, 0.0 + 2.0*I );
    cfm1 = cf_matvec_make_from_args( 3, 1, 3, 0.0 + 0.333333*I, 0.0 + 0.666666*I, 0.0 + 0.666666*I );
@@ -135,8 +135,8 @@ void test_vector_dot_3( void )
    CU_ASSERT( cf_matvec_is_column_vector( cfm ) == 1 );
    CU_ASSERT( abs( x -(  2.0 + 0.0*I ) ) < MAX_ERROR );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
 
    return;
 }
@@ -160,8 +160,8 @@ void test_vector_dot_4( void )
    CU_ASSERT( cd_matvec_is_row_vector( cdm ) == 1 );
    CU_ASSERT( abs( x - ( 2.0 + 0.0*I ) ) < MAX_ERROR );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
 
    cdm = cd_matvec_make_from_args( 3, 1, 3, 0.0 + 1.0*I, 0.0 + 2.0*I, 0.0 + 2.0*I );
    cdm1 = cd_matvec_make_from_args( 3, 1, 3, 0.0 + 0.333333*I, 0.0 + 0.666666*I, 0.0 + 0.666666*I );
@@ -171,8 +171,8 @@ void test_vector_dot_4( void )
    CU_ASSERT( cd_matvec_is_column_vector( cdm ) == 1 );
    CU_ASSERT( abs( x - ( 2.0 + 0.0*I ) ) < MAX_ERROR );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
 
    return;
 }

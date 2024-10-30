@@ -1,7 +1,7 @@
 /**
  @file AList_test_cursor_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AList_cursor_dispose"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AList_cursor_dispose.
+ Unit tests for AList_t
 
 */
 
@@ -25,7 +25,8 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_AList.h"
+#include "i_AList.h"
+#include "s_AList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,34 +37,64 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_cursor_dispose_1( void )
 {
-   int_alist_t *list = NULL;
+   i_alist_t *list = NULL;
 
-   list = int_alist_make();
+   list = i_alist_make();
 
-   int_alist_cursor_t *cursor = int_alist_cursor_make( list );
+   i_alist_cursor_t *cursor = i_alist_cursor_make( list );
 
    CU_ASSERT( cursor != NULL );
 
-   int_alist_cursor_dispose( cursor );
-   int_alist_dispose( list );
+   i_alist_cursor_dispose( &cursor );
+   CU_ASSERT( cursor == NULL );
+
+   i_alist_dispose( &list );
 
    return;
 }
 
+/**
+   test_cursor_dispose_2
+*/
+
 void test_cursor_dispose_2( void )
 {
-   int_alist_t *list = NULL;
+   i_alist_t *list = NULL;
 
-   list = int_alist_make();
-   int_alist_put_last( list, 24 );
+   list = i_alist_make();
+   i_alist_put_last( list, 24 );
 
-   int_alist_cursor_t *cursor = int_alist_cursor_make( list );
+   i_alist_cursor_t *cursor = i_alist_cursor_make( list );
 
-   int_alist_cursor_dispose( cursor );
+   i_alist_cursor_dispose( &cursor );
+   CU_ASSERT( cursor == NULL );
 
-   CU_ASSERT( int_alist_first( list ) == 24 );
+   CU_ASSERT( i_alist_first( list ) == 24 );
 
-   int_alist_dispose( list );
+   i_alist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_cursor_dispose_3
+*/
+
+void test_cursor_dispose_3( void )
+{
+   s_alist_t *list = s_alist_make();
+   s_alist_cursor_t *cursor = s_alist_cursor_make( list );
+
+   string_t *s1 = string_make_from_cstring( "a" ); 
+
+   s_alist_put_last( list, s1 );
+
+   s_alist_cursor_dispose( &cursor );
+   CU_ASSERT( cursor == NULL );
+
+   CU_ASSERT( string_is_equal( s_alist_first( list ), s1 ) == 1 );
+
+   s_alist_deep_dispose( &list );
 
    return;
 }
@@ -88,6 +119,9 @@ add_test_cursor_dispose( void )
 
    // test_cursor_dispose_2
    add_test_to_suite( p_suite, test_cursor_dispose_2, "test_cursor_dispose_2" );
+
+   // test_cursor_dispose_3
+   add_test_to_suite( p_suite, test_cursor_dispose_3, "test_cursor_dispose_3" );
 
    return CUE_SUCCESS;
 

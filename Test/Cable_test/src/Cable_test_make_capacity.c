@@ -1,7 +1,7 @@
 /**
  @file Cable_test_make_from.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -53,8 +53,8 @@ void test_make_from_1( void )
    CU_ASSERT( cable_is_empty( cable1 ) == 1 );
    CU_ASSERT( cable_capacity( cable1 ) == 4 );
 
-   cable_dispose( cable );
-   cable_dispose( cable1 );
+   cable_dispose( &cable );
+   cable_dispose( &cable1 );
 
    return;
 }

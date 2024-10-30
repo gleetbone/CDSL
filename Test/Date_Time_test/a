@@ -1,0 +1,8 @@
+astyle --style=allman -s3 -S -p -D ../../$1/*.c
+astyle --style=allman -s3 -S -p -D ../../$1/*.h
+astyle --style=allman -s3 -S -p -D ../../$1/*.ph
+sed -i -e  's/( \*\(_*[a-z]*[A-Z]*[0-9]*\) )/(*\1)/g' ../../$1/*.c
+sed -i -e  's/( \*\(_*[a-z]*[A-Z]*[0-9]*\) )/(*\1)/g' ../../$1/*.h
+sed -i -e  's/( \*\(_*[a-z]*[A-Z]*[0-9]*\) )/(*\1)/g' ../../$1/*.ph
+sed -i -e  's/( \*\*\(_*[a-z]*[A-Z]*[0-9]*\) )/(**\1)/g' ../../$1/*.c
+rm ../../$1/*.orig

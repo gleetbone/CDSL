@@ -1,7 +1,7 @@
 /**
  @file Cable_test_append_cstring.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -55,7 +55,7 @@ void test_append_cstring_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdx" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_append_cstring_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -97,7 +97,7 @@ void test_append_cstring_3( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

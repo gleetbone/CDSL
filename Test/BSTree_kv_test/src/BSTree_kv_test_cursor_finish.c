@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_cursor_finish.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_kv_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_BSTree_kv.h"
+#include "ss_BSTree_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -48,7 +49,7 @@ void test_cursor_finish_1( void )
    
    CU_ASSERT( ii_bstree_kv_cursor_item_at( cursor ) == 10 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -73,7 +74,7 @@ void test_cursor_finish_2( void )
    
    CU_ASSERT( ii_bstree_kv_cursor_item_at( cursor ) == 30 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -98,7 +99,7 @@ void test_cursor_finish_3( void )
    
    CU_ASSERT( ii_bstree_kv_cursor_item_at( cursor ) == 30 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -123,7 +124,7 @@ void test_cursor_finish_4( void )
    
    CU_ASSERT( ii_bstree_kv_cursor_item_at( cursor ) == 30 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -153,7 +154,7 @@ void test_cursor_finish_5( void )
    
    CU_ASSERT( ii_bstree_kv_cursor_item_at( cursor ) == 60 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -183,7 +184,51 @@ void test_cursor_finish_6( void )
    
    CU_ASSERT( ii_bstree_kv_cursor_item_at( cursor ) == 60 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_cursor_finish_7
+*/
+
+void test_cursor_finish_7( void )
+{
+   ss_bstree_kv_t *bstree = NULL;
+   ss_bstree_kv_cursor_t *cursor = NULL;
+   
+   string_t *s2 = NULL;
+   string_t *s20 = NULL;
+   string_t *s3 = NULL;
+   string_t *s30 = NULL;
+   string_t *s4 = NULL;
+   string_t *s40 = NULL;
+   string_t *s6 = NULL;
+   string_t *s60 = NULL;
+   
+   s2 = string_make_from_cstring( "2" );
+   s20 = string_make_from_cstring( "20" );
+   s3 = string_make_from_cstring( "3" );
+   s30 = string_make_from_cstring( "30" );
+   s4 = string_make_from_cstring( "4" );
+   s40 = string_make_from_cstring( "40" );
+   s6 = string_make_from_cstring( "6" );
+   s60 = string_make_from_cstring( "60" );
+   
+   bstree = ss_bstree_kv_make();
+   cursor = ss_bstree_kv_cursor_make( bstree );
+   
+   ss_bstree_kv_put( bstree, s40, s4 );
+   ss_bstree_kv_put( bstree, s20, s2 );
+   ss_bstree_kv_put( bstree, s60, s6 );
+   ss_bstree_kv_put( bstree, s30, s3 );
+   
+   ss_bstree_kv_cursor_finish( cursor );
+   
+   CU_ASSERT( ss_bstree_kv_cursor_item_at( cursor ) == s60 );
+ 
+   ss_bstree_kv_deep_dispose( &bstree );
 
    return;
 }
@@ -221,6 +266,9 @@ add_test_cursor_finish( void )
 
    // test_cursor_finish_6
    add_test_to_suite( p_suite, test_cursor_finish_6, "test_cursor_finish_6" );
+
+   // test_cursor_finish_7
+   add_test_to_suite( p_suite, test_cursor_finish_7, "test_cursor_finish_7" );
 
    return CUE_SUCCESS;
    

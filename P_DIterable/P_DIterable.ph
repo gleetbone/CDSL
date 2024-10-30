@@ -42,21 +42,17 @@
    Defines
 */
 
-#define P_DITERABLE 0x5A000302
+#define P_DITERABLE_COUNT        0
+#define P_DITERABLE_ITEM         1
+#define P_DITERABLE_OFF          2
+#define P_DITERABLE_IS_EMPTY     3
+#define P_DITERABLE_START        4
+#define P_DITERABLE_FORTH        5
+#define P_DITERABLE_FINISH       6
+#define P_DITERABLE_BACK         7  
 
-#define P_DITERABLE_DISPOSE               0
-#define P_DITERABLE_DISPOSE_WITH_CONTENTS 1
-#define P_DITERABLE_COUNT                 2
-#define P_DITERABLE_ITEM                  3
-#define P_DITERABLE_OFF                   4
-#define P_DITERABLE_IS_EMPTY              5
-#define P_DITERABLE_START                 6
-#define P_DITERABLE_FORTH                 7
-#define P_DITERABLE_FINISH                8
-#define P_DITERABLE_BACK                  9  
-
-#define P_DITERABLE_FUNCTION_MAX     9
-#define P_DITERABLE_FUNCTION_COUNT   10
+#define P_DITERABLE_FUNCTION_MAX     7
+#define P_DITERABLE_FUNCTION_COUNT    8
 
 #endif /* P_DITERABLE_PH */
 

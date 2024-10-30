@@ -1,7 +1,7 @@
 /**
  @file binary_file_test_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for ifr_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for binary_file_t
 
 */
 
@@ -47,8 +47,8 @@ void test_make_1( void )
 
    CU_ASSERT( file != NULL );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -65,7 +65,7 @@ void test_make_2( void )
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -87,8 +87,8 @@ void test_make_3( void )
 
    CU_ASSERT( file != NULL );
    
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -101,11 +101,11 @@ void test_make_4( void )
 {
    binary_file_t *file= NULL;
 
-   file = binary_file_make_cstring_open_read( "src/test/rfile.bin" );
+   file = binary_file_make_open_read_cstring( "src/test/rfile.bin" );
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -127,8 +127,8 @@ void test_make_5( void )
 
    CU_ASSERT( file != NULL );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -141,11 +141,11 @@ void test_make_6( void )
 {
    binary_file_t *file= NULL;
 
-   file = binary_file_make_cstring_open_write( "src/test/file.bin" );
+   file = binary_file_make_open_write_cstring( "src/test/file.bin" );
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -167,8 +167,8 @@ void test_make_7( void )
 
    CU_ASSERT( file != NULL );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -181,11 +181,11 @@ void test_make_8( void )
 {
    binary_file_t *file= NULL;
 
-   file = binary_file_make_cstring_open_read_write( "src/test/rfile.bin" );
+   file = binary_file_make_open_read_write_cstring( "src/test/rfile.bin" );
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -207,8 +207,8 @@ void test_make_9( void )
 
    CU_ASSERT( file != NULL );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -221,11 +221,11 @@ void test_make_10( void )
 {
    binary_file_t *file= NULL;
 
-   file = binary_file_make_cstring_create_read_write( "src/test/file.bin" );
+   file = binary_file_make_create_read_write_cstring( "src/test/file.bin" );
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -247,8 +247,8 @@ void test_make_11( void )
 
    CU_ASSERT( file != NULL );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -261,11 +261,11 @@ void test_make_12( void )
 {
    binary_file_t *file= NULL;
 
-   file = binary_file_make_cstring_open_append( "src/test/file.bin" );
+   file = binary_file_make_open_append_cstring( "src/test/file.bin" );
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -287,8 +287,8 @@ void test_make_13( void )
 
    CU_ASSERT( file != NULL );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -301,11 +301,11 @@ void test_make_14( void )
 {
    binary_file_t *file= NULL;
 
-   file = binary_file_make_cstring_open_read_append( "src/test/rfile.bin" );
+   file = binary_file_make_open_read_append_cstring( "src/test/rfile.bin" );
 
    CU_ASSERT( file != NULL );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -324,7 +324,7 @@ void test_make_15( void )
 
    binary_file_create_read_write( file );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    return;
 }

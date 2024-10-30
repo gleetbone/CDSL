@@ -4,7 +4,7 @@ This data structure implements a doubly linked list. So it's fast to iterate thr
 
 ### Protocols Supported
 
-- P_Clonable
+- P_Basic
 - P_Indexable
 - P_Iterable
 - P_DIterable

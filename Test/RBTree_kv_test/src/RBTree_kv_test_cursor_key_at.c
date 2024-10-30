@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_cursor_key_at.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_make.
+ Unit tests for RBTree_kv_t
 
 */
 
@@ -47,7 +47,7 @@ void test_cursor_key_at_1( void )
    ii_rbtree_kv_cursor_start( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 1 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -77,7 +77,7 @@ void test_cursor_key_at_2( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 3 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -107,7 +107,7 @@ void test_cursor_key_at_3( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 3 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -137,7 +137,7 @@ void test_cursor_key_at_4( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 3 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -175,7 +175,7 @@ void test_cursor_key_at_5( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 6 );
   
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -213,7 +213,7 @@ void test_cursor_key_at_6( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 6 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -251,7 +251,7 @@ void test_cursor_key_at_7( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 6 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -289,7 +289,7 @@ void test_cursor_key_at_8( void )
    ii_rbtree_kv_cursor_forth( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_key_at( cursor ) == 7 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }

@@ -1,7 +1,7 @@
 /**
  @file DList_test_as_array.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for DList_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for DList_item_at.
+ Unit tests for DList_t.
 
 */
 
@@ -25,7 +25,8 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_DList.h"
+#include "i_DList.h"
+#include "s_DList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,37 +37,41 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_as_array_1( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
    int32_t *array = NULL;
    int32_t count = 0;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
 
-   array = int_dlist_as_array( list, &count );
+   array = i_dlist_as_array( list, &count );
 
    CU_ASSERT( count == 1 );
 
    CU_ASSERT( array[0] == 24 );
 
    free( array );
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }
 
+/**
+   test_as_array_2
+*/
+
 void test_as_array_2( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
    int32_t *array = NULL;
    int32_t count = 0;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
    
-   int_dlist_put_last( list, 13 );
+   i_dlist_put_last( list, 13 );
 
-   array = int_dlist_as_array( list, &count );
+   array = i_dlist_as_array( list, &count );
 
    CU_ASSERT( array[0] == 24 );
    CU_ASSERT( array[1] == 13 );
@@ -74,7 +79,38 @@ void test_as_array_2( void )
    CU_ASSERT( count == 2 );
 
    free( array );
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_as_array_3
+*/
+
+void test_as_array_3( void )
+{
+   s_dlist_t *list = NULL;
+   string_t **array = NULL;
+   int32_t count = 0;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   list = s_dlist_make();
+   s_dlist_put_last( list, s1 );
+   
+   s_dlist_put_last( list, s2 );
+
+   array = s_dlist_as_array( list, &count );
+
+   CU_ASSERT( array[0] == s1 );
+   CU_ASSERT( array[1] == s2 );
+
+   CU_ASSERT( count == 2 );
+
+   free( array );
+   s_dlist_deep_dispose( &list );
 
    return;
 }
@@ -99,6 +135,9 @@ add_test_as_array( void )
 
    // test_as_array_2
    add_test_to_suite( p_suite, test_as_array_2, "test_as_array_2" );
+
+   // test_as_array_3
+   add_test_to_suite( p_suite, test_as_array_3, "test_as_array_3" );
 
    return CUE_SUCCESS;
 

@@ -1,7 +1,7 @@
 /**
  @file binary_file_test_movement.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for ifr_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for binary_file_t
 
 */
 
@@ -47,8 +47,8 @@ void test_movement_1( void )
 
    CU_ASSERT( binary_file_count( file ) == 6 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -75,8 +75,8 @@ void test_movement_2( void )
    CU_ASSERT( binary_file_off( file ) == 1 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -105,8 +105,8 @@ void test_movement_3( void )
    CU_ASSERT( binary_file_off( file ) == 0 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -135,8 +135,8 @@ void test_movement_4( void )
    CU_ASSERT( binary_file_off( file ) == 0 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -166,8 +166,8 @@ void test_movement_5( void )
    CU_ASSERT( binary_file_off( file ) == 0 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -196,8 +196,8 @@ void test_movement_6( void )
    CU_ASSERT( binary_file_off( file ) == 0 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -227,8 +227,8 @@ void test_movement_7( void )
    CU_ASSERT( binary_file_off( file ) == 1 );
    CU_ASSERT( binary_file_end_of_file( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -255,8 +255,8 @@ void test_movement_8( void )
    CU_ASSERT( binary_file_off( file ) == 1 );
    CU_ASSERT( binary_file_end_of_file( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -286,8 +286,8 @@ void test_movement_9( void )
    CU_ASSERT( binary_file_off( file ) == 0 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -317,8 +317,8 @@ void test_movement_10( void )
    CU_ASSERT( binary_file_off( file ) == 1 );
    CU_ASSERT( binary_file_end_of_file( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -348,8 +348,8 @@ void test_movement_11( void )
    CU_ASSERT( binary_file_off( file ) == 1 );
    CU_ASSERT( binary_file_end_of_file( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }

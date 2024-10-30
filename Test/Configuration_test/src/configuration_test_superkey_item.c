@@ -1,8 +1,8 @@
 /**
- @file soa_configuration_test_superkey_item.c
+ @file configuration_test_superkey_item.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for messaging_make"
+ @version 2.0.0
+ @brief: "tests for configuration_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_make_dict.
+ Unit tests for configuration_t
 
 */
 
@@ -36,40 +36,40 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_superkey_item_1( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
    
    string_t *key = string_make_from_cstring( "food:fruit" );
    string_t *value = string_make_from_cstring( "apple" );
 
-   soa_configuration_put( configuration, key, value );
+   configuration_put( configuration, key, value );
 
    string_t *key1 = string_make_from_cstring( "fruit" );
    string_t *value1 = string_make_from_cstring( "apple" );
 
-   soa_configuration_put( configuration, key1, value1 );
+   configuration_put( configuration, key1, value1 );
 
    string_t *key2 = string_make_from_cstring( "meat" );
    string_t *value2 = string_make_from_cstring( "fish" );
 
-   soa_configuration_put( configuration, key2, value2 );
+   configuration_put( configuration, key2, value2 );
 
    string_t *s = string_make_from_cstring( "food" );
    string_t *k = string_make_from_cstring( "fruit" );
    string_t *k1 = string_make_from_cstring( "meat" );
 
-   string_t *r = soa_configuration_superkey_item( configuration, s, k );
+   string_t *r = configuration_superkey_item( configuration, s, k );
 
    CU_ASSERT( string_is_equal_cstring( r, "apple" ) );
 
-   r = soa_configuration_superkey_item( configuration, s, k1 );
+   r = configuration_superkey_item( configuration, s, k1 );
 
    CU_ASSERT( string_is_equal_cstring( r, "fish" ) );
 
-   string_dispose_with_contents( s );
-   string_dispose_with_contents( k );
-   string_dispose_with_contents( k1 );
+   string_deep_dispose( &s );
+   string_deep_dispose( &k );
+   string_deep_dispose( &k1 );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }
@@ -80,21 +80,21 @@ void test_superkey_item_1( void )
 
 void test_superkey_item_2( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
 
-   soa_configuration_put_cstring( configuration, "food:fruit", "apple" );
-   soa_configuration_put_cstring( configuration, "fruit", "apple" );
-   soa_configuration_put_cstring( configuration, "meat", "fish" );
+   configuration_put_cstring( configuration, "food:fruit", "apple" );
+   configuration_put_cstring( configuration, "fruit", "apple" );
+   configuration_put_cstring( configuration, "meat", "fish" );
 
-   string_t *r = soa_configuration_superkey_item_cstring( configuration, "food", "fruit" );
+   string_t *r = configuration_superkey_item_cstring( configuration, "food", "fruit" );
 
    CU_ASSERT( string_is_equal_cstring( r, "apple" ) );
 
-   r = soa_configuration_superkey_item_cstring( configuration, "food", "meat" );
+   r = configuration_superkey_item_cstring( configuration, "food", "meat" );
 
    CU_ASSERT( string_is_equal_cstring( r, "fish" ) );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }

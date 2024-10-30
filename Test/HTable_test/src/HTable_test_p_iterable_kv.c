@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_p_iterable_kv.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree P_Iterable"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for HTable_t
 
 */
 
@@ -28,6 +28,8 @@ extern "C" {
 #include "ii_HTable.h"
 #include "Protocol_Base.h"
 #include "ii_Iterable_kv.h"
+#include "ss_HTable.h"
+#include "ss_Iterable_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -47,9 +49,7 @@ void test_p_iterable_kv_1( void )
    CU_ASSERT( tree != NULL );
    CU_ASSERT( pb_tree != NULL );
 
-   CU_ASSERT( ii_iterable_kv_dispose_f( pb_tree ) == ii_htable_dispose );
-
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
  
    return;
 }
@@ -69,9 +69,7 @@ void test_p_iterable_kv_2( void )
    CU_ASSERT( tree != NULL );
    CU_ASSERT( pb_tree != NULL );
 
-   CU_ASSERT( ii_iterable_kv_dispose_with_contents_f( pb_tree ) == ii_htable_dispose_with_contents );
-
-   ii_iterable_kv_dispose_with_contents( pb_tree );
+   ii_htable_deep_dispose( &tree );
 
    return;
 }
@@ -93,10 +91,9 @@ void test_p_iterable_kv_3( void )
 
    ii_htable_put( tree, 24, 240 );
 
-   CU_ASSERT( ii_iterable_kv_count_f( pb_tree ) == ii_htable_count );
    CU_ASSERT( ii_iterable_kv_count( pb_tree ) == 1 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
 
    return;
 }
@@ -119,10 +116,9 @@ void test_p_iterable_kv_4( void )
    ii_htable_put( tree, 24, 240 );
    ii_htable_start( tree );
 
-   CU_ASSERT( ii_iterable_kv_value_f( pb_tree ) == ii_htable_item_at );
    CU_ASSERT( ii_iterable_kv_value( pb_tree) == 24 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
 
    return;
 }
@@ -145,10 +141,9 @@ void test_p_iterable_kv_4a( void )
    ii_htable_put( tree, 24, 240 );
    ii_htable_start( tree );
 
-   CU_ASSERT( ii_iterable_kv_key_f( pb_tree ) == ii_htable_key_at );
    CU_ASSERT( ii_iterable_kv_key( pb_tree) == 240 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
 
    return;
 }
@@ -170,10 +165,9 @@ void test_p_iterable_kv_5( void )
 
    ii_htable_put( tree, 24, 240 );
 
-   CU_ASSERT( ii_iterable_kv_off_f( pb_tree ) == ii_htable_off );
    CU_ASSERT( ii_iterable_kv_off( pb_tree ) == 1 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
 
    return;
 }
@@ -193,10 +187,9 @@ void test_p_iterable_kv_6( void )
    CU_ASSERT( tree != NULL );
    CU_ASSERT( pb_tree != NULL );
 
-   CU_ASSERT( ii_iterable_kv_is_empty_f( pb_tree ) == ii_htable_is_empty );
    CU_ASSERT( ii_iterable_kv_is_empty( pb_tree ) == 1 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
 
    return;
 }
@@ -219,10 +212,9 @@ void test_p_iterable_kv_7( void )
    ii_htable_put( tree, 24, 240 );
    ii_iterable_kv_start( pb_tree );
 
-   CU_ASSERT( ii_iterable_kv_value_f( pb_tree ) == ii_htable_item_at );
    CU_ASSERT( ii_iterable_kv_value( pb_tree) == 24 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
 
    return;
 }
@@ -248,10 +240,43 @@ void test_p_iterable_kv_8( void )
    ii_htable_start( tree );
    ii_iterable_kv_forth( pb_tree );
 
-   CU_ASSERT( ii_iterable_kv_forth_f( pb_tree ) == ii_htable_forth );
    CU_ASSERT( ii_iterable_kv_value( pb_tree) == 13 );
 
-   ii_iterable_kv_dispose( pb_tree );
+   ii_htable_dispose( &tree );
+
+   return;
+}
+
+/**
+   test_p_iterable_kv_9
+*/
+
+void test_p_iterable_kv_9( void )
+{
+   ss_htable_t *tree = NULL;
+   protocol_base_t *pb_tree = NULL;
+
+   string_t *k1 = string_make_from_cstring( "k1" );
+   string_t *v1 = string_make_from_cstring( "v1" );
+   
+   string_t *k2 = string_make_from_cstring( "k2" );
+   string_t *v2 = string_make_from_cstring( "v2" );
+   
+   tree = ss_htable_make();
+   pb_tree = ( protocol_base_t * ) tree;
+
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb_tree != NULL );
+
+   ss_htable_put( tree, v1, k1 );
+   ss_htable_put( tree, v2, k2 );
+
+   ss_htable_start( tree );
+   ss_iterable_kv_forth( pb_tree );
+
+   CU_ASSERT( ss_iterable_kv_value( pb_tree) == v2 );
+
+   ss_htable_deep_dispose( &tree );
 
    return;
 }
@@ -297,6 +322,9 @@ add_test_p_iterable_kv( void )
 
    // test_p_iterable_kv_8
    add_test_to_suite( p_suite, test_p_iterable_kv_8, "test_p_iterable_kv_8" );
+
+   // test_p_iterable_kv_9
+   add_test_to_suite( p_suite, test_p_iterable_kv_9, "test_p_iterable_kv_9" );
 
    return CUE_SUCCESS;
    

@@ -1,0 +1,321 @@
+==== Building Fft_test (debug) ====
+cf_Fft.c
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c: In function ‘cf_fft_dispose’:
+../../../Fft/Fft.c:333:54: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  333 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |                                           ~~~~~~~~~~~^~~~~~~~~~~~~
+      |                                                      |
+      |                                                      cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.h:36,
+                 from ../src/cf_Fft.h:31,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:333:25: warning: taking address of expression of type ‘void’
+  333 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:333:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  333 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:333:25: error: lvalue required as unary ‘&’ operand
+  333 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:333:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  333 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:334:64: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  334 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |                                                     ~~~~~~~~~~~^~~~~~~
+      |                                                                |
+      |                                                                f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.h:35,
+                 from ../src/cf_Fft.h:30,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:334:25: warning: taking address of expression of type ‘void’
+  334 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:334:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  334 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:334:25: error: lvalue required as unary ‘&’ operand
+  334 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:334:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  334 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c: In function ‘cf_fft_deep_dispose’:
+../../../Fft/Fft.c:361:54: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  361 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).input );
+      |                                           ~~~~~~~~~~~^~~~~~
+      |                                                      |
+      |                                                      cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.h:36,
+                 from ../src/cf_Fft.h:31,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:361:25: warning: taking address of expression of type ‘void’
+  361 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).input );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:361:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  361 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).input );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:361:25: error: lvalue required as unary ‘&’ operand
+  361 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).input );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:361:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  361 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).input );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:362:54: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  362 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).output );
+      |                                           ~~~~~~~~~~~^~~~~~~
+      |                                                      |
+      |                                                      cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.h:36,
+                 from ../src/cf_Fft.h:31,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:362:25: warning: taking address of expression of type ‘void’
+  362 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).output );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:362:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  362 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).output );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:362:25: error: lvalue required as unary ‘&’ operand
+  362 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).output );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:362:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  362 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).output );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:363:64: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  363 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).psd );
+      |                                                     ~~~~~~~~~~~^~~~
+      |                                                                |
+      |                                                                f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.h:35,
+                 from ../src/cf_Fft.h:30,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:363:25: warning: taking address of expression of type ‘void’
+  363 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).psd );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:363:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  363 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).psd );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:363:25: error: lvalue required as unary ‘&’ operand
+  363 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).psd );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:363:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  363 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).psd );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:364:64: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  364 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).log_psd );
+      |                                                     ~~~~~~~~~~~^~~~~~~~
+      |                                                                |
+      |                                                                f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.h:35,
+                 from ../src/cf_Fft.h:30,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:364:25: warning: taking address of expression of type ‘void’
+  364 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).log_psd );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:364:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  364 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).log_psd );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:364:25: error: lvalue required as unary ‘&’ operand
+  364 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).log_psd );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:364:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  364 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).log_psd );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:365:64: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  365 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase );
+      |                                                     ~~~~~~~~~~~^~~~~~
+      |                                                                |
+      |                                                                f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.h:35,
+                 from ../src/cf_Fft.h:30,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:365:25: warning: taking address of expression of type ‘void’
+  365 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:365:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  365 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:365:25: error: lvalue required as unary ‘&’ operand
+  365 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:365:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  365 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:366:64: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  366 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase_degrees );
+      |                                                     ~~~~~~~~~~~^~~~~~~~~~~~~~
+      |                                                                |
+      |                                                                f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.h:35,
+                 from ../src/cf_Fft.h:30,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:366:25: warning: taking address of expression of type ‘void’
+  366 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase_degrees );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:366:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  366 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase_degrees );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:366:25: error: lvalue required as unary ‘&’ operand
+  366 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase_degrees );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:366:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  366 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).phase_degrees );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:368:54: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  368 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |                                           ~~~~~~~~~~~^~~~~~~~~~~~~
+      |                                                      |
+      |                                                      cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.h:36,
+                 from ../src/cf_Fft.h:31,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:368:25: warning: taking address of expression of type ‘void’
+  368 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:368:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  368 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:368:25: error: lvalue required as unary ‘&’ operand
+  368 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:368:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  368 |    Matvec_deep_dispose( &Matvec_prefix )( (**current).coefficients );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:369:64: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  369 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |                                                     ~~~~~~~~~~~^~~~~~~
+      |                                                                |
+      |                                                                f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.h:35,
+                 from ../src/cf_Fft.h:30,
+                 from ../src/cf_Fft.c:19:
+../../../Matvec/Matvec.h:194:61: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  194 | void Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **matvec );
+In file included from ../../../Fft/Fft.c:38,
+                 from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c:369:25: warning: taking address of expression of type ‘void’
+  369 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:369:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  369 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |    ^~~~~~~~~~~~~~~~~~~
+../../../Fft/Fft.c:369:25: error: lvalue required as unary ‘&’ operand
+  369 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |                         ^
+../../../Fft/Fft.h:64:33: note: in definition of macro ‘PRIMITIVE_CAT’
+   64 | #define PRIMITIVE_CAT(arg, ...) arg ## __VA_ARGS__
+      |                                 ^~~
+../../../Fft/Fft.c:369:4: note: in expansion of macro ‘Matvec_deep_dispose’
+  369 |    Matvec_deep_dispose( &Matvec_magnitude_prefix )( (**current).window );
+      |    ^~~~~~~~~~~~~~~~~~~
+In file included from ../src/cf_Fft.c:53:
+../../../Fft/Fft.c: In function ‘set_window’:
+../../../Fft/Fft.c:982:19: warning: variable ‘x’ set but not used [-Wunused-but-set-variable]
+  982 |    Magnitude_type x = 0.0;
+      |                   ^
+make[1]: *** [Fft_test.make:154: obj/Debug/cf_Fft.o] Error 1
+make: *** [Makefile:17: Fft_test] Error 2

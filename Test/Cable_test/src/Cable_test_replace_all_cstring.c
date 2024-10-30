@@ -1,7 +1,7 @@
 /**
  @file Cable_test_replace_all_cstring.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -55,7 +55,7 @@ void test_replace_all_cstring_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xybcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_replace_all_cstring_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xyzbcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -97,7 +97,7 @@ void test_replace_all_cstring_3( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xbcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -118,7 +118,7 @@ void test_replace_all_cstring_4( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "axyd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -139,7 +139,7 @@ void test_replace_all_cstring_5( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "axyzd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -160,7 +160,7 @@ void test_replace_all_cstring_6( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "axd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -181,7 +181,7 @@ void test_replace_all_cstring_4a( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "axcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -202,7 +202,7 @@ void test_replace_all_cstring_5a( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "axycd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -223,7 +223,7 @@ void test_replace_all_cstring_7( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcxy" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -244,7 +244,7 @@ void test_replace_all_cstring_8( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -265,7 +265,7 @@ void test_replace_all_cstring_9( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcx" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -286,7 +286,7 @@ void test_replace_all_cstring_10( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "aMaMMa" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -307,7 +307,7 @@ void test_replace_all_cstring_11( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xyzMxyzMMxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -328,7 +328,7 @@ void test_replace_all_cstring_12( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xyzMxyzMMxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -349,7 +349,7 @@ void test_replace_all_cstring_13( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdxyfghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -370,7 +370,7 @@ void test_replace_all_cstring_14( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdxyzfghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -391,7 +391,7 @@ void test_replace_all_cstring_15( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdxfghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -412,7 +412,7 @@ void test_replace_all_cstring_16( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdexyhij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -433,7 +433,7 @@ void test_replace_all_cstring_17( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdexyzhij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -454,7 +454,7 @@ void test_replace_all_cstring_18( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdexhij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -475,7 +475,7 @@ void test_replace_all_cstring_16a( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdexghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -496,7 +496,7 @@ void test_replace_all_cstring_17a( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdxyfghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -517,7 +517,7 @@ void test_replace_all_cstring_19( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefgxyij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -538,7 +538,7 @@ void test_replace_all_cstring_20( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefgxyzij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -559,7 +559,7 @@ void test_replace_all_cstring_21( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefgxij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -580,7 +580,7 @@ void test_replace_all_cstring_22( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "aMaMMa" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -601,7 +601,7 @@ void test_replace_all_cstring_23( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xyzMxyzMMxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -622,7 +622,7 @@ void test_replace_all_cstring_24( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "xyzMxyzMMxyz" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

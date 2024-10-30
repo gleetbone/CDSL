@@ -1,7 +1,7 @@
 /**
  @file SList_test_prune_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_item_at.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -46,7 +47,7 @@ void test_prune_and_dispose_1( void )
 
    CU_ASSERT( int_slist_count( list ) == 0 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -72,7 +73,7 @@ void test_prune_and_dispose_2( void )
    
    CU_ASSERT( int_slist_item_at( list ) == 13 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -98,7 +99,7 @@ void test_prune_and_dispose_3( void )
    
    CU_ASSERT( int_slist_item_at( list ) == 24 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -120,7 +121,7 @@ void test_prune_and_dispose_4( void )
 
    CU_ASSERT( int_slist_count( list ) == 0 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -150,7 +151,7 @@ void test_prune_and_dispose_5( void )
 
    CU_ASSERT( int_slist_count( list ) == 2 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -180,7 +181,7 @@ void test_prune_and_dispose_6( void )
 
    CU_ASSERT( int_slist_count( list ) == 2 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -210,7 +211,7 @@ void test_prune_and_dispose_7( void )
 
    CU_ASSERT( int_slist_count( list ) == 2 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -236,7 +237,7 @@ void test_prune_and_dispose_8( void )
 
    CU_ASSERT( int_slist_count( list ) == 1 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -262,7 +263,7 @@ void test_prune_and_dispose_9( void )
 
    CU_ASSERT( int_slist_count( list ) == 1 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -293,7 +294,43 @@ void test_prune_and_dispose_10( void )
 
    CU_ASSERT( int_slist_count( list ) == 2 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_prune_and_dispose_11
+*/
+
+void test_prune_and_dispose_11( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );   
+   string_t *s4 = string_make_from_cstring( "4" );
+   
+   list = s_slist_make();
+   s_slist_put_last( list, s1 );
+   s_slist_put_last( list, s2 );
+   s_slist_put_last( list, s3 );
+   s_slist_put_last( list, s4 );
+
+   s_slist_prune_and_dispose( list, 1, 2 );
+   
+   s_slist_start( list );
+   
+   CU_ASSERT( s_slist_item_at( list ) == s1 );
+
+   s_slist_forth( list );
+
+   CU_ASSERT( s_slist_item_at( list ) == s4 );
+
+   CU_ASSERT( s_slist_count( list ) == 2 );
+
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -342,6 +379,9 @@ add_test_prune_and_dispose( void )
 
    // test_prune_and_dispose_10
    add_test_to_suite( p_suite, test_prune_and_dispose_10, "test_prune_and_dispose_10" );
+
+   // test_prune_and_dispose_11
+   add_test_to_suite( p_suite, test_prune_and_dispose_11, "test_prune_and_dispose_11" );
 
    return CUE_SUCCESS;
 

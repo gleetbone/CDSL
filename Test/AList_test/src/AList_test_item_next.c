@@ -1,7 +1,7 @@
 /**
  @file AList_test_item_next.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AList_item_next"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AList_item_next.
+ Unit tests for AList_t
 
 */
 
@@ -25,7 +25,8 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_AList.h"
+#include "i_AList.h"
+#include "s_AList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,39 +37,70 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_item_next_1( void )
 {
-   int_alist_t *list = NULL;
+   i_alist_t *list = NULL;
 
-   list = int_alist_make();
-   int_alist_put_last( list, 24 );
-   int_alist_put_last( list, 13 );
+   list = i_alist_make();
+   i_alist_put_last( list, 24 );
+   i_alist_put_last( list, 13 );
 
-   int_alist_start( list );
+   i_alist_start( list );
 
-   CU_ASSERT( int_alist_item_next( list ) == 13 );
+   CU_ASSERT( i_alist_item_next( list ) == 13 );
 
-   int_alist_dispose( list );
+   i_alist_dispose( &list );
 
    return;
 }
 
+/**
+   test_item_next_2
+*/
+
 void test_item_next_2( void )
 {
-   int_alist_t *list = NULL;
+   i_alist_t *list = NULL;
 
-   list = int_alist_make();
-   int_alist_put_last( list, 24 );
-   int_alist_put_last( list, 13 );
-   int_alist_put_last( list, 7 );
+   list = i_alist_make();
+   i_alist_put_last( list, 24 );
+   i_alist_put_last( list, 13 );
+   i_alist_put_last( list, 7 );
 
-   int_alist_start( list );
+   i_alist_start( list );
 
-   CU_ASSERT( int_alist_item_next( list ) == 13 );
+   CU_ASSERT( i_alist_item_next( list ) == 13 );
 
-   int_alist_forth( list );
+   i_alist_forth( list );
 
-   CU_ASSERT( int_alist_item_next( list ) == 7 );
+   CU_ASSERT( i_alist_item_next( list ) == 7 );
 
-   int_alist_dispose( list );
+   i_alist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_item_next_3
+*/
+
+void test_item_next_3( void )
+{
+   s_alist_t *list = s_alist_make();
+   
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   string_t *s3 = string_make_from_cstring( "c" ); 
+   
+   s_alist_put_last( list, s1 );
+   s_alist_put_last( list, s2 );
+   s_alist_put_last( list, s3 );
+
+   s_alist_start( list );
+   CU_ASSERT( string_is_equal( s_alist_item_next( list ), s2 ) == 1 );
+
+   s_alist_forth( list );
+   CU_ASSERT( string_is_equal( s_alist_item_next( list ), s3 ) == 1 );
+
+   s_alist_deep_dispose( &list );
 
    return;
 }
@@ -93,6 +125,9 @@ add_test_item_next( void )
 
    // test_item_next_2
    add_test_to_suite( p_suite, test_item_next_2, "test_item_next_2" );
+
+   // test_item_next_3
+   add_test_to_suite( p_suite, test_item_next_3, "test_item_next_3" );
 
    return CUE_SUCCESS;
 

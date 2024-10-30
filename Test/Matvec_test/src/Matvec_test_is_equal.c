@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_is_equal.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -49,8 +49,8 @@ void test_is_equal_1( void )
    CU_ASSERT( fm1 != NULL );
    CU_ASSERT( f_matvec_is_equal( fm, fm1 ) == 0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
 
    fm = f_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 2.0, 4.0 );
    fm1 = f_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 2.0, 4.0 );
@@ -59,8 +59,8 @@ void test_is_equal_1( void )
    CU_ASSERT( fm1 != NULL );
    CU_ASSERT( f_matvec_is_equal( fm, fm1 ) == 1 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
 
    return;
 }
@@ -80,8 +80,8 @@ void test_is_equal_2( void )
    CU_ASSERT( dm1 != NULL );
    CU_ASSERT( d_matvec_is_equal( dm, dm1 ) == 0 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
 
    dm = d_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 2.0, 4.0 );;
    dm1 = d_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 2.0, 4.0 );;
@@ -90,8 +90,8 @@ void test_is_equal_2( void )
    CU_ASSERT( dm1 != NULL );
    CU_ASSERT( d_matvec_is_equal( dm, dm1 ) == 1 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
 
    return;
 }
@@ -113,8 +113,8 @@ void test_is_equal_3( void )
    CU_ASSERT( cfm1 != NULL );
    CU_ASSERT( cf_matvec_is_equal( cfm, cfm1 ) == 0 );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
 
    cfm = cf_matvec_make_from_args( 2, 2, 4, 1.0 + 1.0*I, 2.0 + 2.0*I, 2.0 + 2.0*I, 4.0 + 4.0*I );
    cfm1 = cf_matvec_make_from_args( 2, 2, 4, 1.0 + 1.0*I, 2.0 + 2.0*I, 2.0 + 2.0*I, 4.0 + 4.0*I );
@@ -123,8 +123,8 @@ void test_is_equal_3( void )
    CU_ASSERT( cfm1 != NULL );
    CU_ASSERT( cf_matvec_is_equal( cfm, cfm1 ) == 1 );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
 
    return;
 }
@@ -145,8 +145,8 @@ void test_is_equal_4( void )
    CU_ASSERT( cdm1 != NULL );
    CU_ASSERT( cd_matvec_is_equal( cdm, cdm1 ) == 0 );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
 
    cdm = cd_matvec_make_from_args( 2, 2, 4, 1.0 + 1.0*I, 2.0 + 2.0*I, 2.0 + 2.0*I, 4.0 + 4.0*I );
    cdm1 = cd_matvec_make_from_args( 2, 2, 4, 1.0 + 1.0*I, 2.0 + 2.0*I, 2.0 + 2.0*I, 4.0 + 4.0*I );
@@ -155,8 +155,8 @@ void test_is_equal_4( void )
    CU_ASSERT( cdm1 != NULL );
    CU_ASSERT( cd_matvec_is_equal( cdm, cdm1 ) == 1 );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
 
    return;
 }

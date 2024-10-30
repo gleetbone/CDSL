@@ -1,7 +1,7 @@
 /**
  @file Cable_test_starts_with.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -54,37 +54,37 @@ void test_starts_with_1( void )
 
    cable1 = cable_make_from_cstring( "a" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "ab" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "abc" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "abcd" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "b" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "ac" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "bd" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_from_cstring( "A" );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -104,45 +104,45 @@ void test_starts_with_2( void )
 
    cable1 = cable_make_capacity_from_cstring( "a", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "ab", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "abc", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "abcd", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "abcde", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "abcdefghi", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "b", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "ac", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "bd", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_make_capacity_from_cstring( "A", 4 );
    CU_ASSERT( cable_starts_with( cable, cable1 ) == 0 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

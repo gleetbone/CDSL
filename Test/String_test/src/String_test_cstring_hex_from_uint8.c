@@ -1,7 +1,7 @@
 /**
  @file string_test_cstring_hex_from_uint8.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 

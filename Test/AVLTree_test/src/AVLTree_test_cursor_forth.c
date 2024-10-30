@@ -1,7 +1,7 @@
 /**
  @file AVLTree_test_cursor_forth.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_AVLTree.h"
+#include "s_AVLTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -49,8 +50,8 @@ void test_cursor_forth_1( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -83,8 +84,8 @@ void test_cursor_forth_2( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -117,8 +118,8 @@ void test_cursor_forth_3( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -151,8 +152,8 @@ void test_cursor_forth_4( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -193,8 +194,8 @@ void test_cursor_forth_5( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
   
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -235,8 +236,8 @@ void test_cursor_forth_6( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -277,8 +278,8 @@ void test_cursor_forth_7( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -319,8 +320,54 @@ void test_cursor_forth_8( void )
    i_avltree_cursor_forth( cursor );
    CU_ASSERT( i_avltree_cursor_off( cursor ) == 1 );
  
-   i_avltree_cursor_dispose( cursor );
-   i_avltree_dispose( avltree );
+   i_avltree_cursor_dispose( &cursor );
+   i_avltree_dispose( &avltree );
+
+   return;
+}
+
+/**
+   test_cursor_forth_9
+   
+            4
+         2      6
+                  7   
+*/
+
+void test_cursor_forth_9( void )
+{
+   s_avltree_t *avltree = NULL;
+   s_avltree_cursor_t *cursor = NULL;
+   
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   string_t *s7 = string_make_from_cstring( "7" );
+   
+   avltree = s_avltree_make();
+   cursor = s_avltree_cursor_make( avltree );
+   
+   s_avltree_put( avltree, s4 );
+   s_avltree_put( avltree, s2 );
+   s_avltree_put( avltree, s6 );
+   s_avltree_put( avltree, s7 );
+   
+   s_avltree_cursor_start( cursor );
+   CU_ASSERT( s_avltree_cursor_item_at( cursor ) == s2 );
+ 
+   s_avltree_cursor_forth( cursor );
+   CU_ASSERT( s_avltree_cursor_item_at( cursor ) == s4 );
+ 
+   s_avltree_cursor_forth( cursor );
+   CU_ASSERT( s_avltree_cursor_item_at( cursor ) == s6 );
+ 
+   s_avltree_cursor_forth( cursor );
+   CU_ASSERT( s_avltree_cursor_item_at( cursor ) == s7 );
+ 
+   s_avltree_cursor_forth( cursor );
+   CU_ASSERT( s_avltree_cursor_off( cursor ) == 1 );
+ 
+   s_avltree_deep_dispose( &avltree );
 
    return;
 }
@@ -363,6 +410,9 @@ add_test_cursor_forth( void )
 
    // test_cursor_forth_8
    add_test_to_suite( p_suite, test_cursor_forth_8, "test_cursor_forth_8" );
+
+   // test_cursor_forth_9
+   add_test_to_suite( p_suite, test_cursor_forth_9, "test_cursor_forth_9" );
 
    return CUE_SUCCESS;
    

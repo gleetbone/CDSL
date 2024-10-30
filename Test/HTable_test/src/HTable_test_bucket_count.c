@@ -1,7 +1,7 @@
 /**
  @file HTable_test_bucket_count.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HTable_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HTable_put.
+ Unit tests for HTable_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_HTable.h"
+#include "ss_HTable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -42,10 +43,14 @@ void test_bucket_count_1( void )
 
    CU_ASSERT( ii_htable_bucket_count( htable ) == 13 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
+
+/**
+   test_bucket_count_2
+*/
 
 void test_bucket_count_2( void )
 {
@@ -55,7 +60,24 @@ void test_bucket_count_2( void )
 
    CU_ASSERT( ii_htable_bucket_count( htable ) == 23 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
+
+   return;
+}
+
+/**
+   test_bucket_count_3
+*/
+
+void test_bucket_count_3( void )
+{
+   ss_htable_t *htable = NULL;
+
+   htable = ss_htable_make_n( 23 );
+
+   CU_ASSERT( ss_htable_bucket_count( htable ) == 23 );
+
+   ss_htable_dispose( &htable );
 
    return;
 }

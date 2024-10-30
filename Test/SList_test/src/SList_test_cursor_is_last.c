@@ -1,7 +1,7 @@
 /**
  @file SList_test_cursor_is_last.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_first"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_first.
+ Unit tests for SList_t.
 
 */
 
@@ -52,7 +52,7 @@ void test_cursor_is_last_1( void )
 
    CU_ASSERT( int_slist_cursor_is_last( cursor ) == 1 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }

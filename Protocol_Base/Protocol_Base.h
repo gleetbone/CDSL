@@ -1,7 +1,7 @@
 /**
  @file Protocol_Base.h
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Protocol Base"
  
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
@@ -56,6 +56,10 @@ protocol_base_is_valid_protocol( int32_t protocol_id );
 
 int32_t
 protocol_base_supports_protocol( protocol_base_t *object, int32_t protocol_id );
+
+int32_t
+protocol_supported_by_arg( int32_t protocol_id, ... );
+
 
 #endif /* PROTOCOL_BASE_H */
 

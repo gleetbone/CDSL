@@ -1,7 +1,7 @@
 /**
  @file Svd_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Svd_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -50,7 +50,7 @@ void test_dispose_1( void )
 
    CU_ASSERT( fsvd != NULL );
 
-   f_svd_dispose( fsvd );
+   f_svd_dispose( &fsvd );
 
    return;
 }
@@ -66,7 +66,7 @@ void test_dispose_2( void )
 
    CU_ASSERT( dsvd != NULL );
 
-   d_svd_dispose( dsvd );
+   d_svd_dispose( &dsvd );
 
    return;
 }
@@ -84,7 +84,7 @@ void test_dispose_3( void )
 
    CU_ASSERT( cfsvd != NULL );
 
-   cf_svd_dispose( cfsvd );
+   cf_svd_dispose( &cfsvd );
 
    return;
 }
@@ -101,7 +101,7 @@ void test_dispose_4( void )
 
    CU_ASSERT( cdsvd != NULL );
 
-   cd_svd_dispose( cdsvd );
+   cd_svd_dispose( &cdsvd );
 
    return;
 }

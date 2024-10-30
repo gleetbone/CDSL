@@ -1,0 +1,4 @@
+cp core.* core
+rm core.*
+( CMDFILE=$(mktemp); echo "bt" >${CMDFILE}; gdb 2>/dev/null --batch -x ${CMDFILE} ./${PWD##*/} core )
+

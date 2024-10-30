@@ -1,7 +1,7 @@
 /**
  @file SList_test_p_indexable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList P_Indexable"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_make.
+ Unit tests for SList_t.
 
 */
 
@@ -26,8 +26,10 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 #include "Protocol_Base.h"
 #include "i_Indexable.h"
+#include "s_Indexable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -47,9 +49,7 @@ void test_p_indexable_1( void )
    CU_ASSERT( list != NULL );
    CU_ASSERT( pb_list != NULL );
 
-   CU_ASSERT( i_indexable_dispose_f( pb_list ) == int_slist_dispose );
-
-   i_indexable_dispose( pb_list );
+   int_slist_dispose( &list );
  
    return;
 }
@@ -69,9 +69,7 @@ void test_p_indexable_2( void )
    CU_ASSERT( list != NULL );
    CU_ASSERT( pb_list != NULL );
 
-   CU_ASSERT( i_indexable_dispose_with_contents_f( pb_list ) == int_slist_dispose_with_contents );
-
-   i_indexable_dispose_with_contents( pb_list );
+   int_slist_deep_dispose( &list );
 
    return;
 }
@@ -93,10 +91,9 @@ void test_p_indexable_3( void )
 
    int_slist_put_last( list, 24 );
 
-   CU_ASSERT( i_indexable_count_f( pb_list ) == int_slist_count );
    CU_ASSERT( i_indexable_count( pb_list ) == 1 );
 
-   i_indexable_dispose( pb_list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -118,11 +115,10 @@ void test_p_indexable_4( void )
 
    int_slist_put_last( list, 24 );
 
-   CU_ASSERT( i_indexable_item_f( pb_list ) == int_slist_item );
    CU_ASSERT( i_indexable_item( pb_list, 0 ) == 24 );
 
 
-   i_indexable_dispose( pb_list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -144,14 +140,13 @@ void test_p_indexable_5( void )
 
    int_slist_put_last( list, 24 );
 
-   CU_ASSERT( i_indexable_item_f( pb_list ) == int_slist_item );
    CU_ASSERT( i_indexable_item( pb_list, 0 ) == 24 );
 
    i_indexable_put( pb_list, 23, 0 );
 
    CU_ASSERT( i_indexable_item( pb_list, 0 ) == 23 );
 
-   i_indexable_dispose( pb_list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -173,14 +168,44 @@ void test_p_indexable_6( void )
 
    int_slist_put_last( list, 24 );
 
-   CU_ASSERT( i_indexable_item_f( pb_list ) == int_slist_item );
    CU_ASSERT( i_indexable_item( pb_list, 0 ) == 24 );
 
    i_indexable_put_and_dispose( pb_list, 23, 0 );
 
    CU_ASSERT( i_indexable_item( pb_list, 0 ) == 23 );
 
-   i_indexable_dispose( pb_list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_p_indexable_7
+*/
+
+void test_p_indexable_7( void )
+{
+   s_slist_t *list = NULL;
+   protocol_base_t *pb_list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   list = s_slist_make();
+   pb_list = ( protocol_base_t * ) list;
+
+   CU_ASSERT( list != NULL );
+   CU_ASSERT( pb_list != NULL );
+
+   s_slist_put_last( list, s1 );
+
+   CU_ASSERT( s_indexable_item( pb_list, 0 ) == s1 );
+
+   s_indexable_put_and_dispose( pb_list, s2, 0 );
+
+   CU_ASSERT( s_indexable_item( pb_list, 0 ) == s2 );
+
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -217,6 +242,9 @@ add_test_p_indexable( void )
 
    // test_p_indexable_6
    add_test_to_suite( p_suite, test_p_indexable_6, "test_p_indexable_6" );
+
+   // test_p_indexable_7
+   add_test_to_suite( p_suite, test_p_indexable_7, "test_p_indexable_7" );
 
    return CUE_SUCCESS;
    

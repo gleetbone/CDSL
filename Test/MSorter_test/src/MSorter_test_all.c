@@ -1,8 +1,8 @@
 /**
  @file MSorter_test_all.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for MSorter_make"
+ @version 2.0.0
+ @brief: "tests for MSorter_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for MSorter_make.
+ Unit tests for MSorter_t
 
 */
 
@@ -28,6 +28,7 @@ extern "C" {
 #include "i_MSorter.h"
 #include "i_Sorter.h"
 #include "i_Sequence.h"
+#include "p_Basic.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -47,12 +48,12 @@ void test_all_1( void )
 
    i_sequence_put( seq, 1, 0 );
    
-   ( i_sorter_sort_f( pb_sorter ) )( pb_sorter, pb_seq );
+   i_sorter_sort( pb_sorter, pb_seq );
 
    CU_ASSERT( i_sequence_item( seq, 0 ) == 1 );
 
-   ( i_sorter_dispose_f( pb_sorter ) )( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
  
    return;
 }
@@ -78,8 +79,8 @@ void test_all_2( void )
    CU_ASSERT( i_sequence_item( seq, 0 ) == 1 );
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -105,8 +106,8 @@ void test_all_3( void )
    CU_ASSERT( i_sequence_item( seq, 0 ) == 1 );
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -134,8 +135,8 @@ void test_all_4a( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 3 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -163,8 +164,8 @@ void test_all_4b( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 3 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -192,8 +193,8 @@ void test_all_4c( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 3 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -221,8 +222,8 @@ void test_all_4d( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 3 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -250,8 +251,8 @@ void test_all_4e( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 3 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -279,8 +280,8 @@ void test_all_4f( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 3 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -308,8 +309,8 @@ void test_all_4g( void )
    CU_ASSERT( i_sequence_item( seq, 1 ) == 2 );
    CU_ASSERT( i_sequence_item( seq, 2 ) == 2 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }
@@ -343,8 +344,8 @@ void test_all_5( void )
    CU_ASSERT( i_sequence_item( seq, 4 ) == 5 );
    CU_ASSERT( i_sequence_item( seq, 5 ) == 6 );
 
-   i_sorter_dispose( pb_sorter );
-   i_sequence_dispose( seq );
+   p_basic_dispose( &pb_sorter );
+   i_sequence_dispose( &seq );
 
    return;
 }

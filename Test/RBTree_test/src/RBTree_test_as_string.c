@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_as_string.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_make.
+ Unit tests for RBTree_t
 
 */
 
@@ -68,7 +68,7 @@ void test_as_string_1( void )
 
    test_print_utility_dispose_array( astr );
 
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -98,7 +98,7 @@ void test_as_string_2( void )
 
    test_print_utility_dispose_array( astr );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }

@@ -1,7 +1,7 @@
 /**
  @file AVLTree_test_start.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_AVLTree.h"
+#include "s_AVLTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -47,7 +48,7 @@ void test_start_1( void )
    CU_ASSERT( i_avltree_item_at( avltree ) == 1 );
    CU_ASSERT( i_avltree_off( avltree ) == 0 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -70,7 +71,7 @@ void test_start_2( void )
    
    CU_ASSERT( i_avltree_item_at( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -93,7 +94,7 @@ void test_start_3( void )
    
    CU_ASSERT( i_avltree_item_at( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -116,7 +117,7 @@ void test_start_4( void )
    
    CU_ASSERT( i_avltree_item_at( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -144,7 +145,7 @@ void test_start_5( void )
    
    CU_ASSERT( i_avltree_item_at( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -172,7 +173,36 @@ void test_start_6( void )
    
    CU_ASSERT( i_avltree_item_at( avltree ) == 2 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
+
+   return;
+}
+
+/**
+   test_start_7
+*/
+
+void test_start_7( void )
+{
+   s_avltree_t *avltree = NULL;
+   
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   
+   avltree = s_avltree_make();
+   
+   s_avltree_put( avltree, s4 );
+   s_avltree_put( avltree, s2 );
+   s_avltree_put( avltree, s6 );
+   s_avltree_put( avltree, s3 );
+   
+   s_avltree_start( avltree );
+   
+   CU_ASSERT( s_avltree_item_at( avltree ) == s2 );
+ 
+   s_avltree_deep_dispose( &avltree );
 
    return;
 }
@@ -210,6 +240,9 @@ add_test_start( void )
 
    // test_start_6
    add_test_to_suite( p_suite, test_start_6, "test_start_6" );
+
+   // test_start_7
+   add_test_to_suite( p_suite, test_start_7, "test_start_7" );
 
    return CUE_SUCCESS;
    

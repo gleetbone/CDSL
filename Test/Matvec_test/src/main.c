@@ -32,7 +32,7 @@ int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
 add_test_rows( void );
@@ -334,7 +334,7 @@ int main()
    add_test_make_from();
    add_test_make_from_args();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_deep_dispose();
    add_test_rows();
    add_test_columns();
    add_test_vector_length();

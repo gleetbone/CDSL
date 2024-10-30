@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_make.
+ Unit tests for RBTree_kv_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_RBTree_kv.h"
+#include "ss_RBTree_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -39,13 +40,12 @@ void test_dispose_1( void )
    ii_rbtree_kv_t *rbtree = NULL;
    
    rbtree = ii_rbtree_kv_make();
-   ii_rbtree_kv_put( rbtree, 130, 13 );
    
    CU_ASSERT( rbtree != NULL );
-   CU_ASSERT( ii_rbtree_kv_count( rbtree ) == 1 );
-   CU_ASSERT( ii_rbtree_kv_is_empty( rbtree ) == 0 );
+   CU_ASSERT( ii_rbtree_kv_count( rbtree ) == 0 );
+   CU_ASSERT( ii_rbtree_kv_is_empty( rbtree ) == 1 );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -56,15 +56,24 @@ void test_dispose_1( void )
 
 void test_dispose_2( void )
 {
-   ii_rbtree_kv_t *rbtree = NULL;
+   ss_rbtree_kv_t *rbtree = NULL;
    
-   rbtree = ii_rbtree_kv_make();
-   ii_rbtree_kv_put( rbtree, 130, 13 );
+   string_t *s1 = NULL;
+   string_t *s10 = NULL;
+   
+   s1 = string_make_from_cstring( "1" );
+   s10 = string_make_from_cstring( "10" );
+   
+   rbtree = ss_rbtree_kv_make();
+   ss_rbtree_kv_put( rbtree, s10, s1 );
    
    CU_ASSERT( rbtree != NULL );
-   CU_ASSERT( ii_rbtree_kv_count( rbtree ) == 1 );
- 
-   ii_rbtree_kv_dispose_with_contents( rbtree );
+   CU_ASSERT( ss_rbtree_kv_count( rbtree ) == 1 );
+   CU_ASSERT( ss_rbtree_kv_is_empty( rbtree ) == 0 );
+
+   ss_rbtree_kv_dispose( &rbtree );
+   string_deep_dispose( &s1 );
+   string_deep_dispose( &s10 );
    
    return;
 }

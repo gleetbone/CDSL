@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -44,7 +45,7 @@ void test_make_1( void )
    CU_ASSERT( i_bstree_count( bstree ) == 0 );
    CU_ASSERT( i_bstree_is_empty( bstree ) == 1 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -53,22 +54,17 @@ void test_make_1( void )
    test_make_2
 */
 
-void test_make_2( void )
+void test_make_3( void )
 {
    i_bstree_t *bstree = NULL;
-   i_bstree_t *bstree1 = NULL;
    
    bstree = i_bstree_make();
    i_bstree_put( bstree, 13 );
    
-   bstree1 = i_bstree_make_duplicate_from( bstree );
-   
-   CU_ASSERT( bstree1 != NULL );
-   CU_ASSERT( i_bstree_count( bstree1 ) == 1 );
-   CU_ASSERT( i_bstree_has( bstree1, 13 ) == 1 );
+   CU_ASSERT( i_bstree_count( bstree ) == 1 );
+   CU_ASSERT( i_bstree_has( bstree, 13 ) == 1 );
  
-   i_bstree_dispose( bstree );
-   i_bstree_dispose( bstree1 );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -77,42 +73,19 @@ void test_make_2( void )
    test_make_3
 */
 
-void test_make_3( void )
+void test_make_2( void )
 {
-   i_bstree_t *bstree = NULL;
-   i_bstree_t *bstree1 = NULL;
+   s_bstree_t *bstree = NULL;
    
-   bstree = i_bstree_make();
-   i_bstree_put( bstree, 13 );
+   string_t *s1 = string_make_from_cstring( "1" );
    
-   bstree1 = i_bstree_make_from( bstree );
+   bstree = s_bstree_make();
+   s_bstree_put( bstree, s1 );
    
-   CU_ASSERT( bstree1 != NULL );
-   CU_ASSERT( i_bstree_count( bstree1 ) == 1 );
-   CU_ASSERT( i_bstree_has( bstree1, 13 ) == 1 );
+   CU_ASSERT( s_bstree_count( bstree ) == 1 );
+   CU_ASSERT( s_bstree_has( bstree, s1 ) == 1 );
  
-   i_bstree_dispose( bstree );
-   i_bstree_dispose( bstree1 );
-
-   return;
-}
-
-/**
-   test_make_4
-*/
-
-void test_make_4( void )
-{
-   i_bstree_t *bstree = NULL;
-   int32_t array[3] = {13, 0, 0 };
-
-   bstree = i_bstree_make_from_array( array, 1 );
-
-   CU_ASSERT( bstree != NULL );
-   CU_ASSERT( i_bstree_count( bstree ) == 1 );
-   CU_ASSERT( i_bstree_has( bstree, 13 ) == 1 );
-
-   i_bstree_dispose( bstree );
+   s_bstree_deep_dispose( &bstree );
 
    return;
 }
@@ -140,9 +113,6 @@ add_test_make( void )
 
    // test_make_3
    add_test_to_suite( p_suite, test_make_3, "test_make_3" );
-
-   // test_make_4
-   add_test_to_suite( p_suite, test_make_4, "test_make_4" );
 
    return CUE_SUCCESS;
    

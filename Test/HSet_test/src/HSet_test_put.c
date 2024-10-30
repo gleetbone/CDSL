@@ -1,7 +1,7 @@
 /**
  @file HSet_test_put.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_put.
+ Unit tests for HSet_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -45,7 +46,7 @@ void test_put_1( void )
    CU_ASSERT( i_hset_count( hset ) == 1 );
    CU_ASSERT( i_hset_is_empty( hset ) == 0 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -70,7 +71,7 @@ void test_put_2( void )
    CU_ASSERT( i_hset_count( hset ) == 2 );
    CU_ASSERT( i_hset_is_empty( hset ) == 0 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -107,7 +108,7 @@ void test_put_3( void )
    CU_ASSERT( i_hset_count( hset ) == 18 );
    CU_ASSERT( i_hset_is_empty( hset ) == 0 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -117,6 +118,62 @@ void test_put_3( void )
 */
 
 void test_put_4( void )
+{
+   s_hset_t *hset = NULL;
+
+   hset = s_hset_make();
+
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   string_t *s3 = string_make_from_cstring( "c" ); 
+   string_t *s4 = string_make_from_cstring( "d" ); 
+   string_t *s5 = string_make_from_cstring( "e" ); 
+   string_t *s6 = string_make_from_cstring( "f" ); 
+   string_t *s7 = string_make_from_cstring( "g" ); 
+   string_t *s8 = string_make_from_cstring( "h" ); 
+   string_t *s9 = string_make_from_cstring( "i" ); 
+   string_t *s10 = string_make_from_cstring( "j" ); 
+   string_t *s11 = string_make_from_cstring( "k" ); 
+   string_t *s12 = string_make_from_cstring( "l" ); 
+   string_t *s13 = string_make_from_cstring( "m" ); 
+   string_t *s14 = string_make_from_cstring( "n" ); 
+   string_t *s15 = string_make_from_cstring( "o" ); 
+   string_t *s16 = string_make_from_cstring( "p" ); 
+   string_t *s17 = string_make_from_cstring( "q" ); 
+   string_t *s18 = string_make_from_cstring( "r" ); 
+   
+   s_hset_put( hset, s1 );
+   s_hset_put( hset, s2 );
+   s_hset_put( hset, s3 );
+   s_hset_put( hset, s4 );
+   s_hset_put( hset, s5);
+   s_hset_put( hset, s6 );
+   s_hset_put( hset, s7 );
+   s_hset_put( hset, s8 );
+   s_hset_put( hset, s9 );
+   s_hset_put( hset, s10 );
+   s_hset_put( hset, s11 );
+   s_hset_put( hset, s12 );
+   s_hset_put( hset, s13 );
+   s_hset_put( hset, s14 );
+   s_hset_put( hset, s15 );
+   s_hset_put( hset, s16 );
+   s_hset_put( hset, s17 );
+   s_hset_put( hset, s18 );
+
+   CU_ASSERT( s_hset_count( hset ) == 18 );
+   CU_ASSERT( s_hset_is_empty( hset ) == 0 );
+
+   s_hset_deep_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_put_5
+*/
+
+void test_put_5( void )
 {
    i_hset_t *hset = NULL;
 
@@ -132,7 +189,7 @@ void test_put_4( void )
    CU_ASSERT( i_hset_count( hset ) == 1 );
    CU_ASSERT( i_hset_is_empty( hset ) == 0 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -163,6 +220,9 @@ add_test_put( void )
 
    // test_make_4
    add_test_to_suite( p_suite, test_put_4, "test_put_4" );
+
+   // test_make_5
+   add_test_to_suite( p_suite, test_put_5, "test_put_5" );
 
    return CUE_SUCCESS;
 

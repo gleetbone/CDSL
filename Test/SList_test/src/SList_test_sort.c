@@ -1,7 +1,7 @@
 /**
  @file SList_test_sort.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_item_at"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_item_at.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -49,6 +50,24 @@ sort_func( int32_t v1, int32_t v2 )
    return result;
 }
 
+static
+int32_t
+s_sort_func( string_t *v1, string_t *v2 )
+{
+   int32_t result = 0;
+   
+   if ( string_is_less_than( v1, v2 ) == 1 )
+   {
+      result = -1;
+   }
+   else if ( string_is_greater_than( v1, v2 ) == 1 )
+   {
+      result = +1;
+   }
+   
+   return result;
+}
+
 /**
    test_sort_1
 */
@@ -63,7 +82,7 @@ void test_sort_1( void )
 
    CU_ASSERT( int_slist_count( list ) == 0 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -83,7 +102,7 @@ void test_sort_2( void )
 
    CU_ASSERT( int_slist_count( list ) == 1 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -110,7 +129,7 @@ void test_sort_3( void )
 
    CU_ASSERT( int_slist_item_at( list ) == 13 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -139,7 +158,42 @@ void test_sort_4( void )
 
    CU_ASSERT( int_slist_item_at( list ) == 17 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_sort_5
+*/
+
+void test_sort_5( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   
+   list = s_slist_make();
+   
+   s_slist_put_last( list, s3 );
+   s_slist_put_last( list, s4 );
+   s_slist_put_last( list, s1 );
+   s_slist_put_last( list, s2 );
+
+   s_slist_sort( list, s_sort_func );
+
+   s_slist_start( list );
+
+   CU_ASSERT( s_slist_item_at( list ) == s1 );
+
+   s_slist_forth( list );
+
+   CU_ASSERT( s_slist_item_at( list ) == s2 );
+
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -170,6 +224,9 @@ add_test_sort( void )
 
    // test_sort_4
    add_test_to_suite( p_suite, test_sort_4, "test_sort_4" );
+
+   // test_sort_5
+   add_test_to_suite( p_suite, test_sort_5, "test_sort_5" );
 
    return CUE_SUCCESS;
 

@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_cursor_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -44,8 +45,8 @@ void test_cursor_make_1( void )
    
    CU_ASSERT( cursor != NULL );
  
-   i_bstree_cursor_dispose( cursor );
-   i_bstree_dispose( bstree );
+   i_bstree_cursor_dispose( &cursor );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -67,9 +68,33 @@ void test_cursor_make_2( void )
    CU_ASSERT( cursor1 != NULL );
    CU_ASSERT( cursor2 != NULL );
 
-   i_bstree_cursor_dispose( cursor2 );
-   i_bstree_cursor_dispose( cursor1 );
-   i_bstree_dispose( bstree );
+   i_bstree_cursor_dispose( &cursor2 );
+   i_bstree_cursor_dispose( &cursor1 );
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_cursor_make_3
+*/
+
+void test_cursor_make_3( void )
+{
+   s_bstree_t *bstree = NULL;
+   s_bstree_cursor_t *cursor1 = NULL;
+   s_bstree_cursor_t *cursor2 = NULL;
+
+   bstree = s_bstree_make();
+   cursor1 = s_bstree_cursor_make( bstree );
+   cursor2 = s_bstree_cursor_make( bstree );
+
+   CU_ASSERT( cursor1 != NULL );
+   CU_ASSERT( cursor2 != NULL );
+
+   s_bstree_cursor_dispose( &cursor2 );
+   s_bstree_cursor_dispose( &cursor1 );
+   s_bstree_dispose( &bstree );
 
    return;
 }
@@ -95,6 +120,9 @@ add_test_cursor_make( void )
 
    // test_cursor_make_2
    add_test_to_suite( p_suite, test_cursor_make_2, "test_cursor_make_2" );
+
+   // test_cursor_make_3
+   add_test_to_suite( p_suite, test_cursor_make_3, "test_cursor_make_3" );
 
    return CUE_SUCCESS;
    

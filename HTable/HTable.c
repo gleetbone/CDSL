@@ -1,17 +1,17 @@
 /**
  @file HTable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Hash Tables"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque HTable_t type.
@@ -37,10 +37,12 @@
 
 #include "HTable.h"
 
-#ifdef PROTOCOLS_ENABLED   
+#include "protocol.h"
+
+#ifdef PROTOCOLS_ENABLED
 #include "Protocol_Base.h"
 #include "Protocol_Base.ph"
-#include "P_Clonable.ph"
+#include "P_Basic.ph"
 #include "P_Iterable_kv.ph"
 #endif // PROTOCOLS_ENABLED   
 
@@ -49,7 +51,7 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include <stdlib.h>   
+#include <stdlib.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -59,8 +61,6 @@ extern "C" {
 /**
    defines
 */
-
-#define HTABLE_TYPE 0xA5000301
 
 #define DEFAULT_BUCKET_SIZE 13
 
@@ -90,13 +90,13 @@ typedef struct node node_t;
 
 struct HTable_struct( Prefix )
 {
-   
+
    PROTOCOLS_DEFINITION;
 
-   int32_t type;
-   int32_t key_type;
-   int32_t item_type;
-   
+   int32_t _type;
+   int32_t _key_type;
+   int32_t _item_type;
+
    node_t *first_in_sequence;
    node_t *last_in_sequence;
    int32_t count;
@@ -124,6 +124,10 @@ struct HTable_cursor_struct( Prefix )
 
 /**
    node_make
+
+   create a new node
+
+   @return the new node
 */
 
 static
@@ -131,20 +135,27 @@ node_t *
 node_make( void )
 {
    node_t *node = ( node_t * ) calloc( 1, sizeof( node_t ) );
-   POSTCONDITION( "node not null", node != NULL );
+   CHECK( "node allocated correctly", node != NULL );
+
    return node;
 }
 
 /**
    node_dispose
+
+   dispose of a node
+
+   @param the node to be disposed
 */
 
 static
 void
-node_dispose( node_t *node )
+node_dispose( node_t **node )
 {
    PRECONDITION( "node not null", node != NULL );
-   free( node );
+   PRECONDITION( "*node not null", *node != NULL );
+   free(*node);
+   *node = NULL;
    return;
 }
 
@@ -154,24 +165,25 @@ node_dispose( node_t *node )
 
    Return 1 if htable has an item for key, 0 if not
 
-   @param htable HTable_t instance
+   @param current HTable_t instance
    @param key the key to query for
+   @return 1 if true, 0 otherwise
 */
 
 static
 int32_t
-has( HTable_type( Prefix ) *htable, Key key )
+has( HTable_type( Prefix ) *current, Key key )
 {
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
 
    // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
+   node_t *node = (*current).bucket[i];
 
    // look through nodes in bucket for match to key
    while ( node != NULL )
    {
-      if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+      if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
       {
          return 1;
       }
@@ -182,21 +194,64 @@ has( HTable_type( Prefix ) *htable, Key key )
 }
 
 /**
-   HTable_put
+   item
+
+   Return value in htable for key
+
+   @param current HTable_t instance
+   @param key the key to query for
+   @return the value
+*/
+
+static
+Type
+item( HTable_type( Prefix ) *current, Key key )
+{
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
+
+   // get first of bucket's nodes
+   node_t *node = (*current).bucket[i];
+
+   Type value = ( *(*current).first_in_sequence ).value;
+
+   // look through nodes in bucket for match to key
+   while ( node != NULL )
+   {
+      if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
+      {
+         value = (*node).value;
+         break;
+      }
+      node = (*node).next;
+   }
+
+   return value;
+}
+
+/**
+   put
+
+   insert a value in the htable for the given key if key not present,
+   replace the value if key present. do not dispose the existing value
+
+   @param current the htable
+   @param value the value to put in the htable
+   @param key the key for the value
 */
 
 static
 void
-put( HTable_type( Prefix ) *htable, Type value, Key key )
+put( HTable_type( Prefix ) *current, Type value, Key key )
 {
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
 
    // get node for new value
    node_t *new_node = NULL;
 
    // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
+   node_t *node = (*current).bucket[i];
 
    // see if node with this key already exists
    int32_t flag = 0;
@@ -204,7 +259,7 @@ put( HTable_type( Prefix ) *htable, Type value, Key key )
    // look through nodes in bucket for match to key
    while ( ( node != NULL ) && ( flag == 0 ) )
    {
-      if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+      if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
       {
          flag = 1;
          new_node = node;
@@ -215,31 +270,31 @@ put( HTable_type( Prefix ) *htable, Type value, Key key )
    // if node exists in htable, replace value with new value
    if ( new_node != NULL )
    {
-      (*new_node).value = value;
-      (*new_node).key = key;
+      ( *new_node ).value = value;
+      ( *new_node ).key = key;
    }
    else
    {
       // else get new node and put new value at head of bucket
       new_node = node_make();
-      (*new_node).value = value;
-      (*new_node).key = key;
-      (*new_node).next = (*htable).bucket[i];
-      (*htable).bucket[i] = new_node;
+      ( *new_node ).value = value;
+      ( *new_node ).key = key;
+      ( *new_node ).next = (*current).bucket[i];
+      (*current).bucket[i] = new_node;
 
       // place new node in node sequence
-      if ( (*htable).last_in_sequence == NULL )
+      if ( (*current).last_in_sequence == NULL )
       {
-         (*htable).first_in_sequence = new_node;
-         (*htable).last_in_sequence = new_node;
+         (*current).first_in_sequence = new_node;
+         (*current).last_in_sequence = new_node;
       }
       else
       {
-         (*(*htable).last_in_sequence).next_in_sequence = new_node;
-         (*htable).last_in_sequence = new_node;
+         ( *(*current).last_in_sequence ).next_in_sequence = new_node;
+         (*current).last_in_sequence = new_node;
       }
 
-      (*htable).count = (*htable).count + 1;
+      (*current).count = (*current).count + 1;
    }
 
    return;
@@ -248,22 +303,28 @@ put( HTable_type( Prefix ) *htable, Type value, Key key )
 /**
    keys_as_array
 
+   create an array of keys for all nodes in the htable
+
+   @param current the htable
+   @return the array of keys
+
 */
 
 static
 Key *
-keys_as_array( HTable_type( Prefix ) *htable )
+keys_as_array( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
+   PRECONDITION( "current not null", current != NULL );
 
    Key *result = NULL;
 
-   result = ( Key * ) calloc( (*htable).count+ 1, sizeof( Key ) );
+   result = ( Key * ) calloc( (*current).count + 1, sizeof( Key ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    int32_t i = 0;
-   node_t *node = (*htable).first_in_sequence;
+   node_t *node = (*current).first_in_sequence;
 
-   for( i=0; i<(*htable).count; i++ )
+   for( i = 0; i < (*current).count; i++ )
    {
       result[i] = (*node).key;
       node = (*node).next_in_sequence;
@@ -273,23 +334,29 @@ keys_as_array( HTable_type( Prefix ) *htable )
 }
 
 /**
-   items_as_array
+   values_as_array
+
+   create an array of values for all nodes in the htable
+
+   @param current the htable
+   @return the array of balues
 
 */
 
 static
 Type *
-items_as_array( HTable_type( Prefix ) *htable )
+values_as_array( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
+   PRECONDITION( "current not null", current != NULL );
 
    Type *result = NULL;
-   result = ( Type * ) calloc( (*htable).count + 1, sizeof( Type ) );
+   result = ( Type * ) calloc( (*current).count + 1, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    int32_t i = 0;
-   node_t *node = (*htable).first_in_sequence;
+   node_t *node = (*current).first_in_sequence;
 
-   for( i=0; i<(*htable).count; i++ )
+   for( i = 0; i < (*current).count; i++ )
    {
       result[i] = (*node).value;
       node = (*node).next_in_sequence;
@@ -304,20 +371,20 @@ items_as_array( HTable_type( Prefix ) *htable )
    After a node hs been removed, move all cursors pointing to that node
    forth.
 
-   @param htable HTable_t instance
+   @param current HTable_t instance
    @param node the just removed node
 */
 static
 void
 move_all_cursors_forth_after_node_removal
 (
-   HTable_type( Prefix ) *htable,
+   HTable_type( Prefix ) *current,
    node_t *node
 )
 {
    HTable_cursor_type( Prefix ) *cursor = NULL;
 
-   for (  cursor = (*htable).first_cursor;
+   for (  cursor = (*current).first_cursor;
           cursor != NULL;
           cursor = (*cursor).next_cursor
        )
@@ -340,26 +407,26 @@ move_all_cursors_forth_after_node_removal
    Remove node from sequence. Does not delete node, does not change count,
    does not change bucket contents.
 
-   @param htable HTable_t instance
+   @param current HTable_t instance
    @param node the to be removed node
 */
 static
 void
 remove_node_from_sequence
 (
-   HTable_type( Prefix ) *htable,
+   HTable_type( Prefix ) *current,
    node_t *node
 )
 {
-   PRECONDITION( "htable not null", htable != NULL );
+   PRECONDITION( "current not null", current != NULL );
    PRECONDITION( "node not null", node != NULL );
 
-   node_t *node1 = (*htable).first_in_sequence;
-   node_t *prev = (*(*htable).first_in_sequence).next_in_sequence;
+   node_t *node1 = (*current).first_in_sequence;
+   node_t *prev = ( *(*current).first_in_sequence ).next_in_sequence;
 
    if ( node1 == node )
    {
-      (*htable).first_in_sequence = (*node).next_in_sequence;
+      (*current).first_in_sequence = (*node).next_in_sequence;
    }
    else
    {
@@ -371,9 +438,9 @@ remove_node_from_sequence
          if ( node1 == node )
          {
             (*prev).next_in_sequence = (*node1).next_in_sequence;
-            if ( node1 == (*htable).last_in_sequence )
+            if ( node1 == (*current).last_in_sequence )
             {
-               (*htable).last_in_sequence = prev;
+               (*current).last_in_sequence = prev;
             }
             node1 = NULL;
          }
@@ -388,6 +455,159 @@ remove_node_from_sequence
 }
 
 /**
+   compare_htables_shallow_equal
+
+   compare two htables for all nodes in each being equal
+
+   @param current the first htable to compare
+   @param other the other htable to compare
+   @return 1 if htable node keys and values equal, 0 otherwise
+*/
+static
+int32_t
+compare_htables_shallow_equal
+(
+   HTable_type( Prefix ) *current,
+   HTable_type( Prefix ) *other
+)
+{
+   int32_t result = 0;
+   int32_t flag = 0;
+   node_t *node_1 = NULL;
+   node_t *node_2 = NULL;
+
+   node_1 = (*current).first_in_sequence;
+
+   while( node_1 != NULL )
+   {
+      node_2 = (*other).first_in_sequence;
+      while( node_2 != NULL )
+      {
+         if ( KEY_DEEP_EQUAL_FUNCTION( ( *node_1 ).key, ( *node_2 ).key ) == 1 )
+         {
+            if ( ( *node_1 ).value == ( *node_2 ).value )
+            {
+               flag = flag + 1;
+               break;
+            }
+         }
+         node_2 = ( *node_2 ).next_in_sequence;
+      }
+      node_1 = ( *node_1 ).next_in_sequence;
+   }
+
+   if ( ( flag == (*current).count ) && ( flag == (*other).count ) )
+   {
+      result = 1;
+   }
+
+   return result;
+}
+
+/**
+   compare_htables_deep_equal
+
+   compare two htables for all nodes in each being deep equal
+
+   @param current the first htable to compare
+   @param other the other htable to compare
+   @return 1 if htable node keys and values equal, 0 otherwise
+*/
+static
+int32_t
+compare_htables_deep_equal
+(
+   HTable_type( Prefix ) *current,
+   HTable_type( Prefix ) *other
+)
+{
+   int32_t result = 0;
+   int32_t flag = 0;
+   node_t *node_1 = NULL;
+   node_t *node_2 = NULL;
+
+   node_1 = (*current).first_in_sequence;
+
+   while( node_1 != NULL )
+   {
+      node_2 = (*other).first_in_sequence;
+      while( node_2 != NULL )
+      {
+         if ( KEY_DEEP_EQUAL_FUNCTION( ( *node_1 ).key, ( *node_2 ).key ) == 1 )
+         {
+            if ( VALUE_DEEP_EQUAL_FUNCTION( ( *node_1 ).value, ( *node_2 ).value ) == 1 )
+            {
+               flag = flag + 1;
+               break;
+            }
+         }
+         node_2 = ( *node_2 ).next_in_sequence;
+      }
+      node_1 = ( *node_1 ).next_in_sequence;
+   }
+
+   if ( ( flag == (*current).count ) && ( flag == (*other).count ) )
+   {
+      result = 1;
+   }
+
+   return result;
+}
+
+/**
+   compare_htable_items_to_array_items
+
+   compare keys and values in htable nodes to arrays of keys and values
+
+   @param current the htable
+   @param key_array the array of keys
+   @param value array the array of values
+   @param count the length of the arrays
+   @result 1 if htable keys and values are equal, 0 otherwise
+*/
+static
+int32_t
+compare_htable_items_to_array_items
+(
+   HTable_type( Prefix ) *current,
+   Key *key_array,
+   Type *value_array,
+   int32_t count
+)
+{
+   int32_t result = 0;
+   int32_t i = 0;
+   int32_t flag = 0;
+   node_t *node = NULL;
+
+   node = (*current).first_in_sequence;
+
+   while( node != NULL )
+   {
+      for( i = 0; i < count; i++ )
+      {
+         if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key_array[i] ) == 1 )
+         {
+            if ( (*node).value == value_array[i] )
+            {
+               flag = flag + 1;
+               break;
+            }
+         }
+      }
+      node = (*node).next_in_sequence;
+   }
+
+   if ( ( flag == (*current).count ) && ( flag == count ) )
+   {
+      result = 1;
+   }
+
+   return result;
+}
+
+
+/**
    Invariant
 */
 
@@ -395,17 +615,17 @@ remove_node_from_sequence
 
 static
 int32_t
-is_empty_implies_first_last_null( HTable_type( Prefix ) *p )
+is_empty_implies_first_last_null( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   if ( (*p).count == 0 )
+   if ( (*current).count == 0 )
    {
       result
          = (
-               ( (*p).first_in_sequence == NULL )
-               &&
-               ( (*p).last_in_sequence  == NULL )
+              ( (*current).first_in_sequence == NULL )
+              &&
+              ( (*current).last_in_sequence  == NULL )
            );
    }
 
@@ -414,22 +634,22 @@ is_empty_implies_first_last_null( HTable_type( Prefix ) *p )
 
 static
 int32_t
-nonnegative_count( HTable_type( Prefix ) *p )
+nonnegative_count( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   result = ( (*p).count >= 0 );
+   result = ( (*current).count >= 0 );
 
    return result;
 }
 
 static
 int32_t
-last_in_sequence_ok( HTable_type( Prefix ) *p )
+last_in_sequence_ok( HTable_type( Prefix ) *current )
 {
    int32_t result = 0;
 
-   node_t *node = (*p).first_in_sequence;
+   node_t *node = (*current).first_in_sequence;
    node_t *node1 = NULL;
 
    while( node != NULL )
@@ -438,19 +658,19 @@ last_in_sequence_ok( HTable_type( Prefix ) *p )
       node = (*node).next_in_sequence;
    }
 
-   result = ( node1 == (*p).last_in_sequence );
+   result = ( node1 == (*current).last_in_sequence );
 
    return result;
 }
 
 static
 int32_t
-valid_sequence_count( HTable_type( Prefix ) *p )
+valid_sequence_count( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
    int32_t n = 0;
 
-   node_t *node = (*p).first_in_sequence;
+   node_t *node = (*current).first_in_sequence;
 
    while( node != NULL )
    {
@@ -458,23 +678,23 @@ valid_sequence_count( HTable_type( Prefix ) *p )
       node = (*node).next_in_sequence;
    }
 
-   result = ( n == (*p).count );
+   result = ( n == (*current).count );
 
    return result;
 }
 
 static
 int32_t
-valid_bucket_count( HTable_type( Prefix ) *p )
+valid_bucket_count( HTable_type( Prefix ) *current )
 {
    int32_t i = 0;
    int32_t result = 1;
    node_t *node = NULL;
    int32_t n = 0;
 
-   for ( i=0; i < (*p).bucket_count; i ++ )
+   for ( i = 0; i < (*current).bucket_count; i ++ )
    {
-      node = (*p).bucket[i];
+      node = (*current).bucket[i];
 
       while( node != NULL )
       {
@@ -483,33 +703,33 @@ valid_bucket_count( HTable_type( Prefix ) *p )
       }
    }
 
-   result = ( n == (*p).count );
+   result = ( n == (*current).count );
 
    return result;
 }
 
 static
 int32_t
-first_cursor_not_null( HTable_type( Prefix ) *p )
+first_cursor_not_null( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   result = ( (*p).first_cursor != NULL );
+   result = ( (*current).first_cursor != NULL );
 
    return result;
 }
 
 static
 int32_t
-cursors_htable_ok( HTable_type( Prefix ) *p )
+cursors_htable_ok( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   HTable_cursor_type( Prefix ) *cursor = (*p).first_cursor;
+   HTable_cursor_type( Prefix ) *cursor = (*current).first_cursor;
 
    while ( ( cursor != NULL ) && ( result == 1 ) )
    {
-      result = ( (*cursor).htable == p );
+      result = ( (*cursor).htable == current );
       cursor = (*cursor).next_cursor;
    }
 
@@ -518,13 +738,13 @@ cursors_htable_ok( HTable_type( Prefix ) *p )
 
 static
 int32_t
-last_cursor_next_null( HTable_type( Prefix ) *p )
+last_cursor_next_null( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   if ( (*p).last_cursor != NULL )
+   if ( (*current).last_cursor != NULL )
    {
-      result = ( (*(*p).last_cursor).next_cursor == NULL );
+      result = ( ( *(*current).last_cursor ).next_cursor == NULL );
    }
 
    return result;
@@ -532,30 +752,30 @@ last_cursor_next_null( HTable_type( Prefix ) *p )
 
 static
 int32_t
-last_cursor_null_if_one_cursor( HTable_type( Prefix ) *p )
+last_cursor_null_if_one_cursor( HTable_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   if ( (*(*p).first_cursor).next_cursor == NULL )
+   if ( ( *(*current).first_cursor ).next_cursor == NULL )
    {
-      result = ( (*p).last_cursor == NULL );
+      result = ( (*current).last_cursor == NULL );
    }
 
    return result;
 }
 
 static
-void invariant( HTable_type( Prefix ) *p )
+void invariant( HTable_type( Prefix ) *current )
 {
-   assert(((void) "empty implies first and last null", is_empty_implies_first_last_null( p ) ));
-   assert(((void) "nonnegative count", nonnegative_count( p ) ));
-   assert(((void) "last in sequence OK", last_in_sequence_ok( p ) ));
-   assert(((void) "valid sequence count", valid_sequence_count( p ) ));
-   assert(((void) "valid bucket count", valid_bucket_count( p ) ));
-   assert(((void) "first cursor not null", first_cursor_not_null( p ) ));
-   assert(((void) "last cursor next null", last_cursor_next_null( p ) ));
-   assert(((void) "last cursor null if one cursor", last_cursor_null_if_one_cursor( p ) ) );
-   assert(((void) "cursors htable OK", cursors_htable_ok( p ) ));
+   assert( ( ( void ) "empty implies first and last null", is_empty_implies_first_last_null( current ) ) );
+   assert( ( ( void ) "nonnegative count", nonnegative_count( current ) ) );
+   assert( ( ( void ) "last in sequence OK", last_in_sequence_ok( current ) ) );
+   assert( ( ( void ) "valid sequence count", valid_sequence_count( current ) ) );
+   assert( ( ( void ) "valid bucket count", valid_bucket_count( current ) ) );
+   assert( ( ( void ) "first cursor not null", first_cursor_not_null( current ) ) );
+   assert( ( ( void ) "last cursor next null", last_cursor_next_null( current ) ) );
+   assert( ( ( void ) "last cursor null if one cursor", last_cursor_null_if_one_cursor( current ) ) );
+   assert( ( ( void ) "cursors htable OK", cursors_htable_ok( current ) ) );
    return;
 }
 
@@ -572,18 +792,22 @@ void invariant( HTable_type( Prefix ) *p )
 */
 
 /**
-   clonable protocol function array
+   basic protocol function array
 */
 
 static
 void *
-p_clonable_table[P_CLONABLE_FUNCTION_COUNT]
+p_basic_table[P_BASIC_FUNCTION_COUNT]
 =
 {
    HTable_dispose( Prefix ),
-   HTable_dispose_with_contents( Prefix ),
-   HTable_make_from( Prefix ),
-   HTable_make_duplicate_from( Prefix )
+   HTable_deep_dispose( Prefix ),
+   HTable_is_equal( Prefix ),
+   HTable_is_deep_equal( Prefix ),
+   HTable_copy( Prefix ),
+   HTable_deep_copy( Prefix ),
+   HTable_clone( Prefix ),
+   HTable_deep_clone( Prefix )
 };
 
 static
@@ -591,8 +815,6 @@ void *
 p_iterable_kv_table[P_ITERABLE_KV_FUNCTION_COUNT]
 =
 {
-   HTable_dispose( Prefix ),
-   HTable_dispose_with_contents( Prefix ),
    HTable_count( Prefix ),
    HTable_key_at( Prefix ),
    HTable_item_at( Prefix ),
@@ -604,6 +826,12 @@ p_iterable_kv_table[P_ITERABLE_KV_FUNCTION_COUNT]
 
 /**
    protocol get_function
+
+   returns function pointer for requested protocol function
+
+   @param protocol_id which protocol
+   @param function_id which function
+   @return function pointer if found, NULL otherwise
 */
 
 static
@@ -620,16 +848,16 @@ get_function
 
    switch ( protocol_id )
    {
-      case P_CLONABLE:
+      case P_BASIC_TYPE:
       {
-         if ( ( function_id >= 0 ) && ( function_id <= P_CLONABLE_FUNCTION_MAX ) )
+         if ( ( function_id >= 0 ) && ( function_id <= P_BASIC_FUNCTION_MAX ) )
          {
-            result = p_clonable_table[ function_id ];
+            result = p_basic_table[ function_id ];
          }
          break;
       }
-   
-      case P_ITERABLE_KV:
+
+      case P_ITERABLE_KV_TYPE:
       {
          if ( ( function_id >= 0 ) && ( function_id <= P_ITERABLE_KV_FUNCTION_MAX ) )
          {
@@ -637,14 +865,19 @@ get_function
          }
          break;
       }
-      
+
    }
-   
+
    return result;
 }
 
 /**
    protocol supports_protocol
+
+   returns 1 if this class supports the specified protocol
+
+   @param protocol_id which protocol
+   @return 1 if protocol supported, 0 otherwise
 */
 
 static
@@ -660,18 +893,18 @@ supports_protocol
 
    switch ( protocol_id )
    {
-      case P_CLONABLE:
+      case P_BASIC_TYPE:
       {
          result = 1;
          break;
       }
-      
-      case P_ITERABLE_KV:
+
+      case P_ITERABLE_KV_TYPE:
       {
          result = 1;
          break;
       }
-   
+
    }
 
    return result;
@@ -688,44 +921,50 @@ HTable_type( Prefix ) *
 HTable_make( Prefix )( void )
 {
    // allocate htable struct
-   HTable_type( Prefix ) * htable
+   HTable_type( Prefix ) *result
       = ( HTable_type( Prefix ) * ) calloc( 1, sizeof( HTable_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( htable );
+   PROTOCOLS_INIT( result );
 
    // set type codes
-   (*htable).type = HTABLE_TYPE;
-   (*htable).key_type = Key_Code;
-   (*htable).item_type = Type_Code;
-   
-   (*htable).count = 0;
+   (*result)._type = HTABLE_TYPE;
+   (*result)._key_type = Key_Code;
+   (*result)._item_type = Type_Code;
+
+   (*result).count = 0;
 
    // allocate bucket array, default size
-   (*htable).bucket = ( node_t ** ) calloc( DEFAULT_BUCKET_SIZE, sizeof( node_t * ) );
+   (*result).bucket = ( node_t ** ) calloc( DEFAULT_BUCKET_SIZE, sizeof( node_t * ) );
+   CHECK( "(*result).bucket allocated correctly", (*result).bucket != NULL );
 
-   (*htable).bucket_count = DEFAULT_BUCKET_SIZE;
+   (*result).bucket_count = DEFAULT_BUCKET_SIZE;
 
    // set built-in cursor
    // allocate cursor struct
    HTable_cursor_type( Prefix ) *cursor
       =  ( HTable_cursor_type( Prefix ) * )
          calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
 
    // set htable
-   (*cursor).htable = htable;
+   (*cursor).htable = result;
 
    // set item to NULL - cursor is "off"
    (*cursor).item = NULL;
 
    // set htable built-in cursor
-   (*htable).first_cursor = cursor;
+   (*result).first_cursor = cursor;
 
-   MULTITHREAD_MUTEX_INIT( (*htable).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( htable );
+   POSTCONDITION( "new htable is empty", (*result).count == 0 );
+   POSTCONDITION( "new htable cursor is off", ( *(*result).first_cursor ).item == NULL );
 
-   return htable;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -738,89 +977,32 @@ HTable_make_n( Prefix )( int32_t bucket_count )
    PRECONDITION( "bucket count ok", bucket_count > 0 );
 
    // allocate htable struct
-   HTable_type( Prefix ) * htable
+   HTable_type( Prefix ) *result
       = ( HTable_type( Prefix ) * ) calloc( 1, sizeof( HTable_type( Prefix ) ) );
-
-   // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( htable );
-
-   // set type codes
-   (*htable).type = HTABLE_TYPE;
-   (*htable).key_type = Key_Code;
-   (*htable).item_type = Type_Code;
-   
-   (*htable).count = 0;
-
-   // allocate bucket array
-   (*htable).bucket = ( node_t ** ) calloc( bucket_count, sizeof( node_t * ) );
-
-   (*htable).bucket_count = bucket_count;
-
-   // set built-in cursor
-   // allocate cursor struct
-   HTable_cursor_type( Prefix ) *cursor
-      =  ( HTable_cursor_type( Prefix ) * )
-         calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
-
-   // set htable
-   (*cursor).htable = htable;
-
-   // set item to NULL - cursor is "off"
-   (*cursor).item = NULL;
-
-   // set htable built-in cursor
-   (*htable).first_cursor = cursor;
-
-
-   MULTITHREAD_MUTEX_INIT( (*htable).mutex );
-
-   INVARIANT( htable );
-   POSTCONDITION( "bucket count set", (*htable).bucket_count == bucket_count );
-
-   return htable;
-}
-
-/**
-   HTable_make_from
-*/
-
-HTable_type( Prefix ) *
-HTable_make_from( Prefix )( HTable_type( Prefix ) *htable )
-{
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-
-   // get input
-   LOCK( (*htable).mutex );
-   Key *keys = keys_as_array( htable );
-   Type *items = items_as_array( htable );
-   int32_t count = (*htable).count;
-   UNLOCK( (*htable).mutex );
-
-   // allocate htable struct
-   HTable_type( Prefix ) * result
-      = ( HTable_type( Prefix ) * ) calloc( 1, sizeof( HTable_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // initialize protocol functions if protocols enabled
    PROTOCOLS_INIT( result );
 
    // set type codes
-   (*result).type = HTABLE_TYPE;
-   (*result).key_type = Key_Code;
-   (*result).item_type = Type_Code;
-   
+   (*result)._type = HTABLE_TYPE;
+   (*result)._key_type = Key_Code;
+   (*result)._item_type = Type_Code;
+
    (*result).count = 0;
 
    // allocate bucket array
-   (*result).bucket = ( node_t ** ) calloc( (*htable).bucket_count, sizeof( node_t * ) );
+   (*result).bucket = ( node_t ** ) calloc( bucket_count, sizeof( node_t * ) );
+   CHECK( "(*result).bucket allocated correctly", (*result).bucket != NULL );
 
-   (*result).bucket_count = (*htable).bucket_count;
+   (*result).bucket_count = bucket_count;
 
    // set built-in cursor
    // allocate cursor struct
    HTable_cursor_type( Prefix ) *cursor
       =  ( HTable_cursor_type( Prefix ) * )
          calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
 
    // set htable
    (*cursor).htable = result;
@@ -831,90 +1013,13 @@ HTable_make_from( Prefix )( HTable_type( Prefix ) *htable )
    // set htable built-in cursor
    (*result).first_cursor = cursor;
 
-   // put key-values from htable into result
-   int32_t i = 0;
-   for ( i=0; i < count; i++ )
-   {
-      put( result, items[i], keys[i] );
-   }
 
-   MULTITHREAD_MUTEX_INIT( (*htable).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   free( keys );
-   free( items );
+   POSTCONDITION( "new htable is empty", (*result).count == 0 );
+   POSTCONDITION( "new htable cursor is off", ( *(*result).first_cursor ).item == NULL );
+   POSTCONDITION( "bucket count set", (*result).bucket_count == bucket_count );
 
-   INVARIANT( result );
-
-   return result;
-}
-
-/**
-   HTable_make_duplicate_from
-*/
-
-HTable_type( Prefix ) *
-HTable_make_duplicate_from( Prefix )( HTable_type( Prefix ) *htable )
-{
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-
-   // get input
-   LOCK( (*htable).mutex );
-   Key *keys = keys_as_array( htable );
-   Type *items = items_as_array( htable );
-   int32_t count = (*htable).count;
-   UNLOCK( (*htable).mutex );
-
-   // allocate htable struct
-   HTable_type( Prefix ) * result
-      = ( HTable_type( Prefix ) * ) calloc( 1, sizeof( HTable_type( Prefix ) ) );
-
-   // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( result );
-
-   // set type codes
-   (*result).type = HTABLE_TYPE;
-   (*result).key_type = Key_Code;
-   (*result).item_type = Type_Code;
-   
-   (*result).count = 0;
-
-   // allocate bucket array
-   (*result).bucket = ( node_t ** ) calloc( (*htable).bucket_count, sizeof( node_t * ) );
-
-   (*result).bucket_count = (*htable).bucket_count;
-
-   // set built-in cursor
-   // allocate cursor struct
-   HTable_cursor_type( Prefix ) *cursor
-      =  ( HTable_cursor_type( Prefix ) * )
-         calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
-
-   // set htable
-   (*cursor).htable = result;
-
-   // set item to NULL - cursor is "off"
-   (*cursor).item = NULL;
-
-   // set htable built-in cursor
-   (*result).first_cursor = cursor;
-
-   Key k;
-   Type v;
-
-   // put key-values from htable into result
-   int32_t i = 0;
-   for ( i = 0; i < count; i++ )
-   {
-      k = KEY_DUPLICATE_FUNCTION( keys[i] );
-      v = VALUE_DUPLICATE_FUNCTION( items[i] );
-      put( result, v, k );
-   }
-
-   MULTITHREAD_MUTEX_INIT( (*htable).mutex );
-
-   free( keys );
-   free( items );
    INVARIANT( result );
 
    return result;
@@ -932,22 +1037,27 @@ HTable_make_from_array( Prefix )( Key *key_array, Type *value_array, int32_t cou
    PRECONDITION( "count ok", count >= 0 );
 
    // allocate htable struct
-   HTable_type( Prefix ) * result = HTable_make( Prefix )();
+   HTable_type( Prefix ) *result = HTable_make( Prefix )();
+   CHECK( "result allocated correctly", result != NULL );
 
    // initialize protocol functions if protocols enabled
    PROTOCOLS_INIT( result );
 
    // set type codes
-   (*result).type = HTABLE_TYPE;
-   (*result).key_type = Key_Code;
-   (*result).item_type = Type_Code;
-   
+   (*result)._type = HTABLE_TYPE;
+   (*result)._key_type = Key_Code;
+   (*result)._item_type = Type_Code;
+
    // put key-values from htable into result
    int32_t i = 0;
-   for ( i=0; i < count; i++ )
+   for ( i = 0; i < count; i++ )
    {
       put( result, value_array[i], key_array[i] );
    }
+
+   POSTCONDITION( "new htable has count items", (*result).count == count );
+   POSTCONDITION( "new htable cursor is off", ( *(*result).first_cursor ).item == NULL );
+   POSTCONDITION( "htable has array items", compare_htable_items_to_array_items( result, key_array, value_array, count ) == 1 );
 
    INVARIANT( result );
 
@@ -959,46 +1069,418 @@ HTable_make_from_array( Prefix )( Key *key_array, Type *value_array, int32_t cou
 */
 
 HTable_cursor_type( Prefix ) *
-HTable_cursor_make( Prefix )( HTable_type( Prefix ) *htable )
+HTable_cursor_make( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "htable not null", current != NULL );
+   PRECONDITION( "htable type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // allocate cursor struct
    HTable_cursor_type( Prefix ) *cursor
       =  ( HTable_cursor_type( Prefix ) * )
          calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
 
    // set htable
-   (*cursor).htable = htable;
+   (*cursor).htable = current;
 
    // set item to NULL - cursor is "off"
    (*cursor).item = NULL;
 
    // place cursor reference into htable structure
-   if ( (*htable).last_cursor == NULL )
+   if ( (*current).last_cursor == NULL )
    {
       // set second cursor for htable
-      (*(*htable).first_cursor).next_cursor = cursor;
-      (*htable).last_cursor = cursor;
+      ( *(*current).first_cursor ).next_cursor = cursor;
+      (*current).last_cursor = cursor;
    }
    else
    {
       // set additional cursor for htable
-      // (*htable).last_cursor holds last cursor allocated
-      (*(*htable).last_cursor).next_cursor = cursor;
-      (*htable).last_cursor = cursor;
+      // (*current).last_cursor holds last cursor allocated
+      ( *(*current).last_cursor ).next_cursor = cursor;
+      (*current).last_cursor = cursor;
    }
 
-   MULTITHREAD_MUTEX_INIT( (*htable).mutex );
+   MULTITHREAD_MUTEX_INIT( (*current).mutex );
 
-   INVARIANT( htable );
-   POSTCONDITION( "new cursor is last cursor", (*htable).last_cursor == cursor );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "new cursor is last cursor", (*current).last_cursor == cursor );
+
+   INVARIANT( current );
+
+   UNLOCK( (*current).mutex );
 
    return cursor;
+}
+
+/**
+   HTable_clone
+*/
+
+HTable_type( Prefix ) *
+HTable_clone( Prefix )( HTable_type( Prefix ) *current )
+{
+   PRECONDITION( "htable not null", current != NULL );
+   PRECONDITION( "htable type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+
+   // get input
+   LOCK( (*current).mutex );
+   Key *keys = keys_as_array( current );
+   Type *items = values_as_array( current );
+   int32_t count = (*current).count;
+   UNLOCK( (*current).mutex );
+
+   // allocate htable struct
+   HTable_type( Prefix ) *result
+      = ( HTable_type( Prefix ) * ) calloc( 1, sizeof( HTable_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
+
+   // initialize protocol functions if protocols enabled
+   PROTOCOLS_INIT( result );
+
+   // set type codes
+   (*result)._type = HTABLE_TYPE;
+   (*result)._key_type = Key_Code;
+   (*result)._item_type = Type_Code;
+
+   (*result).count = 0;
+
+   // allocate bucket array
+   (*result).bucket = ( node_t ** ) calloc( (*current).bucket_count, sizeof( node_t * ) );
+   CHECK( "(*result).bucket allocated correctly", (*result).bucket != NULL );
+
+   (*result).bucket_count = (*current).bucket_count;
+
+   // set built-in cursor
+   // allocate cursor struct
+   HTable_cursor_type( Prefix ) *cursor
+      =  ( HTable_cursor_type( Prefix ) * )
+         calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
+
+   // set htable
+   (*cursor).htable = result;
+
+   // set item to NULL - cursor is "off"
+   (*cursor).item = NULL;
+
+   // set htable built-in cursor
+   (*result).first_cursor = cursor;
+
+   // put key-values from htable into result
+   int32_t i = 0;
+   for ( i = 0; i < count; i++ )
+   {
+      put( result, items[i], keys[i] );
+   }
+
+   MULTITHREAD_MUTEX_INIT( (*current).mutex );
+
+   free( keys );
+   free( items );
+
+   POSTCONDITION( "new htable has count items", (*result).count == (*current).count );
+   POSTCONDITION( "new htable cursor is off", ( ( *(*result).first_cursor ).item == NULL ) );
+   POSTCONDITION( "new htable clone is equal to original", compare_htables_shallow_equal( result, current ) == 1 );
+
+   INVARIANT( result );
+
+   return result;
+}
+
+/**
+   HTable_deep_clone
+*/
+
+HTable_type( Prefix ) *
+HTable_deep_clone( Prefix )( HTable_type( Prefix ) *current )
+{
+   PRECONDITION( "htable not null", current != NULL );
+   PRECONDITION( "htable type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+
+   // get input
+   LOCK( (*current).mutex );
+   Key *keys = keys_as_array( current );
+   Type *items = values_as_array( current );
+   int32_t count = (*current).count;
+   UNLOCK( (*current).mutex );
+
+   // allocate htable struct
+   HTable_type( Prefix ) *result
+      = ( HTable_type( Prefix ) * ) calloc( 1, sizeof( HTable_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
+
+   // initialize protocol functions if protocols enabled
+   PROTOCOLS_INIT( result );
+
+   // set type codes
+   (*result)._type = HTABLE_TYPE;
+   (*result)._key_type = Key_Code;
+   (*result)._item_type = Type_Code;
+
+   (*result).count = 0;
+
+   // allocate bucket array
+   (*result).bucket = ( node_t ** ) calloc( (*current).bucket_count, sizeof( node_t * ) );
+   CHECK( "(*result).bucket allocated correctly", (*result).bucket != NULL );
+
+   (*result).bucket_count = (*current).bucket_count;
+
+   // set built-in cursor
+   // allocate cursor struct
+   HTable_cursor_type( Prefix ) *cursor
+      =  ( HTable_cursor_type( Prefix ) * )
+         calloc( 1, sizeof( HTable_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated correctly", cursor != NULL );
+
+   // set htable
+   (*cursor).htable = result;
+
+   // set item to NULL - cursor is "off"
+   (*cursor).item = NULL;
+
+   // set htable built-in cursor
+   (*result).first_cursor = cursor;
+
+   Key k;
+   Type v;
+
+   // put key-values from htable into result
+   int32_t i = 0;
+   for ( i = 0; i < count; i++ )
+   {
+      k = KEY_DEEP_CLONE_FUNCTION( keys[i] );
+      v = VALUE_DEEP_CLONE_FUNCTION( items[i] );
+      put( result, v, k );
+   }
+
+   MULTITHREAD_MUTEX_INIT( (*current).mutex );
+
+   free( keys );
+   free( items );
+
+   POSTCONDITION( "new htable has count items", (*result).count == (*current).count );
+   POSTCONDITION( "new htable cursor is off", ( ( *(*result).first_cursor ).item == NULL ) );
+   POSTCONDITION( "new htable clone is equal to original", compare_htables_deep_equal( result, current ) == 1 );
+
+   INVARIANT( result );
+
+   return result;
+}
+
+/**
+   HTable_is_equal
+*/
+
+int32_t
+HTable_is_equal( Prefix )( HTable_type( Prefix ) *current, HTable_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == HTABLE_TYPE ) && ( (*other)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+
+   INVARIANT( current );
+
+   int32_t result = 1;
+   int32_t i = 0;
+   Type value;
+
+   // get input
+   LOCK( (*other).mutex );
+   Key *keys = keys_as_array( other );
+   Type *items = values_as_array( other );
+   int32_t count = (*other).count;
+   UNLOCK( (*other).mutex );
+
+   // check count
+   if ( (*current).count != (*other).count )
+   {
+      result = 0;
+   }
+
+   // check equal key-value from other in result
+   for ( i = 0; i < count; i++ )
+   {
+      if ( result == 1 )
+      {
+         if ( has( current, keys[i] ) == 0 )
+         {
+            result = 0;
+            break;
+         }
+         else
+         {
+            value = item( current, keys[i] );
+            if ( value != items[i] )
+            {
+               result = 0;
+               break;
+            }
+         }
+      }
+      else
+      {
+         break;
+      }
+   }
+
+   free( keys );
+   free( items );
+
+   INVARIANT( current );
+
+   return result;
+}
+
+/**
+   HTable_is_deep_equal
+*/
+
+int32_t
+HTable_is_deep_equal( Prefix )( HTable_type( Prefix ) *current, HTable_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == HTABLE_TYPE ) && ( (*other)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+
+   INVARIANT( current );
+
+   int32_t result = 1;
+   int32_t i = 0;
+   Type value;
+
+   // get input
+   LOCK( (*other).mutex );
+   Key *keys = keys_as_array( other );
+   Type *items = values_as_array( other );
+   int32_t count = (*other).count;
+   UNLOCK( (*other).mutex );
+
+   // check count
+   if ( (*current).count != (*other).count )
+   {
+      result = 0;
+   }
+
+   // check equal key-value from other in result
+   for ( i = 0; i < count; i++ )
+   {
+      if ( result == 1 )
+      {
+         if ( has( current, keys[i] ) == 0 )
+         {
+            result = 0;
+            break;
+         }
+         else
+         {
+            value = item( current, keys[i] );
+            if ( VALUE_DEEP_EQUAL_FUNCTION( value, items[i] ) == 0 )
+            {
+               result = 0;
+               break;
+            }
+         }
+      }
+      else
+      {
+         break;
+      }
+   }
+
+   free( keys );
+   free( items );
+
+   INVARIANT( current );
+
+   return result;
+}
+
+/**
+   HTable_copy
+*/
+
+void
+HTable_copy( Prefix )( HTable_type( Prefix ) *current, HTable_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == HTABLE_TYPE ) && ( (*other)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+
+   int32_t i = 0;
+
+   // get input
+   LOCK( (*other).mutex );
+   Key *keys = keys_as_array( other );
+   Type *items = values_as_array( other );
+   int32_t count = (*other).count;
+   UNLOCK( (*other).mutex );
+
+   // empty current
+   HTable_wipe_out_and_dispose( Prefix )( current );
+
+   // put key-values from htable into result
+   for ( i = 0; i < count; i++ )
+   {
+      put( current, items[i], keys[i] );
+   }
+
+   free( keys );
+   free( items );
+
+   POSTCONDITION( "new htable clone is equal to original", compare_htables_shallow_equal( current, other ) == 1 );
+
+   INVARIANT( current );
+
+   return;
+}
+
+/**
+   HTable_deep_copy
+*/
+
+void
+HTable_deep_copy( Prefix )( HTable_type( Prefix ) *current, HTable_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == HTABLE_TYPE ) && ( (*other)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+
+   int32_t i = 0;
+   Key k;
+   Type v;
+
+   // get input
+   LOCK( (*other).mutex );
+   Key *keys = keys_as_array( other );
+   Type *items = values_as_array( other );
+   int32_t count = (*other).count;
+   UNLOCK( (*other).mutex );
+
+   // empty current
+   HTable_wipe_out_and_dispose( Prefix )( current );
+
+   // put key-values from htable into result
+   for ( i = 0; i < count; i++ )
+   {
+      k = KEY_DEEP_CLONE_FUNCTION( keys[i] );
+      v = VALUE_DEEP_CLONE_FUNCTION( items[i] );
+      put( current, v, k );
+   }
+
+   free( keys );
+   free( items );
+
+   POSTCONDITION( "new htable clone is equal to original", compare_htables_deep_equal( current, other ) == 1 );
+
+   INVARIANT( current );
+
+   return;
 }
 
 /**
@@ -1006,25 +1488,26 @@ HTable_cursor_make( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 void
-HTable_dispose( Prefix )( HTable_type( Prefix ) *htable )
+HTable_dispose( Prefix )( HTable_type( Prefix ) **current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "current type ok", ( (**current)._type == HTABLE_TYPE ) && ( (**current)._key_type = Key_Code ) && ( (**current)._item_type = Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
-   // delete htable sequence items
-   node_t *item = (*htable).first_in_sequence;
+   // delete htable sequence nodes
+   node_t *node = (**current).first_in_sequence;
    node_t *next = NULL;
-   while( item != NULL )
+   while( node != NULL )
    {
-      next = (*item).next_in_sequence;
-      node_dispose( item );
-      item = next;
+      next = (*node).next_in_sequence;
+      node_dispose( &node );
+      node = next;
    }
 
    // delete cursors
-   HTable_cursor_type( Prefix ) *cursor = (*htable).first_cursor;
+   HTable_cursor_type( Prefix ) *cursor = (**current).first_cursor;
    HTable_cursor_type( Prefix ) *next_cursor = NULL;
    while( cursor != NULL )
    {
@@ -1034,42 +1517,46 @@ HTable_dispose( Prefix )( HTable_type( Prefix ) *htable )
    }
 
    // delete bucket array
-   free( (*htable).bucket );
+   free( (**current).bucket );
 
-   MULTITHREAD_MUTEX_DESTROY( (*htable).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
    // delete htable struct
-   free( htable );
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
 
 /**
-   HTable_dispose_with_contents
+   HTable_deep_dispose
 */
 
 void
-HTable_dispose_with_contents( Prefix )( HTable_type( Prefix ) *htable )
+HTable_deep_dispose( Prefix )( HTable_type( Prefix ) **current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "current type ok", ( (**current)._type == HTABLE_TYPE ) && ( (**current)._key_type = Key_Code ) && ( (**current)._item_type = Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
-   // delete htable sequence items
-   node_t *item = (*htable).first_in_sequence;
+   // delete htable sequence nodes
+   node_t *node = (**current).first_in_sequence;
    node_t *next = NULL;
-   while( item != NULL )
+   while( node != NULL )
    {
-      next = (*item).next_in_sequence;
-      KEY_DISPOSE_FUNCTION( (*item).key );
-      VALUE_DISPOSE_FUNCTION( (*item).value );
-      node_dispose( item );
-      item = next;
+      next = (*node).next_in_sequence;
+      KEY_DEEP_DISPOSE_FUNCTION( (*node).key );
+      VALUE_DEEP_DISPOSE_FUNCTION( (*node).value );
+      node_dispose( &node );
+      node = next;
    }
 
    // delete cursors
-   HTable_cursor_type( Prefix ) *cursor = (*htable).first_cursor;
+   HTable_cursor_type( Prefix ) *cursor = (**current).first_cursor;
    HTable_cursor_type( Prefix ) *next_cursor = NULL;
    while( cursor != NULL )
    {
@@ -1079,12 +1566,15 @@ HTable_dispose_with_contents( Prefix )( HTable_type( Prefix ) *htable )
    }
 
    // delete bucket array
-   free( (*htable).bucket );
+   free( (**current).bucket );
 
-   MULTITHREAD_MUTEX_DESTROY( (*htable).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
    // delete htable struct
-   free( htable );
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
@@ -1094,28 +1584,29 @@ HTable_dispose_with_contents( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 void
-HTable_cursor_dispose( Prefix )( HTable_cursor_type( Prefix ) *cursor )
+HTable_cursor_dispose( Prefix )( HTable_cursor_type( Prefix ) **cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).htable).mutex );
-   INVARIANT( (*cursor).htable );
+   PRECONDITION( "*cursor not null", *cursor != NULL );
+   PRECONDITION( "cursor list type ok", ( ( *(**cursor).htable )._type == HTABLE_TYPE ) && ( ( *(**cursor).htable )._key_type == Key_Code ) && ( ( *(**cursor).htable )._item_type == Type_Code ) );
+   LOCK( (**cursor).mutex );
+   LOCK( ( *(**cursor).htable ).mutex );
+   INVARIANT( (**cursor).htable );
 
-   HTable_type( Prefix ) *htable = (*cursor).htable;
+   HTable_type( Prefix ) *htable = (**cursor).htable;
 
    HTable_cursor_type( Prefix ) *c1 = NULL;
    HTable_cursor_type( Prefix ) *c2 = NULL;
    int32_t flag = 0;
 
    // find and remove this cursor from htable structure
-   c1 = (*(*cursor).htable).first_cursor;
+   c1 = ( *(**cursor).htable ).first_cursor;
    c2 = (*c1).next_cursor;
 
    // search through the cursors
-   while ( ( c2 != NULL) && ( flag == 0 ) )
+   while ( ( c2 != NULL ) && ( flag == 0 ) )
    {
-      if ( c2 == cursor )
+      if ( c2 == *cursor )
       {
          // if we have a match, remove "c2" from the cursor htable, set flag
          (*c1).next_cursor = (*c2).next_cursor;
@@ -1135,22 +1626,25 @@ HTable_cursor_dispose( Prefix )( HTable_cursor_type( Prefix ) *cursor )
    }
 
    // set htable's last cursor
-   c1 = (*(*cursor).htable).first_cursor;
+   c1 = ( *(**cursor).htable ).first_cursor;
    while ( c1 != NULL )
    {
       c2 = c1;
       c1 = (*c1).next_cursor;
    }
-   (*(*cursor).htable).last_cursor = c2;
+   ( *(**cursor).htable ).last_cursor = c2;
 
    // only one cursor, last_cursor is NULL
-   if ( c2 == (*(*cursor).htable).first_cursor )
+   if ( c2 == ( *(**cursor).htable ).first_cursor )
    {
-      (*(*cursor).htable).last_cursor = NULL;
+      ( *(**cursor).htable ).last_cursor = NULL;
    }
-   
+
    // delete cursor struct
-   free( cursor );
+   free(*cursor);
+
+   // set to NULL
+   *cursor = NULL;
 
    INVARIANT( htable );
    UNLOCK( (*htable).mutex );
@@ -1164,16 +1658,16 @@ HTable_cursor_dispose( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 */
 
 Key *
-HTable_keys_as_array( Prefix )( HTable_type( Prefix ) *htable )
+HTable_keys_as_array( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
 
-   Key *result = keys_as_array( htable );
+   Key *result = keys_as_array( current );
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1184,16 +1678,16 @@ HTable_keys_as_array( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 Type *
-HTable_values_as_array( Prefix )( HTable_type( Prefix ) *htable )
+HTable_values_as_array( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
 
-   Type *result = items_as_array( htable );
+   Type *result = values_as_array( current );
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1206,16 +1700,16 @@ Type
 HTable_cursor_item_at( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).htable).mutex );
+   LOCK( ( *(*cursor).htable ).mutex );
    INVARIANT( (*cursor).htable );
    PRECONDITION( "cursor not off", (*cursor).item != NULL );
 
-   Type value = (*(*cursor).item).value;
+   Type value = ( *(*cursor).item ).value;
 
    INVARIANT( (*cursor).htable );
-   UNLOCK( (*(*cursor).htable).mutex );
+   UNLOCK( ( *(*cursor).htable ).mutex );
    UNLOCK( (*cursor).mutex );
 
    return value;
@@ -1229,16 +1723,16 @@ Key
 HTable_cursor_key_at( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).htable).mutex );
+   LOCK( ( *(*cursor).htable ).mutex );
    INVARIANT( (*cursor).htable );
    PRECONDITION( "cursor not off", (*cursor).item != NULL );
 
-   Key key = (*(*cursor).item).key;
+   Key key = ( *(*cursor).item ).key;
 
    INVARIANT( (*cursor).htable );
-   UNLOCK( (*(*cursor).htable).mutex );
+   UNLOCK( ( *(*cursor).htable ).mutex );
    UNLOCK( (*cursor).mutex );
 
    return key;
@@ -1250,20 +1744,20 @@ HTable_cursor_key_at( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 */
 
 Type
-HTable_item_at( Prefix )( HTable_type( Prefix ) *htable )
+HTable_item_at( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "not off", (*(*htable).first_cursor).item != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "not off", ( *(*current).first_cursor ).item != NULL );
 
-   HTable_cursor_type( Prefix ) *cursor = (*htable).first_cursor;
+   HTable_cursor_type( Prefix ) *cursor = (*current).first_cursor;
 
-   Type value = (*(*cursor).item).value;
+   Type value = ( *(*cursor).item ).value;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return value;
 }
@@ -1273,20 +1767,20 @@ HTable_item_at( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 Key
-HTable_key_at( Prefix )( HTable_type( Prefix ) *htable )
+HTable_key_at( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "not off", (*(*htable).first_cursor).item != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "not off", ( *(*current).first_cursor ).item != NULL );
 
-   HTable_cursor_type( Prefix ) *cursor = (*htable).first_cursor;
+   HTable_cursor_type( Prefix ) *cursor = (*current).first_cursor;
 
-   Key key = (*(*cursor).item).key;
+   Key key = ( *(*cursor).item ).key;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return key;
 }
@@ -1297,16 +1791,16 @@ HTable_key_at( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 Type
-HTable_item_at_index( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
+HTable_item_at_index( Prefix )( HTable_type( Prefix ) *current, int32_t index )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*htable).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*current).count ) );
 
    int32_t i = 0;
-   node_t *node = (*htable).first_in_sequence;
+   node_t *node = (*current).first_in_sequence;
 
    for( i = 1; i <= index; i ++ )
    {
@@ -1315,8 +1809,8 @@ HTable_item_at_index( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
 
    Type value = (*node).value;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return value;
 }
@@ -1326,16 +1820,16 @@ HTable_item_at_index( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
 */
 
 Key
-HTable_key_at_index( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
+HTable_key_at_index( Prefix )( HTable_type( Prefix ) *current, int32_t index )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*htable).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*current).count ) );
 
    int32_t i = 0;
-   node_t *node = (*htable).first_in_sequence;
+   node_t *node = (*current).first_in_sequence;
 
    for( i = 1; i <= index; i ++ )
    {
@@ -1344,8 +1838,8 @@ HTable_key_at_index( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
 
    Key key = (*node).key;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return key;
 }
@@ -1356,35 +1850,18 @@ HTable_key_at_index( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
 */
 
 Type
-HTable_item( Prefix )( HTable_type( Prefix ) *htable, Key key )
+HTable_item( Prefix )( HTable_type( Prefix ) *current, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "has key", has( htable, key ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "has key", has( current, key ) );
 
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   Type value = item( current, key );
 
-   // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
-
-   Type value = (*(*htable).first_in_sequence).value;
-
-   // look through nodes in bucket for match to key
-   while ( node != NULL )
-   {
-      if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
-      {
-         value = (*node).value;
-         break;
-      }
-      node = (*node).next;
-   }
-
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return value;
 }
@@ -1394,17 +1871,17 @@ HTable_item( Prefix )( HTable_type( Prefix ) *htable, Key key )
 */
 
 int32_t
-HTable_count( Prefix )( HTable_type( Prefix ) *htable )
+HTable_count( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t count = (*htable).count;
+   int32_t count = (*current).count;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return count;
 }
@@ -1414,17 +1891,17 @@ HTable_count( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 int32_t
-HTable_bucket_count( Prefix )( HTable_type( Prefix ) *htable )
+HTable_bucket_count( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t count = (*htable).bucket_count;
+   int32_t count = (*current).bucket_count;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return count;
 }
@@ -1434,17 +1911,17 @@ HTable_bucket_count( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 int32_t
-HTable_off( Prefix)( HTable_type( Prefix ) *htable )
+HTable_off( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = ( (*(*htable).first_cursor).item == NULL );
+   int32_t result = ( ( *(*current).first_cursor ).item == NULL );
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1457,7 +1934,7 @@ int32_t
 HTable_cursor_off( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
 
    int32_t result = ( (*cursor).item == NULL );
@@ -1472,17 +1949,17 @@ HTable_cursor_off( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 */
 
 int32_t
-HTable_is_empty( Prefix)( HTable_type( Prefix ) *htable )
+HTable_is_empty( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = ( (*htable).count ==  0 );
+   int32_t result = ( (*current).count ==  0 );
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1492,17 +1969,22 @@ HTable_is_empty( Prefix)( HTable_type( Prefix ) *htable )
 */
 
 int32_t
-HTable_has( Prefix )( HTable_type( Prefix ) *htable, Key key )
+HTable_has( Prefix )( HTable_type( Prefix ) *current, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   POSTCONDITION_VARIABLE_DEFINE( node_t *node_pc = ( *(*current).first_cursor ).item; );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = (*current).count; );
 
-   int32_t result = has( htable, key );
+   int32_t result = has( current, key );
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "current first cursor unchanged", node_pc == ( *(*current).first_cursor ).item );
+   POSTCONDITION( "current count unchanged", count_pc == (*current).count );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1514,12 +1996,12 @@ void
 HTable_cursor_forth( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
 
    if ( (*cursor).item != NULL )
    {
-      (*cursor).item = (*(*cursor).item).next_in_sequence;
+      (*cursor).item = ( *(*cursor).item ).next_in_sequence;
    }
 
    UNLOCK( (*cursor).mutex );
@@ -1534,25 +2016,25 @@ void
 HTable_cursor_go( Prefix )( HTable_cursor_type( Prefix ) *cursor, int32_t index )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).htable).mutex );
+   LOCK( ( *(*cursor).htable ).mutex );
    INVARIANT( (*cursor).htable );
-   PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < (*(*cursor).htable).count ) ) );
+   PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < ( *(*cursor).htable ).count ) ) );
 
    int32_t i = 0;
-   (*cursor).item = (*(*cursor).htable).first_in_sequence;
+   (*cursor).item = ( *(*cursor).htable ).first_in_sequence;
 
    for( i = 1; ( i <= index ) && ( (*cursor).item != NULL ); i++ )
    {
       if ( (*cursor).item != NULL )
       {
-         (*cursor).item = (*(*cursor).item).next_in_sequence;
+         (*cursor).item = ( *(*cursor).item ).next_in_sequence;
       }
    }
 
    INVARIANT( (*cursor).htable );
-   UNLOCK( (*(*cursor).htable).mutex );
+   UNLOCK( ( *(*cursor).htable ).mutex );
    UNLOCK( (*cursor).mutex );
 
    return;
@@ -1566,17 +2048,17 @@ int32_t
 HTable_cursor_index( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).htable).mutex );
+   LOCK( ( *(*cursor).htable ).mutex );
    INVARIANT( (*cursor).htable );
 
    int32_t result = 0;
    int32_t flag = 0;
-   node_t *node = (*(*cursor).htable).first_in_sequence;
+   node_t *node = ( *(*cursor).htable ).first_in_sequence;
    node_t *target = (*cursor).item;
 
-   if ( (*(*cursor).htable).count > 0 )
+   if ( ( *(*cursor).htable ).count > 0 )
    {
       while ( node != NULL )
       {
@@ -1594,9 +2076,9 @@ HTable_cursor_index( Prefix )( HTable_cursor_type( Prefix ) *cursor )
    {
       result = -1;
    }
-   
+
    INVARIANT( (*cursor).htable );
-   UNLOCK( (*(*cursor).htable).mutex );
+   UNLOCK( ( *(*cursor).htable ).mutex );
    UNLOCK( (*cursor).mutex );
 
    return result;
@@ -1610,15 +2092,15 @@ void
 HTable_cursor_start( Prefix )( HTable_cursor_type( Prefix ) *cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor list type ok", ( (*(*cursor).htable).type == HTABLE_TYPE ) && ( (*(*cursor).htable).key_type == Key_Code ) && ( (*(*cursor).htable).item_type == Type_Code ) );
+   PRECONDITION( "cursor list type ok", ( ( *(*cursor).htable )._type == HTABLE_TYPE ) && ( ( *(*cursor).htable )._key_type == Key_Code ) && ( ( *(*cursor).htable )._item_type == Type_Code ) );
    LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).htable).mutex );
+   LOCK( ( *(*cursor).htable ).mutex );
    INVARIANT( (*cursor).htable );
 
-   (*cursor).item = (*(*cursor).htable).first_in_sequence;
+   (*cursor).item = ( *(*cursor).htable ).first_in_sequence;
 
    INVARIANT( (*cursor).htable );
-   UNLOCK( (*(*cursor).htable).mutex );
+   UNLOCK( ( *(*cursor).htable ).mutex );
    UNLOCK( (*cursor).mutex );
 
    return;
@@ -1628,21 +2110,21 @@ HTable_cursor_start( Prefix )( HTable_cursor_type( Prefix ) *cursor )
    HTable_forth
 */
 void
-HTable_forth( Prefix )( HTable_type( Prefix ) *htable )
+HTable_forth( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "not off", (*(*htable).first_cursor).item != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "not off", ( *(*current).first_cursor ).item != NULL );
 
-   if ( (*(*htable).first_cursor).item != NULL )
+   if ( ( *(*current).first_cursor ).item != NULL )
    {
-      (*(*htable).first_cursor).item = (*(*(*htable).first_cursor).item).next_in_sequence;
+      ( *(*current).first_cursor ).item = ( *( *(*current).first_cursor ).item ).next_in_sequence;
    }
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1651,27 +2133,27 @@ HTable_forth( Prefix )( HTable_type( Prefix ) *htable )
    HTable_go
 */
 void
-HTable_go( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
+HTable_go( Prefix )( HTable_type( Prefix ) *current, int32_t index )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < (*htable).count ) ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( ( index >= 0 ) && ( index < (*current).count ) ) );
 
    int32_t i = 0;
-   (*(*htable).first_cursor).item = (*htable).first_in_sequence;
+   ( *(*current).first_cursor ).item = (*current).first_in_sequence;
 
-   for( i = 1; ( i <= index ) && ( (*(*htable).first_cursor).item != NULL ); i++ )
+   for( i = 1; ( i <= index ) && ( ( *(*current).first_cursor ).item != NULL ); i++ )
    {
-      if ( (*(*htable).first_cursor).item != NULL )
+      if ( ( *(*current).first_cursor ).item != NULL )
       {
-         (*(*htable).first_cursor).item = (*(*(*htable).first_cursor).item).next;
+         ( *(*current).first_cursor ).item = ( *( *(*current).first_cursor ).item ).next;
       }
    }
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1681,19 +2163,19 @@ HTable_go( Prefix )( HTable_type( Prefix ) *htable, int32_t index )
 */
 
 int32_t
-HTable_index( Prefix )( HTable_type( Prefix ) *htable )
+HTable_index( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
    int32_t flag = 0;
-   node_t *node = (*htable).first_in_sequence;
-   node_t *target = (*(*htable).first_cursor).item;
+   node_t *node = (*current).first_in_sequence;
+   node_t *target = ( *(*current).first_cursor ).item;
 
-   if ( (*htable).count > 0 )
+   if ( (*current).count > 0 )
    {
       while ( node != NULL )
       {
@@ -1706,14 +2188,14 @@ HTable_index( Prefix )( HTable_type( Prefix ) *htable )
          node = (*node).next_in_sequence;
       }
    }
-      
+
    if ( flag == 0 )
    {
       result = -1;
    }
-   
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1723,17 +2205,17 @@ HTable_index( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 void
-HTable_start( Prefix )( HTable_type( Prefix ) *htable )
+HTable_start( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*(*htable).first_cursor).item = (*htable).first_in_sequence;
+   ( *(*current).first_cursor ).item = (*current).first_in_sequence;
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1743,17 +2225,21 @@ HTable_start( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 void
-HTable_put( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
+HTable_put( Prefix )( HTable_type( Prefix ) *current, Type value, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
 
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = has( current, key ) == 1 ? (*current).count : (*current).count + 1; );
 
-   put( htable, value, key );
+   put( current, value, key );
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "count incremented", (*current).count == count_pc );
+   POSTCONDITION( "item added", has( current, key ) == 1 );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1763,21 +2249,25 @@ HTable_put( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
 */
 
 void
-HTable_replace( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
+HTable_replace( Prefix )( HTable_type( Prefix ) *current, Type value, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   // design-wise, this precondition should hold true
+   // in practice, someone will want replace to be a "put" when the key is not present
+   // PRECONDITION( "has item", has( current, key ) );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = has( current, key ) == 1 ? (*current).count : (*current).count + 1; );
 
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
 
    // get node for new value
    node_t *new_node = NULL;
 
    // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
+   node_t *node = (*current).bucket[i];
 
    // see if node with this key already exists
    int32_t flag = 0;
@@ -1785,7 +2275,7 @@ HTable_replace( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
    // look through nodes in bucket for match to key
    while ( ( node != NULL ) && ( flag == 0 ) )
    {
-      if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+      if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
       {
          flag = 1;
          new_node = node;
@@ -1796,37 +2286,39 @@ HTable_replace( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
    // if node exists in htable, replace value with new value
    if ( new_node != NULL )
    {
-      (*new_node).value = value;
-      (*new_node).key = key;
+      ( *new_node ).value = value;
+      ( *new_node ).key = key;
    }
    else
    {
       // else get new node and put new value at head of bucket
       new_node = node_make();
-      (*new_node).value = value;
-      (*new_node).key = key;
-      (*new_node).next = (*htable).bucket[i];
-      (*new_node).next_in_sequence = NULL;
-      
+      ( *new_node ).value = value;
+      ( *new_node ).key = key;
+      ( *new_node ).next = (*current).bucket[i];
+      ( *new_node ).next_in_sequence = NULL;
+
       // put in sequence
-      if ( (*htable).last_in_sequence == NULL )
+      if ( (*current).last_in_sequence == NULL )
       {
-         (*htable).first_in_sequence = new_node;
-         (*htable).last_in_sequence = new_node;
+         (*current).first_in_sequence = new_node;
+         (*current).last_in_sequence = new_node;
       }
       else
       {
-         (*(*htable).last_in_sequence).next_in_sequence = new_node;
-         (*htable).last_in_sequence = new_node;
+         ( *(*current).last_in_sequence ).next_in_sequence = new_node;
+         (*current).last_in_sequence = new_node;
       }
-      
+
       // put in bucket
-      (*htable).bucket[i] = new_node;
-      (*htable).count = (*htable).count + 1;
+      (*current).bucket[i] = new_node;
+      (*current).count = (*current).count + 1;
    }
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "count unchanged", (*current).count == count_pc );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1836,21 +2328,25 @@ HTable_replace( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
 */
 
 void
-HTable_replace_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Type value, Key key )
+HTable_replace_and_dispose( Prefix )( HTable_type( Prefix ) *current, Type value, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   // design-wise, this precondition should hold true
+   // in practice, someone will want replace to be a "put" when the key is not present
+   // PRECONDITION( "has item", has( current, key ) );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = has( current, key ) == 1 ? (*current).count : (*current).count + 1; );
 
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
 
    // get node for new value
    node_t *new_node = NULL;
 
    // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
+   node_t *node = (*current).bucket[i];
 
    // see if node with this key already exists
    int32_t flag = 0;
@@ -1858,7 +2354,7 @@ HTable_replace_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Type value,
    // look through nodes in bucket for match to key
    while ( ( node != NULL ) && ( flag == 0 ) )
    {
-      if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+      if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
       {
          flag = 1;
          new_node = node;
@@ -1867,40 +2363,50 @@ HTable_replace_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Type value,
    }
 
    // if node exists in htable, replace value with new value
+   // delete previous key unless it is the same as the new key
+   // delete previous value unless it is the same as the new value
    if ( new_node != NULL )
    {
-      VALUE_DISPOSE_FUNCTION( (*new_node).value );
-      (*new_node).value = value;
-      (*new_node).key = key;
+      if ( ( *new_node ).key != key )
+      {
+         KEY_DEEP_DISPOSE_FUNCTION( ( *new_node ).key );
+      }
+      if ( ( *new_node ).value != value )
+      {
+         VALUE_DEEP_DISPOSE_FUNCTION( ( *new_node ).value );
+      }
+      ( *new_node ).key = key;
+      ( *new_node ).value = value;
    }
    else
    {
       // else get new node and put new value at head of bucket
       new_node = node_make();
-      (*new_node).value = value;
-      (*new_node).key = key;
-      (*new_node).next = (*htable).bucket[i];
-      (*new_node).next_in_sequence = NULL;
-      
+      ( *new_node ).value = value;
+      ( *new_node ).key = key;
+      ( *new_node ).next = (*current).bucket[i];
+      ( *new_node ).next_in_sequence = NULL;
+
       // put in sequence
-      if ( (*htable).last_in_sequence == NULL )
+      if ( (*current).last_in_sequence == NULL )
       {
-         (*htable).first_in_sequence = new_node;
-         (*htable).last_in_sequence = new_node;
+         (*current).first_in_sequence = new_node;
+         (*current).last_in_sequence = new_node;
       }
       else
       {
-         (*(*htable).last_in_sequence).next_in_sequence = new_node;
-         (*htable).last_in_sequence = new_node;
+         ( *(*current).last_in_sequence ).next_in_sequence = new_node;
+         (*current).last_in_sequence = new_node;
       }
-      
+
       // put in bucket
-      (*htable).bucket[i] = new_node;
-      (*htable).count = (*htable).count + 1;
+      (*current).bucket[i] = new_node;
+      (*current).count = (*current).count + 1;
    }
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "count unchanged", (*current).count == count_pc );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1910,32 +2416,33 @@ HTable_replace_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Type value,
 */
 
 void
-HTable_remove( Prefix )( HTable_type( Prefix ) *htable, Key key )
+HTable_remove( Prefix )( HTable_type( Prefix ) *current, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "has key", has( htable, key ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "has key", has( current, key ) );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = has( current, key ) ? (*current).count - 1 : (*current).count; );
 
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
 
    // get node for search
    node_t *last_node = NULL;
 
    // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
+   node_t *node = (*current).bucket[i];
 
    // see if first node in bucket matches
-   if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+   if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
    {
-         // remove first node
-         (*htable).bucket[i] = (*node).next;
-         move_all_cursors_forth_after_node_removal( htable, node );
-         remove_node_from_sequence( htable, node );
-         node_dispose( node );
-         (*htable).count = (*htable).count - 1;
+      // remove first node
+      (*current).bucket[i] = (*node).next;
+      move_all_cursors_forth_after_node_removal( current, node );
+      remove_node_from_sequence( current, node );
+      node_dispose( &node );
+      (*current).count = (*current).count - 1;
    }
    else
    {
@@ -1945,13 +2452,13 @@ HTable_remove( Prefix )( HTable_type( Prefix ) *htable, Key key )
       // if not, look through rest of nodes in bucket for match to key
       while ( node != NULL )
       {
-         if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+         if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
          {
-            (*last_node).next = (*node).next;
-            move_all_cursors_forth_after_node_removal( htable, node );
-            remove_node_from_sequence( htable, node );
-            node_dispose( node );
-            (*htable).count = (*htable).count - 1;
+            ( *last_node ).next = (*node).next;
+            move_all_cursors_forth_after_node_removal( current, node );
+            remove_node_from_sequence( current, node );
+            node_dispose( &node );
+            (*current).count = (*current).count - 1;
             break;
          }
 
@@ -1961,14 +2468,15 @@ HTable_remove( Prefix )( HTable_type( Prefix ) *htable, Key key )
    }
 
    // if count now zero, set first and last in sequence to  NULL
-   if ( (*htable).count == 0 )
+   if ( (*current).count == 0 )
    {
-      (*htable).first_in_sequence = NULL;
-      (*htable).last_in_sequence = NULL;
+      (*current).first_in_sequence = NULL;
+      (*current).last_in_sequence = NULL;
    }
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "count decremented", (*current).count == count_pc );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1978,34 +2486,35 @@ HTable_remove( Prefix )( HTable_type( Prefix ) *htable, Key key )
 */
 
 void
-HTable_remove_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Key key )
+HTable_remove_and_dispose( Prefix )( HTable_type( Prefix ) *current, Key key )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
-   PRECONDITION( "has key", has( htable, key ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "has key", has( current, key ) );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = has( current, key ) ? (*current).count - 1 : (*current).count; );
 
-   int32_t hash_code = HASH_FUNCTION( key );
-   int32_t i = hash_code % (*htable).bucket_count;
+   int32_t hash_code = KEY_HASH_FUNCTION( key );
+   int32_t i = hash_code % (*current).bucket_count;
 
    // get node for search
    node_t *last_node = NULL;
 
    // get first of bucket's nodes
-   node_t *node = (*htable).bucket[i];
+   node_t *node = (*current).bucket[i];
 
    // see if first node in bucket matches
-   if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+   if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
    {
-         // remove first node
-         (*htable).bucket[i] = (*node).next;
-         KEY_DISPOSE_FUNCTION( (*node).key );
-         VALUE_DISPOSE_FUNCTION( (*node).value );
-         move_all_cursors_forth_after_node_removal( htable, node );
-         remove_node_from_sequence( htable, node );
-         node_dispose( node );
-         (*htable).count = (*htable).count - 1;
+      // remove first node
+      (*current).bucket[i] = (*node).next;
+      KEY_DEEP_DISPOSE_FUNCTION( (*node).key );
+      VALUE_DEEP_DISPOSE_FUNCTION( (*node).value );
+      move_all_cursors_forth_after_node_removal( current, node );
+      remove_node_from_sequence( current, node );
+      node_dispose( &node );
+      (*current).count = (*current).count - 1;
    }
    else
    {
@@ -2015,15 +2524,15 @@ HTable_remove_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Key key )
       // if not, look through rest of nodes in bucket for match to key
       while ( node != NULL )
       {
-         if ( EQUALITY_FUNCTION( (*node).key, key ) == 1 )
+         if ( KEY_DEEP_EQUAL_FUNCTION( (*node).key, key ) == 1 )
          {
-            (*last_node).next = (*node).next;
-            KEY_DISPOSE_FUNCTION( (*node).key );
-            VALUE_DISPOSE_FUNCTION( (*node).value );
-            move_all_cursors_forth_after_node_removal( htable, node );
-            remove_node_from_sequence( htable, node );
-            node_dispose( node );
-            (*htable).count = (*htable).count - 1;
+            ( *last_node ).next = (*node).next;
+            KEY_DEEP_DISPOSE_FUNCTION( (*node).key );
+            VALUE_DEEP_DISPOSE_FUNCTION( (*node).value );
+            move_all_cursors_forth_after_node_removal( current, node );
+            remove_node_from_sequence( current, node );
+            node_dispose( &node );
+            (*current).count = (*current).count - 1;
             break;
          }
 
@@ -2033,19 +2542,20 @@ HTable_remove_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Key key )
    }
 
    // if count now zero, set first and last in sequence to  NULL
-   if ( (*htable).count == 0 )
+   if ( (*current).count == 0 )
    {
-      (*htable).first_in_sequence = NULL;
-      (*htable).last_in_sequence = NULL;
+      (*current).first_in_sequence = NULL;
+      (*current).last_in_sequence = NULL;
    }
 
-   if ( (*htable).count == 1 )
+   if ( (*current).count == 1 )
    {
-      (*htable).last_in_sequence = (*htable).first_in_sequence;
+      (*current).last_in_sequence = (*current).first_in_sequence;
    }
 
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "count decremented", (*current).count == count_pc );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2055,28 +2565,28 @@ HTable_remove_and_dispose( Prefix )( HTable_type( Prefix ) *htable, Key key )
 */
 
 void
-HTable_wipe_out( Prefix )( HTable_type( Prefix ) *htable )
+HTable_wipe_out( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   // delete htable sequence items
-   node_t *item = (*htable).first_in_sequence;
+   // delete htable sequence nodes
+   node_t *node = (*current).first_in_sequence;
    node_t *next = NULL;
-   while( item != NULL )
+   while( node != NULL )
    {
-      next = (*item).next_in_sequence;
-      node_dispose( item );
-      item = next;
+      next = (*node).next_in_sequence;
+      node_dispose( &node );
+      node = next;
    }
 
    // delete cursors, all but first
-   HTable_cursor_type( Prefix ) *cursor = (*(*htable).first_cursor).next_cursor;
+   HTable_cursor_type( Prefix ) *cursor = ( *(*current).first_cursor ).next_cursor;
    HTable_cursor_type( Prefix ) *next_cursor = NULL;
-   (*(*htable).first_cursor).next_cursor = NULL;
-   (*htable).last_cursor = NULL;
+   ( *(*current).first_cursor ).next_cursor = NULL;
+   (*current).last_cursor = NULL;
    while( cursor != NULL )
    {
       next_cursor = (*cursor).next_cursor;
@@ -2085,16 +2595,16 @@ HTable_wipe_out( Prefix )( HTable_type( Prefix ) *htable )
    }
 
    // clear out buckets
-   memset( (*htable).bucket, 0, (*htable).bucket_count*sizeof( node_t * ) );
+   memset( (*current).bucket, 0, (*current).bucket_count * sizeof( node_t * ) );
 
    // set count to zero
-   (*htable).count = 0;
-   (*htable).first_in_sequence = NULL;
-   (*htable).last_in_sequence = NULL;
+   (*current).count = 0;
+   (*current).first_in_sequence = NULL;
+   (*current).last_in_sequence = NULL;
 
-   POSTCONDITION( "is empty", (*htable).count == 0 );
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "is empty", (*current).count == 0 );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2104,30 +2614,30 @@ HTable_wipe_out( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 void
-HTable_wipe_out_and_dispose( Prefix )( HTable_type( Prefix ) *htable )
+HTable_wipe_out_and_dispose( Prefix )( HTable_type( Prefix ) *current )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   // delete htable sequence items
-   node_t *item = (*htable).first_in_sequence;
+   // delete htable sequence nodes
+   node_t *node = (*current).first_in_sequence;
    node_t *next = NULL;
-   while( item != NULL )
+   while( node != NULL )
    {
-      next = (*item).next_in_sequence;
-      KEY_DISPOSE_FUNCTION( (*item).key );
-      VALUE_DISPOSE_FUNCTION( (*item).value );
-      node_dispose( item );
-      item = next;
+      next = (*node).next_in_sequence;
+      KEY_DEEP_DISPOSE_FUNCTION( (*node).key );
+      VALUE_DEEP_DISPOSE_FUNCTION( (*node).value );
+      node_dispose( &node );
+      node = next;
    }
 
    // delete cursors, all but first
-   HTable_cursor_type( Prefix ) *cursor = (*(*htable).first_cursor).next_cursor;
+   HTable_cursor_type( Prefix ) *cursor = ( *(*current).first_cursor ).next_cursor;
    HTable_cursor_type( Prefix ) *next_cursor = NULL;
-   (*(*htable).first_cursor).next_cursor = NULL;
-   (*htable).last_cursor = NULL;
+   ( *(*current).first_cursor ).next_cursor = NULL;
+   (*current).last_cursor = NULL;
    while( cursor != NULL )
    {
       next_cursor = (*cursor).next_cursor;
@@ -2136,16 +2646,16 @@ HTable_wipe_out_and_dispose( Prefix )( HTable_type( Prefix ) *htable )
    }
 
    // clear out buckets
-   memset( (*htable).bucket, 0, (*htable).bucket_count*sizeof( node_t * ) );
+   memset( (*current).bucket, 0, (*current).bucket_count * sizeof( node_t * ) );
 
    // set count to zero
-   (*htable).count = 0;
-   (*htable).first_in_sequence = NULL;
-   (*htable).last_in_sequence = NULL;
+   (*current).count = 0;
+   (*current).first_in_sequence = NULL;
+   (*current).last_in_sequence = NULL;
 
-   POSTCONDITION( "is empty", (*htable).count == 0 );
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "is empty", (*current).count == 0 );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2155,22 +2665,24 @@ HTable_wipe_out_and_dispose( Prefix )( HTable_type( Prefix ) *htable )
 */
 
 void
-HTable_set_bucket_count( Prefix )( HTable_type( Prefix ) *htable, int32_t new_bucket_count )
+HTable_set_bucket_count( Prefix )( HTable_type( Prefix ) *current, int32_t new_bucket_count )
 {
-   PRECONDITION( "htable not null", htable != NULL );
-   PRECONDITION( "htable type ok", ( (*htable).type == HTABLE_TYPE ) && ( (*htable).key_type = Key_Code ) && ( (*htable).item_type = Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == HTABLE_TYPE ) && ( (*current)._key_type = Key_Code ) && ( (*current)._item_type = Type_Code ) );
    PRECONDITION( "bucket count ok", new_bucket_count > 0 );
-   LOCK( (*htable).mutex );
-   INVARIANT( htable );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // change size of bucket array
-   (*htable).bucket
-      = ( node_t ** ) realloc( (*htable).bucket, new_bucket_count*sizeof( node_t * ) );
-   (*htable).bucket_count = new_bucket_count;
+   (*current).bucket
+      = ( node_t ** ) realloc( (*current).bucket, new_bucket_count * sizeof( node_t * ) );
+   CHECK( "(*current).bucket allocated correctly", (*current).bucket != NULL );
+
+   (*current).bucket_count = new_bucket_count;
 
 
    // zero out bucket array
-   memset( (*htable).bucket, 0, (*htable).bucket_count*sizeof( node_t * ) );
+   memset( (*current).bucket, 0, (*current).bucket_count * sizeof( node_t * ) );
 
    // fill the buckets
    node_t *node = NULL;
@@ -2178,20 +2690,20 @@ HTable_set_bucket_count( Prefix )( HTable_type( Prefix ) *htable, int32_t new_bu
    int32_t hash_code = 0;
    int32_t i = 0;
 
-   for (   node = (*htable).first_in_sequence;
+   for (   node = (*current).first_in_sequence;
            node != NULL;
            node = (*node).next_in_sequence
        )
    {
-      hash_code = HASH_FUNCTION( (*node).key );
-      i = hash_code % (*htable).bucket_count;
-      (*node).next = (*htable).bucket[i];
-      (*htable).bucket[i] = node;
+      hash_code = KEY_HASH_FUNCTION( (*node).key );
+      i = hash_code % (*current).bucket_count;
+      (*node).next = (*current).bucket[i];
+      (*current).bucket[i] = node;
    }
 
-   POSTCONDITION( "bucket count set", (*htable).bucket_count == new_bucket_count );
-   INVARIANT( htable );
-   UNLOCK( (*htable).mutex );
+   POSTCONDITION( "bucket count set", (*current).bucket_count == new_bucket_count );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }

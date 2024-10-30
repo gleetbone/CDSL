@@ -1,7 +1,7 @@
 /**
  @file HTable_test_cursor_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HTable_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HTable_make.
+ Unit tests for HTable_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_HTable.h"
+#include "ss_HTable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -46,9 +47,9 @@ void test_cursor_dispose_1( void )
    
    CU_ASSERT( cursor != NULL );
    
-   ii_htable_cursor_dispose( cursor );
+   ii_htable_cursor_dispose( &cursor );
    
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -75,11 +76,42 @@ void test_cursor_dispose_2( void )
    CU_ASSERT( cursor2 != NULL );
    CU_ASSERT( cursor2 != NULL );
 
-   ii_htable_cursor_dispose( cursor3 );
-   ii_htable_cursor_dispose( cursor2 );
-   ii_htable_cursor_dispose( cursor1 );
+   ii_htable_cursor_dispose( &cursor3 );
+   ii_htable_cursor_dispose( &cursor2 );
+   ii_htable_cursor_dispose( &cursor1 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
+
+   return;
+}
+
+/**
+   test_cursor_dispose_3
+*/
+
+void test_cursor_dispose_3( void )
+{
+   ss_htable_t *htable = NULL;
+
+   htable = ss_htable_make();
+
+   ss_htable_cursor_t *cursor1 = NULL;
+   ss_htable_cursor_t *cursor2 = NULL;
+   ss_htable_cursor_t *cursor3 = NULL;
+
+   cursor1 = ss_htable_cursor_make( htable );
+   cursor2 = ss_htable_cursor_make( htable );
+   cursor3 = ss_htable_cursor_make( htable );
+
+   CU_ASSERT( cursor1 != NULL );
+   CU_ASSERT( cursor2 != NULL );
+   CU_ASSERT( cursor2 != NULL );
+
+   ss_htable_cursor_dispose( &cursor3 );
+   ss_htable_cursor_dispose( &cursor2 );
+   ss_htable_cursor_dispose( &cursor1 );
+
+   ss_htable_dispose( &htable );
 
    return;
 }
@@ -104,6 +136,9 @@ add_test_cursor_dispose( void )
 
    // test_cursor_dispose_2
    add_test_to_suite( p_suite, test_cursor_dispose_2, "test_cursor_dispose_2" );
+
+   // test_cursor_dispose_3
+   add_test_to_suite( p_suite, test_cursor_dispose_3, "test_cursor_dispose_3" );
 
    return CUE_SUCCESS;
    

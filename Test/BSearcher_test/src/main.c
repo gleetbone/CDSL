@@ -14,10 +14,22 @@ extern "C" {
 // test suite declarations
 
 int
+add_test_make( void );
+
+int
+add_test_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_is_equal( void );
+
+int
 add_test_search( void );
 
 int
-add_test_all( void );
+add_test_plain_search( void );
 
 
 int
@@ -56,8 +68,12 @@ int main()
 
    // add tests for path utilites
 
+   add_test_make();
+   add_test_clone();
+   add_test_copy();
+   add_test_is_equal();
    add_test_search();
-   add_test_all();
+   add_test_plain_search();
    
    // Run all tests using the CUnit Basic interface
 

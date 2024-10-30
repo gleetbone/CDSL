@@ -1,8 +1,8 @@
 /**
  @file ifr_test_multiline.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_make_from_cstring"
+ @version 2.0.0
+ @brief: "tests for ifr_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for ifr_t
 
 */
 
@@ -37,7 +37,7 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 void test_multiline_1( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
+   string_t *file_name = NULL;
    s_dlist_t *list = NULL;
    
    string_t *t1 = NULL;
@@ -78,9 +78,9 @@ void test_multiline_1( void )
    v1 = string_make_from_cstring( "--" );
    v2 = string_make_from_cstring( "end" );
    
-   filename = string_make_from_cstring( "src/input_files/f_multiline.txt" );
+   file_name = string_make_from_cstring( "src/input_files/f_multiline.txt" );
    
-   ifr = ifr_make( filename );
+   ifr = ifr_make( file_name );
 
    // first line
    ifr_forth( ifr );
@@ -188,23 +188,23 @@ void test_multiline_1( void )
 
    CU_ASSERT( ifr_eof( ifr ) == 1 );
 
-   ifr_dispose( ifr );
-   string_dispose_with_contents( filename );
-   string_dispose_with_contents( t1 );
-   string_dispose_with_contents( t2 );
-   string_dispose_with_contents( t3 );
-   string_dispose_with_contents( t4 );
-   string_dispose_with_contents( t5 );
-   string_dispose_with_contents( s1 );
-   string_dispose_with_contents( s2 );
-   string_dispose_with_contents( s3 );
-   string_dispose_with_contents( s4 );
-   string_dispose_with_contents( s5 );
-   string_dispose_with_contents( s6 );
-   string_dispose_with_contents( u1 );
-   string_dispose_with_contents( u2 );
-   string_dispose_with_contents( v1 );
-   string_dispose_with_contents( v2 );
+   ifr_deep_dispose( &ifr );
+   string_deep_dispose( &file_name );
+   string_deep_dispose( &t1 );
+   string_deep_dispose( &t2 );
+   string_deep_dispose( &t3 );
+   string_deep_dispose( &t4 );
+   string_deep_dispose( &t5 );
+   string_deep_dispose( &s1 );
+   string_deep_dispose( &s2 );
+   string_deep_dispose( &s3 );
+   string_deep_dispose( &s4 );
+   string_deep_dispose( &s5 );
+   string_deep_dispose( &s6 );
+   string_deep_dispose( &u1 );
+   string_deep_dispose( &u2 );
+   string_deep_dispose( &v1 );
+   string_deep_dispose( &v2 );
    
    return;
 }

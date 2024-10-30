@@ -1,7 +1,7 @@
 /**
  @file SList_test_remove_at_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_item_at.
+ Unit tests for SList_t.
 
 */
 
@@ -48,7 +48,7 @@ void test_remove_at_and_dispose_1( void )
 
    CU_ASSERT( int_slist_count( list ) == 0 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_remove_at_and_dispose_2( void )
 
    CU_ASSERT( int_slist_item_at( list ) == 13 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -104,7 +104,7 @@ void test_remove_at_and_dispose_3( void )
 
    CU_ASSERT( int_slist_item_at( list ) == 24 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -140,7 +140,7 @@ void test_remove_at_and_dispose_4( void )
 
    CU_ASSERT( int_slist_item_at( list ) == 7 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }

@@ -1,0 +1,6 @@
+python /home/leegr3/metrixplusplus/metrix++.py collect --std.code.complexity.cyclomatic $1
+
+python /home/leegr3/metrixplusplus/metrix++.py view -- $1 > x.txt
+
+python /home/leegr3/metrixplusplus/metrix++.py limit --max-limit=std.code.complexity:cyclomatic:10
+

@@ -1,7 +1,7 @@
 /**
  @file PQueue_test_remove.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for PQueue_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -52,7 +52,7 @@ void test_remove_1( void )
 
    CU_ASSERT( int_pqueue_count( pqueue ) == 0 );
 
-   int_pqueue_dispose( pqueue );
+   int_pqueue_dispose( &pqueue );
 
    return;
 }
@@ -81,7 +81,7 @@ void test_remove_2( void )
 
    CU_ASSERT( int_pqueue_count( pqueue ) == 0 );
 
-   int_pqueue_dispose( pqueue );
+   int_pqueue_dispose( &pqueue );
 
    return;
 }

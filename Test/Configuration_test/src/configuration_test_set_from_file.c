@@ -1,8 +1,8 @@
 /**
- @file soa_configuration_test_set_from_file.c
+ @file configuration_test_set_from_file.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for messaging_make"
+ @version 2.0.0
+ @brief: "tests for configuration_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_make_dict.
+ Unit tests for configuration_t
 
 */
 
@@ -36,40 +36,40 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_set_from_file_1( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
    
    string_t *filename = string_make_from_cstring( "src/config.txt" );
-   soa_configuration_set_from_file( configuration, filename );
+   configuration_set_from_file( configuration, filename );
 
    string_t *key = string_make_from_cstring( "fruit" );
    string_t *key1 = string_make_from_cstring( "meat" );
    string_t *key2 = string_make_from_cstring( "bread" );
    string_t *s = NULL;
 
-   int32_t flag = soa_configuration_has( configuration, key );
+   int32_t flag = configuration_has( configuration, key );
    CU_ASSERT( flag == 1 );
 
-   s = soa_configuration_item( configuration, key );
+   s = configuration_item( configuration, key );
    CU_ASSERT( string_is_equal_cstring( s, "apple" ) );
 
-   flag = soa_configuration_has( configuration, key1 );
+   flag = configuration_has( configuration, key1 );
    CU_ASSERT( flag == 1 );
 
-   s = soa_configuration_item( configuration, key1 );
+   s = configuration_item( configuration, key1 );
    CU_ASSERT( string_is_equal_cstring( s, "fish" ) );
 
-   flag = soa_configuration_has( configuration, key2 );
+   flag = configuration_has( configuration, key2 );
    CU_ASSERT( flag == 0 );
 
-   s = soa_configuration_item( configuration, key2 );
+   s = configuration_item( configuration, key2 );
    CU_ASSERT( s == NULL );
 
-   string_dispose_with_contents( filename );
-   string_dispose_with_contents( key );
-   string_dispose_with_contents( key1 );
-   string_dispose_with_contents( key2 );
+   string_deep_dispose( &filename );
+   string_deep_dispose( &key );
+   string_deep_dispose( &key1 );
+   string_deep_dispose( &key2 );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }
@@ -80,29 +80,29 @@ void test_set_from_file_1( void )
 
 void test_set_from_file_2( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
    
-   soa_configuration_set_from_file_cstring( configuration, "src/config.txt" );
+   configuration_set_from_file_cstring( configuration, "src/config.txt" );
 
-   int32_t flag = soa_configuration_has_cstring( configuration, "fruit" );
+   int32_t flag = configuration_has_cstring( configuration, "fruit" );
    CU_ASSERT( flag == 1 );
 
-   string_t *s = soa_configuration_item_cstring( configuration, "fruit" );
+   string_t *s = configuration_item_cstring( configuration, "fruit" );
    CU_ASSERT( string_is_equal_cstring( s, "apple" ) );
 
-   flag = soa_configuration_has_cstring( configuration, "meat" );
+   flag = configuration_has_cstring( configuration, "meat" );
    CU_ASSERT( flag == 1 );
 
-   s = soa_configuration_item_cstring( configuration, "meat" );
+   s = configuration_item_cstring( configuration, "meat" );
    CU_ASSERT( string_is_equal_cstring( s, "fish" ) );
 
-   flag = soa_configuration_has_cstring( configuration, "bread" );
+   flag = configuration_has_cstring( configuration, "bread" );
    CU_ASSERT( flag == 0 );
 
-   s = soa_configuration_item_cstring( configuration, "bread" );
+   s = configuration_item_cstring( configuration, "bread" );
    CU_ASSERT( s == NULL );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }

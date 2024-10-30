@@ -1,17 +1,17 @@
 /**
  @file Sequence.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Sequences (resizable arrays)"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,28 +28,30 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque Sequence_t type.
 
 */
 
-#include "Sequence.h"
+#include "protocol.h"
 
-#ifdef PROTOCOLS_ENABLED   
+#ifdef PROTOCOLS_ENABLED
 #include "Protocol_Base.h"
 #include "Protocol_Base.ph"
-#include "P_Clonable.ph"
+#include "P_Basic.ph"
 #include "P_Indexable.ph"
 #endif // PROTOCOLS_ENABLED   
+
+#include "Sequence.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <string.h>
-#include <stdlib.h>   
+#include <stdlib.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -60,8 +62,6 @@ extern "C" {
    defines
 */
 
-#define SEQUENCE_TYPE 0xA5000400
-
 /**
    Sequence structure
    contiguous array of Type
@@ -69,12 +69,12 @@ extern "C" {
 
 struct Sequence_struct( Prefix )
 {
-   
+
    PROTOCOLS_DEFINITION;
 
-   int32_t type;
-   int32_t item_type;
-   
+   int32_t _type;
+   int32_t _item_type;
+
    int32_t count;
    int32_t capacity;
    Type *buffer;
@@ -91,31 +91,31 @@ struct Sequence_struct( Prefix )
 
 static
 int32_t
-nonnegative_count( Sequence_type( Prefix ) *p )
+nonnegative_count( Sequence_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   result = ( (*p).count >= 0 );
+   result = ( (*current).count >= 0 );
 
    return result;
 }
 
 static
 int32_t
-valid_count_capacity( Sequence_type( Prefix ) *p )
+valid_count_capacity( Sequence_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   result = ( (*p).capacity >= (*p).count );
+   result = ( (*current).capacity >= (*current).count );
 
    return result;
 }
 
 static
-void invariant( Sequence_type( Prefix ) *p )
+void invariant( Sequence_type( Prefix ) *current )
 {
-   assert(( (void) "nonnegative count", nonnegative_count( p ) ));
-   assert(( (void) "valid count and capacity", valid_count_capacity( p ) ));
+   assert( ( ( void ) "nonnegative count", nonnegative_count( current ) ) );
+   assert( ( ( void ) "valid count and capacity", valid_count_capacity( current ) ) );
    return;
 }
 
@@ -132,16 +132,20 @@ void invariant( Sequence_type( Prefix ) *p )
 */
 
 /**
-   clonable protocol function array
+   basic protocol function array
 */
 
 static
 void *
-p_clonable_table[P_CLONABLE_FUNCTION_COUNT]
+p_basic_table[P_BASIC_FUNCTION_COUNT]
 =
 {
    Sequence_dispose( Prefix ),
-   Sequence_dispose_with_contents( Prefix ),
+   Sequence_deep_dispose( Prefix ),
+   Sequence_is_equal( Prefix ),
+   Sequence_is_deep_equal( Prefix ),
+   Sequence_copy( Prefix ),
+   Sequence_deep_copy( Prefix ),
    Sequence_clone( Prefix ),
    Sequence_deep_clone( Prefix )
 };
@@ -151,8 +155,6 @@ void *
 p_indexable_table[P_INDEXABLE_FUNCTION_COUNT]
 =
 {
-   Sequence_dispose( Prefix ),
-   Sequence_dispose_with_contents( Prefix ),
    Sequence_count( Prefix ),
    Sequence_item( Prefix ),
    Sequence_replace( Prefix ),
@@ -161,6 +163,12 @@ p_indexable_table[P_INDEXABLE_FUNCTION_COUNT]
 
 /**
    protocol get_function
+
+   returns function pointer for requested protocol function
+
+   @param protocol_id which protocol
+   @param function_id which function
+   @return function pointer if found, NULL otherwise
 */
 
 static
@@ -177,17 +185,17 @@ get_function
 
    switch ( protocol_id )
    {
-   
-      case P_CLONABLE:
+
+      case P_BASIC_TYPE:
       {
-         if ( ( function_id >= 0 ) && ( function_id <= P_CLONABLE_FUNCTION_MAX ) )
+         if ( ( function_id >= 0 ) && ( function_id <= P_BASIC_FUNCTION_MAX ) )
          {
-            result = p_clonable_table[ function_id ];
+            result = p_basic_table[ function_id ];
          }
          break;
       }
-   
-      case P_INDEXABLE:
+
+      case P_INDEXABLE_TYPE:
       {
          if ( ( function_id >= 0 ) && ( function_id <= P_INDEXABLE_FUNCTION_MAX ) )
          {
@@ -195,14 +203,19 @@ get_function
          }
          break;
       }
-      
+
    }
-   
+
    return result;
 }
 
 /**
    protocol supports_protocol
+
+   returns 1 if this class supports the specified protocol
+
+   @param protocol_id which protocol
+   @return 1 if protocol supported, 0 otherwise
 */
 
 static
@@ -218,18 +231,18 @@ supports_protocol
 
    switch ( protocol_id )
    {
-      case P_CLONABLE:
+      case P_BASIC_TYPE:
       {
          result = 1;
          break;
       }
-      
-      case P_INDEXABLE:
+
+      case P_INDEXABLE_TYPE:
       {
          result = 1;
          break;
       }
-   
+
    }
 
    return result;
@@ -246,31 +259,129 @@ Sequence_type( Prefix ) *
 Sequence_make( Prefix )( void )
 {
    // allocate sequence struct
-   Sequence_type( Prefix ) * sequence
+   Sequence_type( Prefix ) *result
       = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // allocate buffer
-   (*sequence).buffer = ( Type * ) calloc( 1, sizeof( Type ) );
+   (*result).buffer = ( Type * ) calloc( 1, sizeof( Type ) );
+   CHECK( "(*result).buffer allocated correctly", (*result).buffer != NULL );
 
    // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( sequence );
+   PROTOCOLS_INIT( result );
 
    // set type codes
-   (*sequence).type = SEQUENCE_TYPE;
-   (*sequence).item_type = Type_Code;
-   
+   (*result)._type = SEQUENCE_TYPE;
+   (*result)._item_type = Type_Code;
+
    // set count and capacity
-   (*sequence).count = 0;
-   (*sequence).capacity = 1;
+   (*result).count = 0;
+   (*result).capacity = 1;
 
-   MULTITHREAD_MUTEX_INIT( (*sequence).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( sequence );
-   POSTCONDITION( "count set", (*sequence).count == 0 );
-   POSTCONDITION( "capacity set", (*sequence).capacity == 1 );
-   POSTCONDITION( "buffer set", (*sequence).buffer != NULL );
+   INVARIANT( result );
+   POSTCONDITION( "count set", (*result).count == 0 );
+   POSTCONDITION( "capacity set", (*result).capacity == 1 );
+   POSTCONDITION( "buffer set", (*result).buffer != NULL );
 
-   return sequence;
+   return result;
+}
+
+/**
+   Sequence_clone
+*/
+
+Sequence_type( Prefix ) *
+Sequence_clone( Prefix )( Sequence_type( Prefix ) *current )
+{
+   PRECONDITION( "result ok", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+
+   int32_t i = 0;
+
+   // allocate result struct
+   Sequence_type( Prefix ) * result
+      = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
+
+   // allocate buffer
+   (*result).buffer = ( Type * ) calloc( (*current).capacity, sizeof( Type ) );
+   CHECK( "(*result).buffer allocated correctly", (*result).buffer != NULL );
+
+   // set buffer
+   for( i = 0; i < (*current).count; i++ )
+   {
+      (*result).buffer[i] = (*current).buffer[i];
+   }
+
+   // initialize protocol functions if protocols enabled
+   PROTOCOLS_INIT( result );
+
+   // set type codes
+   (*result)._type = SEQUENCE_TYPE;
+   (*result)._item_type = Type_Code;
+
+   // set count and capacity
+   (*result).count = (*current).count;
+   (*result).capacity = (*current).capacity;
+
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
+
+   INVARIANT( result );
+   POSTCONDITION( "count set", (*result).count == (*current).count );
+   POSTCONDITION( "capacity set", (*result).capacity == (*current).capacity );
+   POSTCONDITION( "buffer set", (*result).buffer != NULL );
+
+   return result;
+}
+
+/**
+   Sequence_deep_clone
+*/
+
+Sequence_type( Prefix ) *
+Sequence_deep_clone( Prefix )( Sequence_type( Prefix ) *current )
+{
+   PRECONDITION( "result ok", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+
+   int32_t i = 0;
+
+   // allocate result struct
+   Sequence_type( Prefix ) *result
+      = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
+
+   // allocate buffer
+   (*result).buffer = ( Type * ) calloc( (*current).capacity, sizeof( Type ) );
+   CHECK( "(*result).buffer allocated correctly", (*result).buffer != NULL );
+
+   // set buffer
+   for( i = 0; i < (*current).count; i++ )
+   {
+      (*result).buffer[i] = VALUE_DEEP_CLONE_FUNCTION( (*current).buffer[i] );
+   }
+
+   // initialize protocol functions if protocols enabled
+   PROTOCOLS_INIT( result );
+
+   // set type codes
+   (*result)._type = SEQUENCE_TYPE;
+   (*result)._item_type = Type_Code;
+
+   // set count and capacity
+   (*result).count = (*current).count;
+   (*result).capacity = (*current).capacity;
+
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
+
+   INVARIANT( result );
+   POSTCONDITION( "count set", (*result).count == (*current).count );
+   POSTCONDITION( "capacity set", (*result).capacity == (*current).capacity );
+   POSTCONDITION( "buffer set", (*result).buffer != NULL );
+
+   return result;
 }
 
 /**
@@ -282,32 +393,34 @@ Sequence_make_n( Prefix )( int32_t n )
 {
    PRECONDITION( "n ok", n > 0 );
 
-   // allocate sequence struct
-   Sequence_type( Prefix ) * sequence
+   // allocate result struct
+   Sequence_type( Prefix ) *result
       = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // allocate buffer
-   (*sequence).buffer = ( Type * ) calloc( n, sizeof( Type ) );
+   (*result).buffer = ( Type * ) calloc( n, sizeof( Type ) );
+   CHECK( "(*result).buffer allocated correctly", (*result).buffer != NULL );
 
    // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( sequence );
+   PROTOCOLS_INIT( result );
 
    // set type codes
-   (*sequence).type = SEQUENCE_TYPE;
-   (*sequence).item_type = Type_Code;
-   
+   (*result)._type = SEQUENCE_TYPE;
+   (*result)._item_type = Type_Code;
+
    // set count and capacity
-   (*sequence).count = 0;
-   (*sequence).capacity = n;
+   (*result).count = 0;
+   (*result).capacity = n;
 
-   MULTITHREAD_MUTEX_INIT( (*sequence).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( sequence );
-   POSTCONDITION( "count set", (*sequence).count == 0 );
-   POSTCONDITION( "capacity set", (*sequence).capacity == n );
-   POSTCONDITION( "buffer set", (*sequence).buffer != NULL );
+   INVARIANT( result );
+   POSTCONDITION( "count set", (*result).count == 0 );
+   POSTCONDITION( "capacity set", (*result).capacity == n );
+   POSTCONDITION( "buffer set", (*result).buffer != NULL );
 
-   return sequence;
+   return result;
 }
 
 /**
@@ -323,38 +436,229 @@ Sequence_make_from_array( Prefix )( Type *array, int32_t count, int32_t capacity
 
    int32_t i = 0;
 
-   // allocate sequence struct
-   Sequence_type( Prefix ) * sequence
+   // allocate result struct
+   Sequence_type( Prefix ) *result
       = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // allocate buffer
-   (*sequence).buffer = ( Type * ) calloc( capacity, sizeof( Type ) );
+   (*result).buffer = ( Type * ) calloc( capacity, sizeof( Type ) );
+   CHECK( "(*result).buffer allocated correctly", (*result).buffer != NULL );
 
    // set buffer
-   for( i=0; i<count; i++ )
+   for( i = 0; i < count; i++ )
    {
-      (*sequence).buffer[i] = array[i];
+      (*result).buffer[i] = array[i];
    }
 
    // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( sequence );
+   PROTOCOLS_INIT( result );
 
    // set type codes
-   (*sequence).type = SEQUENCE_TYPE;
-   (*sequence).item_type = Type_Code;
-   
+   (*result)._type = SEQUENCE_TYPE;
+   (*result)._item_type = Type_Code;
+
    // set count and capacity
-   (*sequence).count = count;
-   (*sequence).capacity = capacity;
+   (*result).count = count;
+   (*result).capacity = capacity;
 
-   MULTITHREAD_MUTEX_INIT( (*sequence).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( sequence );
-   POSTCONDITION( "count set", (*sequence).count == count );
-   POSTCONDITION( "capacity set", (*sequence).capacity == capacity );
-   POSTCONDITION( "buffer set", (*sequence).buffer != NULL );
+   INVARIANT( result );
+   POSTCONDITION( "count set", (*result).count == count );
+   POSTCONDITION( "capacity set", (*result).capacity == capacity );
+   POSTCONDITION( "buffer set", (*result).buffer != NULL );
 
-   return sequence;
+   return result;
+}
+
+/**
+   Sequence_is_equal
+*/
+
+int32_t
+Sequence_is_equal( Prefix )( Sequence_type( Prefix ) *current, Sequence_type( Prefix ) *other )
+{
+   PRECONDITION( "current ok", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "sequence ok", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == SEQUENCE_TYPE ) && ( (*other)._item_type == Type_Code ) );
+
+   INVARIANT( current );
+
+   int32_t result = 1;
+   int32_t i = 0;
+
+   // check count
+   if ( (*current).count != (*other).count )
+   {
+      result = 0;
+   }
+
+   LOCK( (*other).mutex );
+
+   for ( i = 0; i < (*other).count; i++ )
+   {
+      if ( result == 1 )
+      {
+         if ( (*current).buffer[i] != (*other).buffer[i] )
+         {
+            result = 0;
+         }
+      }
+   }
+
+   // unlock other
+   UNLOCK( (*other).mutex );
+
+   INVARIANT( current );
+
+   return result;
+}
+
+/**
+   Sequence_is_deep_equal
+*/
+
+int32_t
+Sequence_is_deep_equal( Prefix )( Sequence_type( Prefix ) *current, Sequence_type( Prefix ) *other )
+{
+   PRECONDITION( "current ok", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "sequence ok", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == SEQUENCE_TYPE ) && ( (*other)._item_type == Type_Code ) );
+
+   int32_t result = 1;
+   int32_t i = 0;
+
+   INVARIANT( current );
+
+   // check count
+   if ( (*current).count != (*other).count )
+   {
+      result = 0;
+   }
+
+   LOCK( (*other).mutex );
+
+   for ( i = 0; i < (*other).count; i++ )
+   {
+      if ( result == 1 )
+      {
+         if ( VALUE_DEEP_EQUAL_FUNCTION( (*current).buffer[i], (*other).buffer[i] ) == 0 )
+         {
+            result = 0;
+         }
+      }
+   }
+
+   // unlock other
+   UNLOCK( (*other).mutex );
+
+   INVARIANT( current );
+
+   return result;
+}
+
+/**
+   Sequence_copy
+*/
+
+void
+Sequence_copy( Prefix )( Sequence_type( Prefix ) *current, Sequence_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type = Type_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == SEQUENCE_TYPE ) && ( (*other)._item_type = Type_Code ) );
+
+   INVARIANT( current );
+
+   int32_t i = 0;
+
+   // empty out current
+
+   // remove all nodes
+   for ( i = 0; i < (*current).count; i++ )
+   {
+      VALUE_DEEP_DISPOSE_FUNCTION( (*current).buffer[i] );
+   }
+
+   // set array
+   (*current).buffer = ( Type * ) realloc( (*current).buffer, (*other).capacity * sizeof( Type ) );
+   CHECK( "(*current).buffer allocated correctly", (*current).buffer != NULL );
+
+   // set capacity
+   (*current).capacity = (*other).capacity;
+
+   // set count
+   (*current).count = (*other).count;
+
+   // lock other
+   LOCK( (*other).mutex );
+
+   for ( i = 0; i < (*other).count; i++ )
+   {
+      (*current).buffer[i] = (*other).buffer[i];
+   }
+
+   // unlock other
+   UNLOCK( (*other).mutex );
+
+   INVARIANT( current );
+
+   return;
+}
+
+/**
+   Sequence_deep_copy
+*/
+
+void
+Sequence_deep_copy( Prefix )( Sequence_type( Prefix ) *current, Sequence_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type = Type_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == SEQUENCE_TYPE ) && ( (*other)._item_type = Type_Code ) );
+
+   INVARIANT( current );
+
+   int32_t i = 0;
+
+   // empty out current
+
+   // remove all nodes
+   for ( i = 0; i < (*current).count; i++ )
+   {
+      VALUE_DEEP_DISPOSE_FUNCTION( (*current).buffer[i] );
+   }
+
+   // set array
+   (*current).buffer = ( Type * ) realloc( (*current).buffer, (*other).capacity * sizeof( Type ) );
+   CHECK( "(*current).buffer allocated correctly", (*current).buffer != NULL );
+
+   // set capacity
+   (*current).capacity = (*other).capacity;
+
+   // set count
+   (*current).count = (*other).count;
+
+
+   // lock other
+   LOCK( (*other).mutex );
+
+   for ( i = 0; i < (*other).count; i++ )
+   {
+      (*current).buffer[i] = VALUE_DEEP_CLONE_FUNCTION( (*other).buffer[i] );
+   }
+
+   // unlock other
+   UNLOCK( (*other).mutex );
+
+   INVARIANT( current );
+
+   return;
 }
 
 /**
@@ -362,50 +666,58 @@ Sequence_make_from_array( Prefix )( Type *array, int32_t count, int32_t capacity
 */
 
 void
-Sequence_dispose( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_dispose( Prefix )( Sequence_type( Prefix ) **current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "type ok", ( (**current)._type == SEQUENCE_TYPE ) && ( (**current)._item_type == Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
    // delete buffer
-   free( (*sequence).buffer );
+   free( (**current).buffer );
 
-   MULTITHREAD_MUTEX_DESTROY( (*sequence).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
-   // delete sequence struct
-   free( sequence );
+   // delete current struct
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
 
 /**
-   Sequence_dispose_with_contents
+   Sequence_deep_dispose
 */
 
 void
-Sequence_dispose_with_contents( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_deep_dispose( Prefix )( Sequence_type( Prefix ) **current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "type ok", ( (**current)._type == SEQUENCE_TYPE ) && ( (**current)._item_type == Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
    // delete buffer items
    int32_t i = 0;
-   for( i = 0; i < (*sequence).count; i++ )
+   for( i = 0; i < (**current).count; i++ )
    {
-      DISPOSE_FUNCTION( (*sequence).buffer[i] );
+      VALUE_DEEP_DISPOSE_FUNCTION( (**current).buffer[i] );
    }
 
    // delete buffer
-   free( (*sequence).buffer );
+   free( (**current).buffer );
 
-   MULTITHREAD_MUTEX_DESTROY( (*sequence).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
-   // delete sequence struct
-   free( sequence );
+   // delete current struct
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
@@ -415,18 +727,18 @@ Sequence_dispose_with_contents( Prefix )( Sequence_type( Prefix ) *sequence )
 */
 
 Type
-Sequence_item( Prefix )( Sequence_type( Prefix ) *sequence, int32_t index )
+Sequence_item( Prefix )( Sequence_type( Prefix ) *current, int32_t index )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
-   PRECONDITION( "index ok", ( index >= 0) && ( index < (*sequence).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*current).count ) );
 
-   Type value = (*sequence).buffer[index];
+   Type value = (*current).buffer[index];
 
-   INVARIANT( sequence );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return value;
 }
@@ -436,26 +748,27 @@ Sequence_item( Prefix )( Sequence_type( Prefix ) *sequence, int32_t index )
 */
 
 Type *
-Sequence_as_array( Prefix )( Sequence_type( Prefix ) *sequence, int32_t *count )
+Sequence_as_array( Prefix )( Sequence_type( Prefix ) *current, int32_t *count )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type *result = ( Type * ) calloc( (*sequence).count + 1, sizeof( Type ) ); 
-   
+   Type *result = ( Type * ) calloc( (*current).count + 1, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
+
    int32_t i = 0;
-   
-   for( i=0; i<(*sequence).count; i++ )
+
+   for( i = 0; i < (*current).count; i++ )
    {
-      result[i] = (*sequence).buffer[i];
+      result[i] = (*current).buffer[i];
    }
 
-   (*count) = (*sequence).count;
-   
-   INVARIANT( sequence );
-   UNLOCK( (*sequence).mutex );
+   (*count) = (*current).count;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -465,17 +778,17 @@ Sequence_as_array( Prefix )( Sequence_type( Prefix ) *sequence, int32_t *count )
 */
 
 int32_t
-Sequence_count( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_count( Prefix )( Sequence_type( Prefix ) *current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = (*sequence).count;
+   int32_t result = (*current).count;
 
-   INVARIANT( sequence );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -485,17 +798,17 @@ Sequence_count( Prefix )( Sequence_type( Prefix ) *sequence )
 */
 
 int32_t
-Sequence_capacity( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_capacity( Prefix )( Sequence_type( Prefix ) *current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = (*sequence).capacity;
+   int32_t result = (*current).capacity;
 
-   INVARIANT( sequence );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -505,17 +818,17 @@ Sequence_capacity( Prefix )( Sequence_type( Prefix ) *sequence )
 */
 
 int32_t
-Sequence_is_empty( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_is_empty( Prefix )( Sequence_type( Prefix ) *current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = ( (*sequence).count == 0 );
+   int32_t result = ( (*current).count == 0 );
 
-   INVARIANT( sequence );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -525,19 +838,19 @@ Sequence_is_empty( Prefix )( Sequence_type( Prefix ) *sequence )
 */
 
 void
-Sequence_put( Prefix )( Sequence_type( Prefix ) *sequence, Type value, int32_t index )
+Sequence_put( Prefix )( Sequence_type( Prefix ) *current, Type value, int32_t index )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
-   PRECONDITION( "index ok", ( index >= 0) && ( index < (*sequence).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*current).count ) );
 
-   (*sequence).buffer[index] = value;
+   (*current).buffer[index] = value;
 
-   INVARIANT( sequence );
-   POSTCONDITION( "item set", (*sequence).buffer[index] == value );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "item set", (*current).buffer[index] == value );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -547,19 +860,19 @@ Sequence_put( Prefix )( Sequence_type( Prefix ) *sequence, Type value, int32_t i
 */
 
 void
-Sequence_replace( Prefix )( Sequence_type( Prefix ) *sequence, Type value, int32_t index )
+Sequence_replace( Prefix )( Sequence_type( Prefix ) *current, Type value, int32_t index )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
-   PRECONDITION( "index ok", ( index >= 0) && ( index < (*sequence).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*current).count ) );
 
-   (*sequence).buffer[index] = value;
+   (*current).buffer[index] = value;
 
-   INVARIANT( sequence );
-   POSTCONDITION( "item set", (*sequence).buffer[index] == value );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "item set", (*current).buffer[index] == value );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -569,20 +882,20 @@ Sequence_replace( Prefix )( Sequence_type( Prefix ) *sequence, Type value, int32
 */
 
 void
-Sequence_replace_and_dispose( Prefix )( Sequence_type( Prefix ) *sequence, Type value, int32_t index )
+Sequence_replace_and_dispose( Prefix )( Sequence_type( Prefix ) *current, Type value, int32_t index )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
-   PRECONDITION( "index ok", ( index >= 0) && ( index < (*sequence).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "index ok", ( index >= 0 ) && ( index < (*current).count ) );
 
-   DISPOSE_FUNCTION( (*sequence).buffer[index] );
-   (*sequence).buffer[index] = value;
+   VALUE_DEEP_DISPOSE_FUNCTION( (*current).buffer[index] );
+   (*current).buffer[index] = value;
 
-   INVARIANT( sequence );
-   POSTCONDITION( "item set", (*sequence).buffer[index] == value );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "item set", (*current).buffer[index] == value );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -592,18 +905,18 @@ Sequence_replace_and_dispose( Prefix )( Sequence_type( Prefix ) *sequence, Type 
 */
 
 void
-Sequence_wipe_out( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_wipe_out( Prefix )( Sequence_type( Prefix ) *current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*sequence).count = 0;
+   (*current).count = 0;
 
-   INVARIANT( sequence );
-   POSTCONDITION( "sequence is empty", (*sequence).count == 0 );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "current is empty", (*current).count == 0 );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -613,24 +926,24 @@ Sequence_wipe_out( Prefix )( Sequence_type( Prefix ) *sequence )
 */
 
 void
-Sequence_wipe_out_and_dispose( Prefix )( Sequence_type( Prefix ) *sequence )
+Sequence_wipe_out_and_dispose( Prefix )( Sequence_type( Prefix ) *current )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
-   for( i=0; i < (*sequence).count; i++ )
+   for( i = 0; i < (*current).count; i++ )
    {
-      DISPOSE_FUNCTION( (*sequence).buffer[i] );
+      VALUE_DEEP_DISPOSE_FUNCTION( (*current).buffer[i] );
    }
 
-   (*sequence).count = 0;
+   (*current).count = 0;
 
-   INVARIANT( sequence );
-   POSTCONDITION( "sequence is empty", (*sequence).count == 0 );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "current is empty", (*current).count == 0 );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -640,19 +953,19 @@ Sequence_wipe_out_and_dispose( Prefix )( Sequence_type( Prefix ) *sequence )
 */
 
 void
-Sequence_set_count( Prefix )( Sequence_type( Prefix ) *sequence, int32_t count )
+Sequence_set_count( Prefix )( Sequence_type( Prefix ) *current, int32_t count )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
-   PRECONDITION( "count ok", ( count >= 0) && ( count <= (*sequence).capacity ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "count ok", ( count >= 0 ) && ( count <= (*current).capacity ) );
 
-   (*sequence).count = count;
+   (*current).count = count;
 
-   INVARIANT( sequence );
-   POSTCONDITION( "count set", (*sequence).count == count );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "count set", (*current).count == count );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -662,15 +975,15 @@ Sequence_set_count( Prefix )( Sequence_type( Prefix ) *sequence, int32_t count )
 */
 
 void
-Sequence_set_capacity( Prefix )( Sequence_type( Prefix ) *sequence, int32_t capacity )
+Sequence_set_capacity( Prefix )( Sequence_type( Prefix ) *current, int32_t capacity )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
-   PRECONDITION( "capacity ok", ( capacity >= 0) && ( capacity >= (*sequence).count ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+   PRECONDITION( "capacity ok", ( capacity >= 0 ) && ( capacity >= (*current).count ) );
 
-   int32_t old_capacity = (*sequence).capacity;
+   int32_t old_capacity = (*current).capacity;
 
    int32_t real_capacity = capacity;
    if ( real_capacity == 0 )
@@ -678,25 +991,27 @@ Sequence_set_capacity( Prefix )( Sequence_type( Prefix ) *sequence, int32_t capa
       real_capacity = 1;
    }
 
-   (*sequence).buffer
-      = ( Type * ) realloc( (*sequence).buffer, real_capacity*sizeof( Type ) );
-   (*sequence).capacity = real_capacity;
+   (*current).buffer
+      = ( Type * ) realloc( (*current).buffer, real_capacity * sizeof( Type ) );
+   CHECK( "(*current).buffer allocated correctly", (*current).buffer != NULL );
+
+   (*current).capacity = real_capacity;
 
    // zero out buffer if capacity increased
    if ( real_capacity > old_capacity )
    {
       memset
       (
-         &((*sequence).buffer[old_capacity]),
+         &( (*current).buffer[old_capacity] ),
          0,
-         ( real_capacity - old_capacity)*sizeof( Type )
+         ( real_capacity - old_capacity )*sizeof( Type )
       );
    }
 
-   INVARIANT( sequence );
-   POSTCONDITION( "buffer ok", (*sequence).buffer != NULL );
-   POSTCONDITION( "capacity set", (*sequence).capacity == real_capacity );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "buffer ok", (*current).buffer != NULL );
+   POSTCONDITION( "capacity set", (*current).capacity == real_capacity );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -706,137 +1021,47 @@ Sequence_set_capacity( Prefix )( Sequence_type( Prefix ) *sequence, int32_t capa
 */
 
 void
-Sequence_ensure_count( Prefix )( Sequence_type( Prefix ) *sequence, int32_t count )
+Sequence_ensure_count( Prefix )( Sequence_type( Prefix ) *current, int32_t count )
 {
-   PRECONDITION( "sequence not null", sequence != NULL );
-   PRECONDITION( "type ok", ( (*sequence).type == SEQUENCE_TYPE ) && ( (*sequence).item_type == Type_Code ) );
-   LOCK( (*sequence).mutex );
-   INVARIANT( sequence );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "type ok", ( (*current)._type == SEQUENCE_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
    PRECONDITION( "count ok", count >= 0 );
 
-   int32_t old_capacity = (*sequence).capacity;
+   int32_t old_capacity = (*current).capacity;
 
-   if ( (*sequence).count < count )
+   if ( (*current).count < count )
    {
-      if ( (*sequence).capacity < count )
+      if ( (*current).capacity < count )
       {
-         (*sequence).buffer
-            = ( Type * ) realloc( (*sequence).buffer, count*sizeof( Type ) );
-         (*sequence).capacity = count;
+         (*current).buffer
+            = ( Type * ) realloc( (*current).buffer, count * sizeof( Type ) );
+         CHECK( "(*current).buffer allocated correctly", (*current).buffer != NULL );
+
+         (*current).capacity = count;
 
          // zero out buffer if capacity increased
          if ( count > old_capacity )
          {
             memset
             (
-               &((*sequence).buffer[old_capacity]),
+               &( (*current).buffer[old_capacity] ),
                0,
-               ( count - old_capacity)*sizeof( Type )
+               ( count - old_capacity )*sizeof( Type )
             );
          }
       }
-      (*sequence).count = count;
+      (*current).count = count;
    }
 
-   INVARIANT( sequence );
-   POSTCONDITION( "count ok", (*sequence).count >= count );
-   UNLOCK( (*sequence).mutex );
+   INVARIANT( current );
+   POSTCONDITION( "count ok", (*current).count >= count );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
-
-/**
-   Sequence_clone
-*/
-
-Sequence_type( Prefix ) *
-Sequence_clone( Prefix )( Sequence_type( Prefix ) *other )
-{
-   PRECONDITION( "sequence ok", other != NULL );
-   PRECONDITION( "other type ok", ( (*other).type == SEQUENCE_TYPE ) && ( (*other).item_type == Type_Code ) );
-
-   int32_t i = 0;
-
-   // allocate sequence struct
-   Sequence_type( Prefix ) * sequence
-      = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
-
-   // allocate buffer
-   (*sequence).buffer = ( Type * ) calloc( (*other).capacity, sizeof( Type ) );
-
-   // set buffer
-   for( i=0; i<(*other).count; i++ )
-   {
-      (*sequence).buffer[i] = (*other).buffer[i];
-   }
-
-   // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( sequence );
-
-   // set type codes
-   (*sequence).type = SEQUENCE_TYPE;
-   (*sequence).item_type = Type_Code;
-   
-   // set count and capacity
-   (*sequence).count = (*other).count;
-   (*sequence).capacity = (*other).capacity;
-
-   MULTITHREAD_MUTEX_INIT( (*sequence).mutex );
-
-   INVARIANT( sequence );
-   POSTCONDITION( "count set", (*sequence).count == (*other).count );
-   POSTCONDITION( "capacity set", (*sequence).capacity == (*other).capacity );
-   POSTCONDITION( "buffer set", (*sequence).buffer != NULL );
-
-   return sequence;
-}
-
-/**
-   Sequence_deep_clone
-*/
-
-Sequence_type( Prefix ) *
-Sequence_deep_clone( Prefix )( Sequence_type( Prefix ) *other )
-{
-   PRECONDITION( "sequence ok", other != NULL );
-   PRECONDITION( "other type ok", ( (*other).type == SEQUENCE_TYPE ) && ( (*other).item_type == Type_Code ) );
-
-   int32_t i = 0;
-
-   // allocate sequence struct
-   Sequence_type( Prefix ) * sequence
-      = ( Sequence_type( Prefix ) * ) calloc( 1, sizeof( Sequence_type( Prefix ) ) );
-
-   // allocate buffer
-   (*sequence).buffer = ( Type * ) calloc( (*other).capacity, sizeof( Type ) );
-
-   // set buffer
-   for( i=0; i<(*other).count; i++ )
-   {
-      (*sequence).buffer[i] = COPY_FUNCTION( (*other).buffer[i] );
-   }
-
-   // initialize protocol functions if protocols enabled
-   PROTOCOLS_INIT( sequence );
-
-   // set type codes
-   (*sequence).type = SEQUENCE_TYPE;
-   (*sequence).item_type = Type_Code;
-   
-   // set count and capacity
-   (*sequence).count = (*other).count;
-   (*sequence).capacity = (*other).capacity;
-
-   MULTITHREAD_MUTEX_INIT( (*sequence).mutex );
-
-   INVARIANT( sequence );
-   POSTCONDITION( "count set", (*sequence).count == (*other).count );
-   POSTCONDITION( "capacity set", (*sequence).capacity == (*other).capacity );
-   POSTCONDITION( "buffer set", (*sequence).buffer != NULL );
-
-   return sequence;
-}
 
 /* End of file */
 

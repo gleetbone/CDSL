@@ -1,17 +1,17 @@
 /**
- @file rng_isaac.c
+ @file Rng_isaac.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "ISAAC (pseudo) Random Number Generator"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,14 +28,14 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque rng_isaac_t type.
 
  Code taken from Bob Jenkin's ISAAC random number generator. As of this writing,
  ISAAC can be found at http://burtleburtle.net/bob/rand/isaacafa.html.
- 
+
 */
 
 #include "Rng_Isaac.h"
@@ -46,7 +46,7 @@ extern "C" {
 
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>   
+#include <math.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -56,8 +56,6 @@ extern "C" {
 /**
    defines
 */
-
-#define RNG_ISAAC_TYPE 0xA5000B02
 
 #define RANDBUF_LENGTH 256
 #define RANDBUF_OFFSET_MASK ((RANDBUF_LENGTH-1)<<3)
@@ -73,8 +71,8 @@ extern "C" {
 
 struct rng_isaac_struct
 {
-   int32_t type;
-   
+   int32_t _type;
+
    // length, mask
    int32_t length;
    uint64_t offset_mask;
@@ -113,7 +111,15 @@ static void isaac64( rng_isaac_t *rng );
 
 #define GOLDEN_RATIO 0x9e3779b97f4a7c13LL
 
-static void randinit( rng_isaac_t *rng, uint64_t seed )
+/**
+   randinit
+
+   initialize the pseudo random number generator with a seed
+
+   @param current the rng
+   @param seed the seed for the rng
+*/
+static void randinit( rng_isaac_t *current, uint64_t seed )
 {
    int32_t i = 0;
 
@@ -126,54 +132,54 @@ static void randinit( rng_isaac_t *rng, uint64_t seed )
    uint64_t g = seed;
    uint64_t h = seed;
 
-   uint64_t *randrsl = (*rng).randrsl;
-   uint64_t *mm = (*rng).mm;
+   uint64_t *randrsl = (*current).randrsl;
+   uint64_t *mm = (*current).mm;
 
    // set global variables
-   (*rng).aa = 0;
-   (*rng).bb = 0;
-   (*rng).cc = 0;
+   (*current).aa = 0;
+   (*current).bb = 0;
+   (*current).cc = 0;
 
    // mix up the golden ratios in a through h
-   for ( i=0; i<4; i++ )
+   for ( i = 0; i < 4; i++ )
    {
-     a -= e;
-     f ^= h >> 9;
-     h += a;
-     b -= f;
-     g ^= a << 9;
-     a += b;
-     c -= g;
-     h ^= b >> 23;
-     b += c;
-     d -= h;
-     a ^= c << 15;
-     c += d;
-     e -= a;
-     b ^= d >> 14;
-     d += e;
-     f -= b;
-     c ^= e << 20;
-     e += f;
-     g -= c;
-     d ^= f >> 17;
-     f += g;
-     h -= d;
-     e ^= g << 14;
-     g += h;
+      a -= e;
+      f ^= h >> 9;
+      h += a;
+      b -= f;
+      g ^= a << 9;
+      a += b;
+      c -= g;
+      h ^= b >> 23;
+      b += c;
+      d -= h;
+      a ^= c << 15;
+      c += d;
+      e -= a;
+      b ^= d >> 14;
+      d += e;
+      f -= b;
+      c ^= e << 20;
+      e += f;
+      g -= c;
+      d ^= f >> 17;
+      f += g;
+      h -= d;
+      e ^= g << 14;
+      g += h;
    }
 
-   for ( i=0; i<RANDBUF_LENGTH; i+=8 )
+   for ( i = 0; i < RANDBUF_LENGTH; i += 8 )
    {
       // use the entire buffer as a seed
       a += randrsl[i  ];
-      b += randrsl[i+1];
-      c += randrsl[i+2];
-      d += randrsl[i+3];
-      e += randrsl[i+4];
-      f += randrsl[i+5];
-      g += randrsl[i+6];
-      h += randrsl[i+7];
+      b += randrsl[i + 1];
+      c += randrsl[i + 2];
+      d += randrsl[i + 3];
+      e += randrsl[i + 4];
+      f += randrsl[i + 5];
+      g += randrsl[i + 6];
+      h += randrsl[i + 7];
 
       // scramble the numbers
       a -= e;
@@ -203,28 +209,28 @@ static void randinit( rng_isaac_t *rng, uint64_t seed )
 
       // set scrambled values into random number buffer
       mm[i  ] = a;
-      mm[i+1] = b;
-      mm[i+2] = c;
-      mm[i+3] = d;
-      mm[i+4] = e;
-      mm[i+5] = f;
-      mm[i+6] = g;
-      mm[i+7] = h;
+      mm[i + 1] = b;
+      mm[i + 2] = c;
+      mm[i + 3] = d;
+      mm[i + 4] = e;
+      mm[i + 5] = f;
+      mm[i + 6] = g;
+      mm[i + 7] = h;
    }
 
 
    // do a second pass
-   for ( i=0; i<RANDBUF_LENGTH; i+=8 )
+   for ( i = 0; i < RANDBUF_LENGTH; i += 8 )
    {
       // use the entire buffer as a seed
-      a+=mm[i ];
-      b+=mm[i+1];
-      c+=mm[i+2];
-      d+=mm[i+3];
-      e+=mm[i+4];
-      f+=mm[i+5];
-      g+=mm[i+6];
-      h+=mm[i+7];
+      a += mm[i ];
+      b += mm[i + 1];
+      c += mm[i + 2];
+      d += mm[i + 3];
+      e += mm[i + 4];
+      f += mm[i + 5];
+      g += mm[i + 6];
+      h += mm[i + 7];
 
       // scramble the numbers
       a -= e;
@@ -254,30 +260,34 @@ static void randinit( rng_isaac_t *rng, uint64_t seed )
 
       // set scrambled values into random number buffer
       mm[i  ] = a;
-      mm[i+1] = b;
-      mm[i+2] = c;
-      mm[i+3] = d;
-      mm[i+4] = e;
-      mm[i+5] = f;
-      mm[i+6] = g;
-      mm[i+7] = h;
+      mm[i + 1] = b;
+      mm[i + 2] = c;
+      mm[i + 3] = d;
+      mm[i + 4] = e;
+      mm[i + 5] = f;
+      mm[i + 6] = g;
+      mm[i + 7] = h;
    }
 
    // get the first valid random number buffer
-   isaac64( rng );
+   isaac64( current );
 
    // reset the buffer index
-   (*rng).index = 0;
+   (*current).index = 0;
 
    return;
 }
 
 
 /**
+   isaac64
+
    ISAAC function to compute the next random number buffer
+
+   @param current the rng
 */
 
-static void isaac64( rng_isaac_t *rng )
+static void isaac64( rng_isaac_t *current )
 {
    register uint64_t a = 0;
    register uint64_t b = 0;
@@ -290,68 +300,68 @@ static void isaac64( rng_isaac_t *rng )
    register uint64_t *mm = NULL;
 
    // set pointers
-   m = (*rng).mm;
-   mm = (*rng).mm;
-   r = (*rng).randrsl;
+   m = (*current).mm;
+   mm = (*current).mm;
+   r = (*current).randrsl;
 
    // set local variables from global variables
-   a = (*rng).aa;
-   b = (*rng).bb + (++((*rng).cc));
+   a = (*current).aa;
+   b = (*current).bb + ( ++( (*current).cc ) );
 
    // compute next buffer of random numbers
-   for ( m = mm, mend = m2 = m+(RANDBUF_LENGTH/2); m<mend; )
+   for ( m = mm, mend = m2 = m + ( RANDBUF_LENGTH / 2 ); m < mend; )
    {
       x = *m;
-      a = (~(a^(a<<21))) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( ~( a ^ ( a << 21 ) ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
 
       x = *m;
-      a = (a^(a>>5)) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( a ^ ( a >> 5 ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
 
       x = *m;
-      a = (a^(a<<12)) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( a ^ ( a << 12 ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
 
       x = *m;
-      a = (a^(a>>33)) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( a ^ ( a >> 33 ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
    }
 
-   for ( m2 = mm; m2<mend; )
+   for ( m2 = mm; m2 < mend; )
    {
       x = *m;
-      a = (~(a^(a<<21))) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( ~( a ^ ( a << 21 ) ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
 
       x = *m;
-      a = (a^(a>>5)) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( a ^ ( a >> 5 ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
 
       x = *m;
-      a = (a^(a<<12)) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( a ^ ( a << 12 ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
 
       x = *m;
-      a = (a^(a>>33)) + *(m2++);
-      *(m++) = y = (*(uint64_t *)((uint8_t *)(mm) + ((x) & RANDBUF_OFFSET_MASK))) + a + b;
-      *(r++) = b = (*(uint64_t *)((uint8_t *)(mm) + ((y>>(8)) & RANDBUF_OFFSET_MASK))) + x;
+      a = ( a ^ ( a >> 33 ) ) + *( m2++ );
+      *( m++ ) = y = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( x ) & RANDBUF_OFFSET_MASK ) ) ) + a + b;
+      *( r++ ) = b = ( *( uint64_t * )( ( uint8_t * )( mm ) + ( ( y >> ( 8 ) ) & RANDBUF_OFFSET_MASK ) ) ) + x;
    }
 
-  // update global variables
-  (*rng).bb = b;
-  (*rng).aa = a;
+   // update global variables
+   (*current).bb = b;
+   (*current).aa = a;
 
-  (*rng).index = 0;
+   (*current).index = 0;
 
-  return;
+   return;
 }
 
 /**
@@ -377,7 +387,7 @@ arrays_not_null( rng_isaac_t *p )
 static
 void invariant( rng_isaac_t *p )
 {
-   assert(((void) "arrays not null", arrays_not_null( p ) ));
+   assert( ( ( void ) "arrays not null", arrays_not_null( p ) ) );
    return;
 }
 
@@ -391,32 +401,36 @@ rng_isaac_t *
 rng_isaac_make( void )
 {
    // allocate rng struct
-   rng_isaac_t * rng
+   rng_isaac_t * result
       = ( rng_isaac_t * ) calloc( 1, sizeof( rng_isaac_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*rng).type = RNG_ISAAC_TYPE;
-   
+   (*result)._type = RNG_ISAAC_TYPE;
+
    // set values
-   (*rng).length = RANDBUF_LENGTH;
-   (*rng).offset_mask = RANDBUF_OFFSET_MASK;
-   (*rng).index = 0;
-   (*rng).aa = 0;
-   (*rng).bb = 0;
-   (*rng).cc = 0;
+   (*result).length = RANDBUF_LENGTH;
+   (*result).offset_mask = RANDBUF_OFFSET_MASK;
+   (*result).index = 0;
+   (*result).aa = 0;
+   (*result).bb = 0;
+   (*result).cc = 0;
 
    // allocate arrays
-   (*rng).randrsl = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
-   (*rng).mm = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
+   (*result).randrsl = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
+   CHECK( "(*result).randrsl allocated correctly", (*result).randrsl != NULL );
 
-   MULTITHREAD_MUTEX_INIT( (*rng).mutex );
+   (*result).mm = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
+   CHECK( "(*result).mm allocated correctly", (*result).mm != NULL );
+
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // initialize rng
-   randinit( rng, GOLDEN_RATIO );
+   randinit( result, GOLDEN_RATIO );
 
-   INVARIANT( rng );
+   INVARIANT( result );
 
-   return rng;
+   return result;
 }
 
 /**
@@ -427,32 +441,36 @@ rng_isaac_t *
 rng_isaac_make_with_seed( uint64_t seed )
 {
    // allocate rng struct
-   rng_isaac_t * rng
+   rng_isaac_t * result
       = ( rng_isaac_t * ) calloc( 1, sizeof( rng_isaac_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*rng).type = RNG_ISAAC_TYPE;
-   
+   (*result)._type = RNG_ISAAC_TYPE;
+
    // set values
-   (*rng).length = RANDBUF_LENGTH;
-   (*rng).offset_mask = RANDBUF_OFFSET_MASK;
-   (*rng).index = 0;
-   (*rng).aa = 0;
-   (*rng).bb = 0;
-   (*rng).cc = 0;
+   (*result).length = RANDBUF_LENGTH;
+   (*result).offset_mask = RANDBUF_OFFSET_MASK;
+   (*result).index = 0;
+   (*result).aa = 0;
+   (*result).bb = 0;
+   (*result).cc = 0;
 
    // allocate arrays
-   (*rng).randrsl = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
-   (*rng).mm = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
+   (*result).randrsl = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
+   CHECK( "(*result).randrsl allocated correctly", (*result).randrsl != NULL );
 
-   MULTITHREAD_MUTEX_INIT( (*rng).mutex );
+   (*result).mm = ( uint64_t * ) calloc( RANDBUF_LENGTH, sizeof( int64_t ) );
+   CHECK( "(*result).mm allocated correctly", (*result).mm != NULL );
+
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // initialize rng
-   randinit( rng, seed );
+   randinit( result, seed );
 
-   INVARIANT( rng );
+   INVARIANT( result );
 
-   return rng;
+   return result;
 }
 
 
@@ -461,21 +479,28 @@ rng_isaac_make_with_seed( uint64_t seed )
 */
 
 void
-rng_isaac_dispose( rng_isaac_t *rng )
+rng_isaac_dispose( rng_isaac_t **current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current not null", *current != NULL );
+   PRECONDITION( "current type OK", (**current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
    // free the arrays
-   free( (*rng).randrsl );
-   free( (*rng).mm );
+   free( (**current).randrsl );
+   (**current).randrsl = NULL;
 
-   MULTITHREAD_MUTEX_DESTROY( (*rng).mutex );
+   free( (**current).mm );
+   (**current).mm = NULL;
 
-   // delete rng struct
-   free( rng );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
+
+   // delete current struct
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
@@ -485,21 +510,21 @@ rng_isaac_dispose( rng_isaac_t *rng )
 */
 
 int32_t
-rng_isaac_i32_item( rng_isaac_t *rng )
+rng_isaac_i32_item( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
    uint64_t temp = 0;
 
-   temp = (*rng).randrsl[ (*rng).index ];
+   temp = (*current).randrsl[ (*current).index ];
    result = UNION_CAST( ( temp >> RAND_HALF_BITS ), int32_t );
 
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -509,21 +534,21 @@ rng_isaac_i32_item( rng_isaac_t *rng )
 */
 
 uint32_t
-rng_isaac_u32_item( rng_isaac_t *rng )
+rng_isaac_u32_item( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint32_t result = 0;
    uint64_t temp = 0;
 
-   temp = (*rng).randrsl[ (*rng).index ];
+   temp = (*current).randrsl[ (*current).index ];
    result = UNION_CAST( ( temp >> RAND_HALF_BITS ), uint32_t );
 
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -533,21 +558,21 @@ rng_isaac_u32_item( rng_isaac_t *rng )
 */
 
 int64_t
-rng_isaac_i64_item( rng_isaac_t *rng )
+rng_isaac_i64_item( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int64_t result = 0;
    uint64_t temp = 0;
 
-   temp = (*rng).randrsl[ (*rng).index ];
+   temp = (*current).randrsl[ (*current).index ];
    result = UNION_CAST( temp, int64_t );
 
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -557,19 +582,19 @@ rng_isaac_i64_item( rng_isaac_t *rng )
 */
 
 uint64_t
-rng_isaac_u64_item( rng_isaac_t *rng )
+rng_isaac_u64_item( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint64_t result = 0;
 
-   result = (*rng).randrsl[ (*rng).index ];
+   result = (*current).randrsl[ (*current).index ];
 
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -579,24 +604,24 @@ rng_isaac_u64_item( rng_isaac_t *rng )
 */
 
 float32_t
-rng_isaac_f32_item( rng_isaac_t *rng )
+rng_isaac_f32_item( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    float32_t result = 0.0;
    uint64_t temp = 0;
    uint32_t temp1 = 0;
 
-   temp = (*rng).randrsl[ (*rng).index ];
+   temp = (*current).randrsl[ (*current).index ];
    temp1 = UNION_CAST( ( temp >> RAND_HALF_BITS ), uint32_t );
 
-   result = 1.0*temp1/UINT32_MAX;
+   result = 1.0 * temp1 / UINT32_MAX;
 
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -606,22 +631,22 @@ rng_isaac_f32_item( rng_isaac_t *rng )
 */
 
 float64_t
-rng_isaac_f64_item( rng_isaac_t *rng )
+rng_isaac_f64_item( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    float64_t result = 0.0;
    uint64_t temp = 0;
 
-   temp = (*rng).randrsl[ (*rng).index ];
+   temp = (*current).randrsl[ (*current).index ];
 
-   result = 1.0*temp/UINT64_MAX;
+   result = 1.0 * temp / UINT64_MAX;
 
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -631,24 +656,24 @@ rng_isaac_f64_item( rng_isaac_t *rng )
 */
 
 void
-rng_isaac_forth( rng_isaac_t *rng )
+rng_isaac_forth( rng_isaac_t *current )
 {
-   PRECONDITION( "rng not null", rng != NULL );
-   PRECONDITION( "rng type OK", (*rng).type == RNG_ISAAC_TYPE  );
-   LOCK( (*rng).mutex );
-   INVARIANT( rng );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == RNG_ISAAC_TYPE  );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // increment index
-   ( (*rng).index )++;
-      
+   ( (*current).index )++;
+
    // account for wrap around
-   if ( (*rng).index == (*rng).length )
+   if ( (*current).index == (*current).length )
    {
-      isaac64( rng );
+      isaac64( current );
    }
-   
-   INVARIANT( rng );
-   UNLOCK( (*rng).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }

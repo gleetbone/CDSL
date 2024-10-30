@@ -1,8 +1,8 @@
 /**
  @file raw_buffer_test_put_uint16.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for soa_node_iterator_make_str"
+ @version 2.0.0
+ @brief: "tests for raw_buffer_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_iterator_make_str.
+ Unit tests for raw_buffer_t
 
 */
 
@@ -50,7 +50,7 @@ void test_put_uint16_1( void )
 
    CU_ASSERT( value == 1206 );
    
-   raw_buffer_dispose_with_contents( raw_buffer );
+   raw_buffer_deep_dispose( &raw_buffer );
 
    return;
 }

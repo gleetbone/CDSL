@@ -1,8 +1,8 @@
 /**
  @file configuration_test_has.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for messaging_make"
+ @version 2.0.0
+ @brief: "tests for configuration_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_make_dict.
+ Unit tests for configuration_t
 
 */
 
@@ -36,35 +36,35 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_has_1( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
 
    string_t *key = string_make_from_cstring( "fruit" );
    string_t *value = string_make_from_cstring( "apple" );
 
-   soa_configuration_put( configuration, key, value );
+   configuration_put( configuration, key, value );
 
    string_t *key1 = string_make_from_cstring( "meat" );
    string_t *value1 = string_make_from_cstring( "fish" );
 
-   soa_configuration_put( configuration, key1, value1 );
+   configuration_put( configuration, key1, value1 );
 
-   int32_t flag = soa_configuration_has( configuration, key );
+   int32_t flag = configuration_has( configuration, key );
 
    CU_ASSERT( flag == 1 );
 
-   flag = soa_configuration_has( configuration, key1 );
+   flag = configuration_has( configuration, key1 );
 
    CU_ASSERT( flag == 1 );
 
    string_t *key2 = string_make_from_cstring( "bread" );
 
-   flag = soa_configuration_has( configuration, key2 );
+   flag = configuration_has( configuration, key2 );
 
    CU_ASSERT( flag == 0 );
 
-   string_dispose_with_contents( key2 );
+   string_deep_dispose( &key2 );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }
@@ -75,24 +75,24 @@ void test_has_1( void )
 
 void test_has_2( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
 
-   soa_configuration_put_cstring( configuration, "fruit", "apple" );
-   soa_configuration_put_cstring( configuration, "meat", "fish" );
+   configuration_put_cstring( configuration, "fruit", "apple" );
+   configuration_put_cstring( configuration, "meat", "fish" );
 
-   int32_t flag = soa_configuration_has_cstring( configuration, "fruit" );
-
-   CU_ASSERT( flag == 1 );
-
-   flag = soa_configuration_has_cstring( configuration, "meat" );
+   int32_t flag = configuration_has_cstring( configuration, "fruit" );
 
    CU_ASSERT( flag == 1 );
 
-   flag = soa_configuration_has_cstring( configuration, "bread" );
+   flag = configuration_has_cstring( configuration, "meat" );
+
+   CU_ASSERT( flag == 1 );
+
+   flag = configuration_has_cstring( configuration, "bread" );
 
    CU_ASSERT( flag == 0 );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }

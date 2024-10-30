@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_row_vector_squared_magnitude.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -48,7 +48,7 @@ void test_row_vector_squared_magnitude_1( void )
    CU_ASSERT( fm != NULL );
    CU_ASSERT( x == 77.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    return;
 }
@@ -67,7 +67,7 @@ void test_row_vector_squared_magnitude_2( void )
    CU_ASSERT( dm != NULL );
    CU_ASSERT( x == 77.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    return;
 }
@@ -88,7 +88,7 @@ void test_row_vector_squared_magnitude_3( void )
    CU_ASSERT( cfm != NULL );
    CU_ASSERT( x == ( 154.0 + 0.0I ) );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    return;
 }
@@ -108,7 +108,7 @@ void test_row_vector_squared_magnitude_4( void )
    CU_ASSERT( cdm != NULL );
    CU_ASSERT( x == ( 154.0 + 0.0I ) );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    return;
 }

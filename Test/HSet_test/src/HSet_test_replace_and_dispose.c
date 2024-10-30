@@ -1,7 +1,7 @@
 /**
  @file HSet_test_replace_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_put.
+ Unit tests for HSet_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -48,7 +49,7 @@ void test_replace_and_dispose_1( void )
 
    CU_ASSERT( i_hset_item( hset, 24 ) == 24 );
    
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -79,7 +80,7 @@ void test_replace_and_dispose_2( void )
    CU_ASSERT( i_hset_item( hset, 24 ) == 24 );
    CU_ASSERT( i_hset_item( hset, 13 ) == 13 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -110,7 +111,46 @@ void test_replace_and_dispose_3( void )
    CU_ASSERT( i_hset_item( hset, 24 ) == 24 );
    CU_ASSERT( i_hset_item( hset, 13 ) == 13 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_replace_and_dispose_4
+*/
+
+void test_replace_and_dispose_4( void )
+{
+   s_hset_t *hset = NULL;
+
+   hset = s_hset_make();
+
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   string_t *s3 = string_make_from_cstring( "a" ); 
+   string_t *s4 = string_make_from_cstring( "b" ); 
+   
+   s_hset_put( hset, s1 );
+   s_hset_put( hset, s2 );
+
+   CU_ASSERT( s_hset_item( hset, s1 ) == s1 );
+   CU_ASSERT( s_hset_item( hset, s2 ) == s2 );
+   CU_ASSERT( s_hset_item( hset, s3 ) == s1 );
+   CU_ASSERT( s_hset_item( hset, s4 ) == s2 );
+
+   s_hset_replace_and_dispose( hset, s3 );
+   
+   CU_ASSERT( s_hset_item( hset, s2 ) == s2 );
+   CU_ASSERT( s_hset_item( hset, s3 ) == s3 );
+   CU_ASSERT( s_hset_item( hset, s4 ) == s2 );
+
+   s_hset_replace_and_dispose( hset, s4 );
+   
+   CU_ASSERT( s_hset_item( hset, s3 ) == s3 );
+   CU_ASSERT( s_hset_item( hset, s4 ) == s4 );
+
+   s_hset_deep_dispose( &hset );
 
    return;
 }
@@ -121,7 +161,7 @@ add_test_replace_and_dispose( void )
    CU_pSuite p_suite = NULL;
 
    // add a suite for these tests to the registry
-   p_suite = CU_add_suite("suite_test_make", NULL, NULL);
+   p_suite = CU_add_suite("suite_test_replace_and_dispose", NULL, NULL);
    if (NULL == p_suite)
    {
       CU_cleanup_registry();
@@ -130,14 +170,17 @@ add_test_replace_and_dispose( void )
 
    // add the tests to the suite
 
-   // test_make_1
+   // test_replace_and_dispose_1
    add_test_to_suite( p_suite, test_replace_and_dispose_1, "test_replace_and_dispose_1" );
 
-   // test_make_2
+   // test_replace_and_dispose_2
    add_test_to_suite( p_suite, test_replace_and_dispose_2, "test_replace_and_dispose_2" );
 
-   // test_make_3
+   // test_replace_and_dispose_3
    add_test_to_suite( p_suite, test_replace_and_dispose_3, "test_replace_and_dispose_3" );
+
+   // test_replace_and_dispose_4
+   add_test_to_suite( p_suite, test_replace_and_dispose_4, "test_replace_and_dispose_4" );
 
    return CUE_SUCCESS;
 

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "CUnit/Basic.h"
+#include "base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,16 +21,16 @@ int
 add_test_make_n( void );
 
 int
-add_test_make_from( void );
-
-int
 add_test_make_from_cstring( void );
 
 int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_dispose_wrapper( void );
+
+int
+add_test_deep_dispose( void );
 
 int
 add_test_item( void );
@@ -42,6 +43,9 @@ add_test_count( void );
 
 int
 add_test_capacity( void );
+
+int
+add_test_char_count( void );
 
 int
 add_test_is_empty( void );
@@ -62,6 +66,9 @@ int
 add_test_is_equal( void );
 
 int
+add_test_is_deep_equal( void );
+
+int
 add_test_is_equal_cstring( void );
 
 int
@@ -71,10 +78,34 @@ int
 add_test_is_less_than_cstring( void );
 
 int
+add_test_is_less_than_or_equal( void );
+
+int
+add_test_is_less_than_or_equal_cstring( void );
+
+int
 add_test_is_greater_than( void );
 
 int
 add_test_is_greater_than_cstring( void );
+
+int
+add_test_is_greater_than_or_equal( void );
+
+int
+add_test_is_greater_than_or_equal_cstring( void );
+
+int
+add_test_compare( void );
+
+int
+add_test_compare_cstring( void );
+
+int
+add_test_substring_count( void );
+
+int
+add_test_substring_count_cstring( void );
 
 int
 add_test_has_substring( void );
@@ -120,6 +151,9 @@ add_test_as_upper( void );
 
 int
 add_test_as_int32( void );
+
+int
+add_test_as_int64( void );
 
 int
 add_test_as_float64( void );
@@ -179,13 +213,31 @@ int
 add_test_to_lower( void );
 
 int
+add_test_to_lower_by_index( void );
+
+int
 add_test_to_upper( void );
+
+int
+add_test_to_upper_by_index( void );
 
 int
 add_test_substring( void );
 
 int
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
 add_test_copy( void );
+
+int
+add_test_copy_cstring( void );
+
+int
+add_test_deep_copy( void );
 
 int
 add_test_remove( void );
@@ -204,6 +256,12 @@ add_test_remove_head( void );
 
 int
 add_test_remove_tail( void );
+
+int
+add_test_remove_leading_whitespace( void );
+
+int
+add_test_remove_trailing_whitespace( void );
 
 int
 add_test_wipe_out( void );
@@ -246,6 +304,9 @@ add_test_hex_from_uint8( void );
 
 int
 add_test_hex_from_int32( void );
+
+int
+add_test_hex_from_int64( void );
 
 int
 add_test_cstring_hex_from_uint8( void );
@@ -292,6 +353,9 @@ int main()
 {
    CU_ErrorCode result;
 
+   // enable core dump on failure
+   core_dump_enable();
+   
    // initialize the CUnit test registry
    result = CU_initialize_registry();
    if ( result != CUE_SUCCESS )
@@ -303,25 +367,40 @@ int main()
 
    add_test_make();
    add_test_make_n();
-   add_test_make_from();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_copy();
+   add_test_copy_cstring();
+   add_test_deep_copy();
    add_test_make_from_cstring();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_dispose_wrapper();
+   add_test_deep_dispose();
    add_test_item();
    add_test_as_cstring();
    add_test_count();
    add_test_capacity();
+   add_test_char_count();
    add_test_is_empty();
    add_test_has();
    add_test_is_int32();
    add_test_is_float64();
    add_test_hash_code();
    add_test_is_equal();
+   add_test_is_deep_equal();
    add_test_is_equal_cstring();
    add_test_is_less_than();
    add_test_is_less_than_cstring();
+   add_test_is_less_than_or_equal();
+   add_test_is_less_than_or_equal_cstring();
    add_test_is_greater_than();
    add_test_is_greater_than_cstring();
+   add_test_is_greater_than_or_equal();
+   add_test_is_greater_than_or_equal_cstring();
+   add_test_compare();
+   add_test_compare_cstring();
+   add_test_substring_count();
+   add_test_substring_count_cstring();
    add_test_has_substring();
    add_test_has_substring_cstring();
    add_test_starts_with();
@@ -337,6 +416,7 @@ int main()
    add_test_as_lower();
    add_test_as_upper();
    add_test_as_int32();
+   add_test_as_int64();
    add_test_as_float64();
    add_test_put();
    add_test_replace();
@@ -356,15 +436,18 @@ int main()
    add_test_insert_int32();
    add_test_insert_float64();
    add_test_to_lower();
+   add_test_to_lower_by_index();
    add_test_to_upper();
+   add_test_to_upper_by_index();
    add_test_substring();
-   add_test_copy();
    add_test_remove();
    add_test_remove_substring();
    add_test_keep_head();
    add_test_keep_tail();
    add_test_remove_head();
    add_test_remove_tail();
+   add_test_remove_leading_whitespace();
+   add_test_remove_trailing_whitespace();
    add_test_wipe_out();
    add_test_valid_index();
    add_test_resize();

@@ -1,7 +1,7 @@
 /**
  @file i_HSet.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "implementation file for hash set of ints"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -23,11 +23,9 @@ extern "C" {
 #endif
  
 #define HASH_FUNCTION( arg ) ( arg )
-
-#define EQUALITY_FUNCTION( arg1, arg2 ) ( arg1 == arg2 )
-
-#define DISPOSE_FUNCTION( arg )
-#define DUPLICATE_FUNCTION( arg ) ( arg )
+#define DEEP_DISPOSE_FUNCTION( arg )
+#define DEEP_CLONE_FUNCTION( arg ) ( arg )
+#define DEEP_EQUAL_FUNCTION( arg1, arg2 ) ( (arg1) == (arg2) )
 
 #define PRE_FILE DBC_YES
 #define POST_FILE DBC_YES

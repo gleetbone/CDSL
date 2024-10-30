@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_determinant.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -48,7 +48,7 @@ void test_determinant_1( void )
    CU_ASSERT( fm != NULL );
    CU_ASSERT( x == -2.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    fm = f_matvec_make_from_args( 2, 2, 4, 0.0, 2.0, 3.0, 4.0 );
    x = f_matvec_determinant( fm );
@@ -56,7 +56,7 @@ void test_determinant_1( void )
    CU_ASSERT( fm != NULL );
    CU_ASSERT( x == -6.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    fm = f_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 0.0, 0.0 );
    x = f_matvec_determinant( fm );
@@ -64,7 +64,7 @@ void test_determinant_1( void )
    CU_ASSERT( fm != NULL );
    CU_ASSERT( x == 0.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    return;
 }
@@ -83,7 +83,7 @@ void test_determinant_2( void )
    CU_ASSERT( dm != NULL );
    CU_ASSERT( x == -2.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    return;
 }
@@ -104,7 +104,7 @@ void test_determinant_3( void )
    CU_ASSERT( cfm != NULL );
    CU_ASSERT( x == 0.0 - 4.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    return;
 }
@@ -124,7 +124,7 @@ void test_determinant_4( void )
    CU_ASSERT( cdm != NULL );
    CU_ASSERT( x == 0.0 - 4.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    return;
 }

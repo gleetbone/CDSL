@@ -1,7 +1,7 @@
 /**
  @file HTable_test_remove.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HTable_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HTable_put.
+ Unit tests for HTable_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_HTable.h"
+#include "ss_HTable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -50,7 +51,7 @@ void test_remove_1( void )
    
    CU_ASSERT( ii_htable_count( htable ) == 0 );
    
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -81,7 +82,7 @@ void test_remove_2( void )
    CU_ASSERT( ii_htable_has( htable, 1000 ) == 0 );
    CU_ASSERT( ii_htable_has( htable, 2000 ) == 0 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -112,7 +113,7 @@ void test_remove_3( void )
    CU_ASSERT( ii_htable_has( htable, 1000 ) == 0 );
    CU_ASSERT( ii_htable_has( htable, 1013 ) == 0 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -147,7 +148,7 @@ void test_remove_4( void )
    CU_ASSERT( ii_htable_has( htable, 1000 ) == 0 );
    CU_ASSERT( ii_htable_has( htable, 1013 ) == 0 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -188,7 +189,7 @@ void test_remove_5( void )
    CU_ASSERT( ii_htable_has( htable, 1013 ) == 0 );
    CU_ASSERT( ii_htable_has( htable, 1026 ) == 0 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -229,7 +230,64 @@ void test_remove_6( void )
    CU_ASSERT( ii_htable_has( htable, 1013 ) == 0 );
    CU_ASSERT( ii_htable_has( htable, 1026 ) == 0 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
+
+   return;
+}
+
+/**
+   test_remove_7
+*/
+
+void test_remove_7( void )
+{
+   ss_htable_t *htable = NULL;
+
+   htable = ss_htable_make();
+
+   string_t *k1 = string_make_from_cstring( "k1" );
+   string_t *v1 = string_make_from_cstring( "v1" );
+   
+   string_t *k2 = string_make_from_cstring( "k2" );
+   string_t *v2 = string_make_from_cstring( "v2" );
+   
+   string_t *k3 = string_make_from_cstring( "k3" );
+   string_t *v3 = string_make_from_cstring( "v3" );
+   
+   ss_htable_put( htable, v1, k1 );
+   ss_htable_put( htable, v2, k2 );
+   ss_htable_put( htable, v3, k3 );
+
+   CU_ASSERT( ss_htable_has( htable, k1 ) == 1 );
+   CU_ASSERT( ss_htable_has( htable, k2 ) == 1 );
+   CU_ASSERT( ss_htable_has( htable, k3 ) == 1 );
+
+   ss_htable_remove( htable, k1 );
+
+   CU_ASSERT( ss_htable_has( htable, k1 ) == 0 );
+   CU_ASSERT( ss_htable_has( htable, k2 ) == 1 );
+   CU_ASSERT( ss_htable_has( htable, k3 ) == 1 );
+
+   ss_htable_remove( htable, k2 );
+
+   CU_ASSERT( ss_htable_has( htable, k1 ) == 0 );
+   CU_ASSERT( ss_htable_has( htable, k2 ) == 0 );
+   CU_ASSERT( ss_htable_has( htable, k3 ) == 1 );
+
+   ss_htable_remove( htable, k3 );
+
+   CU_ASSERT( ss_htable_has( htable, k1 ) == 0 );
+   CU_ASSERT( ss_htable_has( htable, k2 ) == 0 );
+   CU_ASSERT( ss_htable_has( htable, k3 ) == 0 );
+
+   string_deep_dispose( &v1 );
+   string_deep_dispose( &k1 );
+   string_deep_dispose( &v2 );
+   string_deep_dispose( &k2 );
+   string_deep_dispose( &v3 );
+   string_deep_dispose( &k3 );
+   
+   ss_htable_dispose( &htable );
 
    return;
 }
@@ -240,7 +298,7 @@ add_test_remove( void )
    CU_pSuite p_suite = NULL;
 
    // add a suite for these tests to the registry
-   p_suite = CU_add_suite("suite_test_make", NULL, NULL);
+   p_suite = CU_add_suite("suite_test_remove", NULL, NULL);
    if (NULL == p_suite)
    {
       CU_cleanup_registry();
@@ -249,23 +307,26 @@ add_test_remove( void )
 
    // add the tests to the suite
 
-   // test_make_1
+   // test_remove_1
    add_test_to_suite( p_suite, test_remove_1, "test_remove_1" );
 
-   // test_make_2
+   // test_remove_2
    add_test_to_suite( p_suite, test_remove_2, "test_remove_2" );
 
-   // test_make_3
+   // test_remove_3
    add_test_to_suite( p_suite, test_remove_3, "test_remove_3" );
 
-   // test_make_4
+   // test_remove_4
    add_test_to_suite( p_suite, test_remove_4, "test_remove_4" );
 
-   // test_make_5
+   // test_remove_5
    add_test_to_suite( p_suite, test_remove_5, "test_remove_5" );
 
-   // test_make_6
+   // test_remove_6
    add_test_to_suite( p_suite, test_remove_6, "test_remove_6" );
+
+   // test_remove_7
+   add_test_to_suite( p_suite, test_remove_7, "test_remove_7" );
 
    return CUE_SUCCESS;
 

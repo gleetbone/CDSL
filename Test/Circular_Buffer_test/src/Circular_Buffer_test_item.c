@@ -1,7 +1,7 @@
 /**
  @file Circular_Buffer_test_item.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Circular_Buffer_put_item"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Circular_Buffer_item_at.
+ Unit tests for Circular_Buffer_t
 
 */
 
@@ -44,7 +44,7 @@ void test_item_1( void )
 
    CU_ASSERT( i_circular_buffer_item( circular_buffer ) == 24 );
 
-   i_circular_buffer_dispose( circular_buffer );
+   i_circular_buffer_dispose( &circular_buffer );
 
    return;
 }
@@ -67,7 +67,7 @@ void test_item_2( void )
 
    CU_ASSERT( i_circular_buffer_item( circular_buffer ) == 7 );
 
-   i_circular_buffer_dispose( circular_buffer );
+   i_circular_buffer_dispose( &circular_buffer );
 
    return;
 }

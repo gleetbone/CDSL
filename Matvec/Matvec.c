@@ -1,17 +1,17 @@
 /**
  @file Matvec.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Matrices and vectors"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque Matvec_t type.
@@ -43,7 +43,7 @@ extern "C" {
 
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>   
+#include <math.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -53,8 +53,6 @@ extern "C" {
 /**
    defines
 */
-
-#define MATVEC_TYPE 0xA5000B00
 
 /**
    Note that this include file does NOT have an include guard - it may
@@ -91,9 +89,9 @@ extern "C" {
 
 struct Matvec_struct( Prefix )
 {
-   int32_t type;
-   int32_t item_type;
-   
+   int32_t _type;
+   int32_t _item_type;
+
    // number of columns
    int32_t n_columns;
 
@@ -119,7 +117,7 @@ num_rows_and_num_columns_positive( Matvec_type( Prefix ) *p )
 {
    int32_t result = 0;
 
-   if ( ( (*p).n_rows > 0 ) &&( (*p).n_columns > 0 ) )
+   if ( ( (*p).n_rows > 0 ) && ( (*p).n_columns > 0 ) )
    {
       result = 1;
    }
@@ -144,8 +142,8 @@ array_is_not_null( Matvec_type( Prefix ) *p )
 static
 void invariant( Matvec_type( Prefix ) *p )
 {
-   assert(((void) "num rows and num columns positive", num_rows_and_num_columns_positive( p ) ));
-   assert(((void) "array is not null", array_is_not_null( p ) ));
+   assert( ( ( void ) "num rows and num columns positive", num_rows_and_num_columns_positive( p ) ) );
+   assert( ( ( void ) "array is not null", array_is_not_null( p ) ) );
    return;
 }
 
@@ -173,36 +171,38 @@ Matvec_make( Prefix )( int32_t rows, int32_t columns )
    int32_t j = 0;
    Type *pa = NULL;
 
-   // allocate matvec struct
-   Matvec_type( Prefix ) * matvec
+   // allocate result struct
+   Matvec_type( Prefix ) * result
       = ( Matvec_type( Prefix ) * ) calloc( 1, sizeof( Matvec_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*matvec).type = MATVEC_TYPE;
-   (*matvec).item_type = Type_Code;
+   (*result)._type = MATVEC_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set rows and columns
-   (*matvec).n_rows = rows;
-   (*matvec).n_columns = columns;
+   (*result).n_rows = rows;
+   (*result).n_columns = columns;
 
-   MULTITHREAD_MUTEX_INIT( (*matvec).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // allocate array
-   (*matvec).a = ( Type * ) calloc( rows*columns, sizeof( Type ) );
-   pa = (*matvec).a;
+   (*result).a = ( Type * ) calloc( rows * columns, sizeof( Type ) );
+   CHECK( "(*result).a allocated correctly", (*result).a != NULL );
+   pa = (*result).a;
 
    // fill array with default value
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa[ i*columns + j ] = DEFAULT_VALUE;
+         pa[ i * columns + j ] = DEFAULT_VALUE;
       }
    }
 
-   INVARIANT( matvec );
+   INVARIANT( result );
 
-   return matvec;
+   return result;
 }
 
 /**
@@ -219,36 +219,38 @@ Matvec_make_row_vector( Prefix )( int32_t columns )
    int32_t j = 0;
    Type *pa = NULL;
 
-   // allocate matvec struct
-   Matvec_type( Prefix ) * matvec
+   // allocate result struct
+   Matvec_type( Prefix ) * result
       = ( Matvec_type( Prefix ) * ) calloc( 1, sizeof( Matvec_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*matvec).type = MATVEC_TYPE;
-   (*matvec).item_type = Type_Code;
+   (*result)._type = MATVEC_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set rows and columns
-   (*matvec).n_rows = rows;
-   (*matvec).n_columns = columns;
+   (*result).n_rows = rows;
+   (*result).n_columns = columns;
 
-   MULTITHREAD_MUTEX_INIT( (*matvec).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // allocate array
-   (*matvec).a = ( Type * ) calloc( rows*columns, sizeof( Type ) );
-   pa = (*matvec).a;
+   (*result).a = ( Type * ) calloc( rows * columns, sizeof( Type ) );
+   CHECK( "(*result).a allocated correctly", (*result).a != NULL );
+   pa = (*result).a;
 
    // fill array with default value
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa[ i*columns + j ] = DEFAULT_VALUE;
+         pa[ i * columns + j ] = DEFAULT_VALUE;
       }
    }
 
-   INVARIANT( matvec );
+   INVARIANT( result );
 
-   return matvec;
+   return result;
 }
 
 /**
@@ -265,36 +267,38 @@ Matvec_make_column_vector( Prefix )( int32_t rows )
    int32_t j = 0;
    Type *pa = NULL;
 
-   // allocate matvec struct
-   Matvec_type( Prefix ) * matvec
+   // allocate result struct
+   Matvec_type( Prefix ) * result
       = ( Matvec_type( Prefix ) * ) calloc( 1, sizeof( Matvec_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*matvec).type = MATVEC_TYPE;
-   (*matvec).item_type = Type_Code;
+   (*result)._type = MATVEC_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set rows and columns
-   (*matvec).n_rows = rows;
-   (*matvec).n_columns = columns;
+   (*result).n_rows = rows;
+   (*result).n_columns = columns;
 
-   MULTITHREAD_MUTEX_INIT( (*matvec).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // allocate array
-   (*matvec).a = ( Type * ) calloc( rows*columns, sizeof( Type ) );
-   pa = (*matvec).a;
+   (*result).a = ( Type * ) calloc( rows * columns, sizeof( Type ) );
+   CHECK( "(*result).a allocated correctly", (*result).a != NULL );
+   pa = (*result).a;
 
    // fill array with default value
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa[ i*columns + j ] = DEFAULT_VALUE;
+         pa[ i * columns + j ] = DEFAULT_VALUE;
       }
    }
 
-   INVARIANT( matvec );
+   INVARIANT( result );
 
-   return matvec;
+   return result;
 }
 
 /**
@@ -305,7 +309,7 @@ Matvec_type( Prefix ) *
 Matvec_make_from( Prefix )( Matvec_type( Prefix ) *other )
 {
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
 
    int32_t rows = (*other).n_rows;
    int32_t columns = (*other).n_columns;
@@ -314,37 +318,39 @@ Matvec_make_from( Prefix )( Matvec_type( Prefix ) *other )
    Type *pa = NULL;
    Type *pa_other = NULL;
 
-   // allocate matvec struct
-   Matvec_type( Prefix ) * matvec
+   // allocate result struct
+   Matvec_type( Prefix ) * result
       = ( Matvec_type( Prefix ) * ) calloc( 1, sizeof( Matvec_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*matvec).type = MATVEC_TYPE;
-   (*matvec).item_type = Type_Code;
+   (*result)._type = MATVEC_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set rows and columns
-   (*matvec).n_rows = rows;
-   (*matvec).n_columns = columns;
+   (*result).n_rows = rows;
+   (*result).n_columns = columns;
 
-   MULTITHREAD_MUTEX_INIT( (*matvec).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // allocate array
-   (*matvec).a = ( Type * ) calloc( rows*columns, sizeof( Type ) );
-   pa = (*matvec).a;
+   (*result).a = ( Type * ) calloc( rows * columns, sizeof( Type ) );
+   CHECK( "(*result).a allocated correctly", (*result).a != NULL );
+   pa = (*result).a;
    pa_other = (*other).a;
 
    // fill array with duplicate values from other
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa[ i*columns + j ] = DUPLICATE_FUNCTION( pa_other[ i*columns + j ] );
+         pa[ i * columns + j ] = DUPLICATE_FUNCTION( pa_other[ i * columns + j ] );
       }
    }
 
-   INVARIANT( matvec );
+   INVARIANT( result );
 
-   return matvec;
+   return result;
 }
 
 /**
@@ -364,41 +370,43 @@ Matvec_make_from_args( Prefix )( int32_t n_rows, int32_t n_columns, int32_t coun
    int32_t j = 0;
    Type *pa = NULL;
 
-   // allocate matvec struct
-   Matvec_type( Prefix ) * matvec
+   // allocate result struct
+   Matvec_type( Prefix ) * result
       = ( Matvec_type( Prefix ) * ) calloc( 1, sizeof( Matvec_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*matvec).type = MATVEC_TYPE;
-   (*matvec).item_type = Type_Code;
+   (*result)._type = MATVEC_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set rows and columns
-   (*matvec).n_rows = rows;
-   (*matvec).n_columns = columns;
+   (*result).n_rows = rows;
+   (*result).n_columns = columns;
 
-   MULTITHREAD_MUTEX_INIT( (*matvec).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    // allocate array
-   (*matvec).a = ( Type * ) calloc( count, sizeof( Type ) );
-   pa = (*matvec).a;
+   (*result).a = ( Type * ) calloc( count, sizeof( Type ) );
+   CHECK( "(*result).a allocated correctly", (*result).a != NULL );
+   pa = (*result).a;
 
    // init valist
    va_start( valist, count );
 
    // fill array with duplicate values from other
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa[ i*columns + j ] = ( Type ) va_arg( valist, Va_type );
+         pa[ i * columns + j ] = ( Type ) va_arg( valist, Va_type );
       }
    }
    // terminate valist
    va_end( valist );
 
-   INVARIANT( matvec );
+   INVARIANT( result );
 
-   return matvec;
+   return result;
 }
 
 /**
@@ -406,59 +414,67 @@ Matvec_make_from_args( Prefix )( int32_t n_rows, int32_t n_columns, int32_t coun
 */
 
 void
-Matvec_dispose( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_dispose( Prefix )( Matvec_type( Prefix ) **current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current not null", *current != NULL );
+   PRECONDITION( "current type OK", ( (**current)._type == MATVEC_TYPE ) && ( (**current)._item_type == Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
-   // delete matvec array
-   free( (*matvec).a );
-   (*matvec).a = NULL;
+   // delete current array
+   free( (**current).a );
+   (**current).a = NULL;
 
-   MULTITHREAD_MUTEX_DESTROY( (*matvec).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
-   // delete matvec struct
-   free( matvec );
+   // delete current struct
+   free(*current);
+
+   // set current to NULL
+   *current = NULL;
 
    return;
 }
 
 /**
-   Matvec_dispose_with_contents
+   Matvec_deep_dispose
 */
 
 void
-Matvec_dispose_with_contents( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current not null", *current != NULL );
+   PRECONDITION( "current type OK", ( (**current)._type == MATVEC_TYPE ) && ( (**current)._item_type == Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (**current).n_rows;
+   int32_t columns = (**current).n_columns;
    int32_t i = 0;
    int32_t j = 0;
 
-   // delete matvec items
-   for ( i=0; i<rows; i++ )
+   // delete current items
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         DISPOSE_FUNCTION( (*matvec).a[ i*columns + j ] );
+         DISPOSE_FUNCTION( (**current).a[ i * columns + j ] );
       }
    }
 
-   // delete matvec array
-   free( (*matvec).a );
-   (*matvec).a = NULL;
+   // delete current array
+   free( (**current).a );
+   (**current).a = NULL;
 
-   MULTITHREAD_MUTEX_DESTROY( (*matvec).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
-   // delete matvec struct
-   free( matvec );
+   // delete current struct
+   free(*current);
+
+   // set current to NULL
+   *current = NULL;
 
    return;
 }
@@ -468,17 +484,17 @@ Matvec_dispose_with_contents( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_rows( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_rows( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = (*matvec).n_rows;
+   int32_t result = (*current).n_rows;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -488,17 +504,17 @@ Matvec_rows( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_columns( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_columns( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int32_t result = (*matvec).n_columns;
+   int32_t result = (*current).n_columns;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -508,27 +524,27 @@ Matvec_columns( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_vector_length( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_length( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1 ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1 ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
 
-   if ( (*matvec).n_rows == 1 )
+   if ( (*current).n_rows == 1 )
    {
-      result = (*matvec).n_columns;
+      result = (*current).n_columns;
    }
    else
    {
-      result = (*matvec).n_rows;
+      result = (*current).n_rows;
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -538,22 +554,22 @@ Matvec_vector_length( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_is_row_vector( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_is_row_vector( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
 
-   if ( (*matvec).n_rows == 1 )
+   if ( (*current).n_rows == 1 )
    {
       result = 1;
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -563,22 +579,22 @@ Matvec_is_row_vector( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_is_column_vector( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_is_column_vector( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
 
-   if ( (*matvec).n_columns == 1 )
+   if ( (*current).n_columns == 1 )
    {
       result = 1;
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -588,19 +604,19 @@ Matvec_is_column_vector( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type
-Matvec_item( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_row, int32_t i_column )
+Matvec_item( Prefix )( Matvec_type( Prefix ) *current, int32_t i_row, int32_t i_column )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*matvec).a[ i_row*(*matvec).n_columns + i_column ];
+   Type result = (*current).a[ i_row * (*current).n_columns + i_column ];
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -610,20 +626,20 @@ Matvec_item( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_row, int32_t i_c
 */
 
 Type
-Matvec_vector_item( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i )
+Matvec_vector_item( Prefix )( Matvec_type( Prefix ) *current, int32_t i )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( i >= 0 ) && ( i < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( i >= 0 ) && ( i < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( i >= 0 ) && ( i < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( i >= 0 ) && ( i < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*matvec).a[i];
+   Type result = (*current).a[i];
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -633,20 +649,20 @@ Matvec_vector_item( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i )
 */
 
 Type
-Matvec_vector_x( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_x( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 0 >= 0 ) && ( 0 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 0 >= 0 ) && ( 0 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 0 >= 0 ) && ( 0 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 0 >= 0 ) && ( 0 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*matvec).a[0];
+   Type result = (*current).a[0];
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -656,20 +672,20 @@ Matvec_vector_x( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type
-Matvec_vector_y( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_y( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 1 >= 0 ) && ( 1 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 1 >= 0 ) && ( 1 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 1 >= 0 ) && ( 1 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 1 >= 0 ) && ( 1 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*matvec).a[1];
+   Type result = (*current).a[1];
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -679,20 +695,20 @@ Matvec_vector_y( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type
-Matvec_vector_z( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_z( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 2 >= 0 ) && ( 2 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 2 >= 0 ) && ( 2 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 2 >= 0 ) && ( 2 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 2 >= 0 ) && ( 2 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*matvec).a[2];
+   Type result = (*current).a[2];
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -702,13 +718,13 @@ Matvec_vector_z( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Magnitude_type
-Matvec_vector_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_magnitude( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Magnitude_type result = 0;
    int32_t i = 0;
@@ -716,16 +732,16 @@ Matvec_vector_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
    Type item = DEFAULT_VALUE;
    Type *pa = NULL;
 
-   if ( (*matvec).n_rows > (*matvec).n_columns )
+   if ( (*current).n_rows > (*current).n_columns )
    {
-      n = (*matvec).n_rows;
+      n = (*current).n_rows;
    }
    else
    {
-      n = (*matvec).n_columns;
+      n = (*current).n_columns;
    }
 
-   pa = (*matvec).a;
+   pa = (*current).a;
 
    for ( i = 0; i < n; i++ )
    {
@@ -735,8 +751,8 @@ Matvec_vector_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
 
    result = sqrt( result );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -746,13 +762,13 @@ Matvec_vector_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Magnitude_type
-Matvec_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Magnitude_type result = 0;
    int32_t i = 0;
@@ -760,16 +776,16 @@ Matvec_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
    Type item = DEFAULT_VALUE;
    Type *pa = NULL;
 
-   if ( (*matvec).n_rows > (*matvec).n_columns )
+   if ( (*current).n_rows > (*current).n_columns )
    {
-      n = (*matvec).n_rows;
+      n = (*current).n_rows;
    }
    else
    {
-      n = (*matvec).n_columns;
+      n = (*current).n_columns;
    }
 
-   pa = (*matvec).a;
+   pa = (*current).a;
 
    for ( i = 0; i < n; i++ )
    {
@@ -777,8 +793,8 @@ Matvec_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
       result = result + SQUARED_MAGNITUDE_FUNCTION( item );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -788,32 +804,32 @@ Matvec_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Magnitude_type
-Matvec_max_item_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_max_item_magnitude( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Magnitude_type result = 0;
    Magnitude_type x = 0;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    Type item = DEFAULT_VALUE;
    Type *pa = NULL;
 
-   item = (*matvec).a[0];
+   item = (*current).a[0];
    result = SQUARED_MAGNITUDE_FUNCTION( item );
 
-   pa = (*matvec).a;
+   pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = pa[i*columns + j];
+         item = pa[i * columns + j];
          x = SQUARED_MAGNITUDE_FUNCTION( item );
          if ( x > result )
          {
@@ -824,8 +840,8 @@ Matvec_max_item_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
 
    result = sqrt( result );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -835,26 +851,26 @@ Matvec_max_item_magnitude( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_is_symmetric( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_is_symmetric( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; ( ( i<rows ) && ( result == 1 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( result == 1 ) ); i++ )
    {
-      for ( j=i+1; j<columns; j++ )
+      for ( j = i + 1; j < columns; j++ )
       {
-         result = EQUAL_FUNCTION( pa[i*columns + j], pa[j*columns + i] );
+         result = EQUAL_FUNCTION( pa[i * columns + j], pa[j * columns + i] );
          if ( result == 0 )
          {
             break;
@@ -862,8 +878,8 @@ Matvec_is_symmetric( Prefix )( Matvec_type( Prefix ) *matvec )
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -873,28 +889,28 @@ Matvec_is_symmetric( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_is_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_is_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item1 = DEFAULT_VALUE;
    int32_t result = 1;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; ( ( i<rows ) && ( result == 1 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( result == 1 ) ); i++ )
    {
-      for ( j=i+1; j<columns; j++ )
+      for ( j = i + 1; j < columns; j++ )
       {
-         item1 = CONJUGATE_FUNCTION( pa[j*columns + i] );
-         result = EQUAL_FUNCTION( pa[i*columns + j], item1 );
+         item1 = CONJUGATE_FUNCTION( pa[j * columns + i] );
+         result = EQUAL_FUNCTION( pa[i * columns + j], item1 );
          DISPOSE_FUNCTION( item1 );
 
          if ( result == 0 )
@@ -904,8 +920,8 @@ Matvec_is_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *matvec )
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -915,14 +931,14 @@ Matvec_is_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 int32_t
-Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magnitude_type precision )
+Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *current, Magnitude_type precision )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
    PRECONDITION( "precision not negative", precision >= 0.0 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
    Magnitude_type m = 0;
@@ -930,9 +946,9 @@ Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magn
    Magnitude_type p = 0;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type item = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
@@ -941,11 +957,11 @@ Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magn
    item = pa[0];
    m = SQUARED_MAGNITUDE_FUNCTION( item );
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = pa[i*columns + j];
+         item = pa[i * columns + j];
          x = SQUARED_MAGNITUDE_FUNCTION( item );
          if ( x > m )
          {
@@ -955,16 +971,16 @@ Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magn
    }
 
    // get precision value to compare to
-   p = sqrt( m )*precision;
+   p = sqrt( m ) * precision;
 
    // go through each item, check that its symmetric items are p close to each other
-   for ( i=0; ( ( i<rows ) && ( result == 1 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( result == 1 ) ); i++ )
    {
-      for ( j=i+1; j<columns; j++ )
+      for ( j = i + 1; j < columns; j++ )
       {
-         item = pa[i*columns + j];
+         item = pa[i * columns + j];
          item1 = NEGATE_FUNCTION( item );
-         item2 = ADD_FUNCTION( pa[j*columns + i], item1 );
+         item2 = ADD_FUNCTION( pa[j * columns + i], item1 );
          x = SQUARED_MAGNITUDE_FUNCTION( item2 );
          DISPOSE_FUNCTION( item1 );
          DISPOSE_FUNCTION( item2 );
@@ -978,8 +994,8 @@ Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magn
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -989,14 +1005,14 @@ Matvec_is_approximately_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magn
 */
 
 int32_t
-Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *matvec, Magnitude_type precision )
+Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *current, Magnitude_type precision )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
    PRECONDITION( "precision not negative", precision >= 0.0 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
    Magnitude_type m = 0;
@@ -1004,9 +1020,9 @@ Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *ma
    Magnitude_type p = 0;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type item = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
@@ -1017,11 +1033,11 @@ Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *ma
    item = pa[0];
    m = SQUARED_MAGNITUDE_FUNCTION( item );
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = pa[i*columns + j];
+         item = pa[i * columns + j];
          x = SQUARED_MAGNITUDE_FUNCTION( item );
          if ( x > m )
          {
@@ -1031,15 +1047,15 @@ Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *ma
    }
 
    // get precision value to compare to
-   p = sqrt( m )*precision;
+   p = sqrt( m ) * precision;
 
    // go through each item, check that its symmetric items are p close to each other
-   for ( i=0; ( ( i<rows ) && ( result == 1 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( result == 1 ) ); i++ )
    {
-      for ( j=i+1; j<columns; j++ )
+      for ( j = i + 1; j < columns; j++ )
       {
-         item = pa[i*columns + j];
-         item1 = pa[j*columns + i];
+         item = pa[i * columns + j];
+         item1 = pa[j * columns + i];
          item2 = CONJUGATE_FUNCTION( item1 );
          item3 = NEGATE_FUNCTION( item2 );
          item4 = ADD_FUNCTION( item, item3 );
@@ -1057,8 +1073,8 @@ Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *ma
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1068,29 +1084,29 @@ Matvec_is_approximately_hermitian_symmetric( Prefix )( Matvec_type( Prefix ) *ma
 */
 
 int32_t
-Matvec_is_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_is_equal( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   for ( i=0; ( ( i<rows ) && ( result == 1 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( result == 1 ) ); i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         result = EQUAL_FUNCTION( pa[i*columns + j], pa_other[i*columns + j] );
+         result = EQUAL_FUNCTION( pa[i * columns + j], pa_other[i * columns + j] );
          if ( result == 0 )
          {
             break;
@@ -1098,8 +1114,8 @@ Matvec_is_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) 
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1109,16 +1125,16 @@ Matvec_is_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) 
 */
 
 int32_t
-Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other, Magnitude_type precision )
+Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other, Magnitude_type precision )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
    PRECONDITION( "precision not negative", precision >= 0.0 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
    Magnitude_type m = 0;
@@ -1126,9 +1142,9 @@ Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_t
    Magnitude_type p = 0;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type item = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
@@ -1139,18 +1155,18 @@ Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_t
    item = pa[0];
    m = SQUARED_MAGNITUDE_FUNCTION( item );
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = pa[i*columns + j];
+         item = pa[i * columns + j];
          x = SQUARED_MAGNITUDE_FUNCTION( item );
          if ( x > m )
          {
             m = x;
          }
 
-         item = pa_other[i*columns + j];
+         item = pa_other[i * columns + j];
          x = SQUARED_MAGNITUDE_FUNCTION( item );
          if ( x > m )
          {
@@ -1160,16 +1176,16 @@ Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_t
    }
 
    // get precision value to compare to
-   p = sqrt( m )*precision;
+   p = sqrt( m ) * precision;
 
-   // go through each item in matvec, check that its items are p close to
+   // go through each item in current, check that its items are p close to
    // corresponding item in other
-   for ( i=0; ( ( i<rows ) && ( result == 1 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( result == 1 ) ); i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = pa[i*columns + j];
-         item1 = pa_other[i*columns + j];
+         item = pa[i * columns + j];
+         item1 = pa_other[i * columns + j];
          item2 = NEGATE_FUNCTION( item1 );
          item3 = ADD_FUNCTION( item, item2 );
          x = SQUARED_MAGNITUDE_FUNCTION( item3 );
@@ -1185,8 +1201,8 @@ Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_t
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1196,20 +1212,20 @@ Matvec_is_approximately_equal( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_t
 */
 
 void
-Matvec_put( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int32_t i_row, int32_t i_column )
+Matvec_put( Prefix )( Matvec_type( Prefix ) *current, Type value, int32_t i_row, int32_t i_column )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*matvec).a[i_row*(*matvec).n_columns + i_column] = value;
+   (*current).a[i_row * (*current).n_columns + i_column] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1219,23 +1235,23 @@ Matvec_put( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int32_t i_row, 
 */
 
 void
-Matvec_put_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int32_t i_row, int32_t i_column )
+Matvec_put_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Type value, int32_t i_row, int32_t i_column )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // dispose of current item
-   DISPOSE_FUNCTION( (*matvec).a[i_row*(*matvec).n_rows + i_column] );
+   DISPOSE_FUNCTION( (*current).a[i_row * (*current).n_rows + i_column] );
 
    // set item with value
-   (*matvec).a[i_row*(*matvec).n_columns + i_column] = value;
+   (*current).a[i_row * (*current).n_columns + i_column] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1245,21 +1261,21 @@ Matvec_put_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int
 */
 
 void
-Matvec_vector_put( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int32_t i )
+Matvec_vector_put( Prefix )( Matvec_type( Prefix ) *current, Type value, int32_t i )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( i >= 0 ) && ( i < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( i >= 0 ) && ( i < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( i >= 0 ) && ( i < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( i >= 0 ) && ( i < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*matvec).a[i] = value;
+   (*current).a[i] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1269,24 +1285,24 @@ Matvec_vector_put( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int32_t 
 */
 
 void
-Matvec_vector_put_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type value, int32_t i )
+Matvec_vector_put_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Type value, int32_t i )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( i >= 0 ) && ( i < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( i >= 0 ) && ( i < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( i >= 0 ) && ( i < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( i >= 0 ) && ( i < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // dispose of current item
-   DISPOSE_FUNCTION( (*matvec).a[i] );
+   DISPOSE_FUNCTION( (*current).a[i] );
 
    // set item with value
-   (*matvec).a[i] = value;
+   (*current).a[i] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1296,21 +1312,21 @@ Matvec_vector_put_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type val
 */
 
 void
-Matvec_vector_put_x( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
+Matvec_vector_put_x( Prefix )( Matvec_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 0 >= 0 ) && ( 0 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 0 >= 0 ) && ( 0 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 0 >= 0 ) && ( 0 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 0 >= 0 ) && ( 0 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*matvec).a[0] = value;
+   (*current).a[0] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1320,24 +1336,24 @@ Matvec_vector_put_x( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
 */
 
 void
-Matvec_vector_put_x_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
+Matvec_vector_put_x_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 0 >= 0 ) && ( 0 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 0 >= 0 ) && ( 0 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 0 >= 0 ) && ( 0 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 0 >= 0 ) && ( 0 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // dispose of current item
-   DISPOSE_FUNCTION( (*matvec).a[0] );
+   DISPOSE_FUNCTION( (*current).a[0] );
 
    // set item with value
-   (*matvec).a[0] = value;
+   (*current).a[0] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1347,21 +1363,21 @@ Matvec_vector_put_x_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type v
 */
 
 void
-Matvec_vector_put_y( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
+Matvec_vector_put_y( Prefix )( Matvec_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 1 >= 0 ) && ( 1 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 1 >= 0 ) && ( 1 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 1 >= 0 ) && ( 1 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 1 >= 0 ) && ( 1 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*matvec).a[1] = value;
+   (*current).a[1] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1371,24 +1387,24 @@ Matvec_vector_put_y( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
 */
 
 void
-Matvec_vector_put_y_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
+Matvec_vector_put_y_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 1 >= 0 ) && ( 1 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 1 >= 0 ) && ( 1 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 1 >= 0 ) && ( 1 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 1 >= 0 ) && ( 1 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // dispose of current item
-   DISPOSE_FUNCTION( (*matvec).a[1] );
+   DISPOSE_FUNCTION( (*current).a[1] );
 
    // set item with value
-   (*matvec).a[1] = value;
+   (*current).a[1] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1398,21 +1414,21 @@ Matvec_vector_put_y_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type v
 */
 
 void
-Matvec_vector_put_z( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
+Matvec_vector_put_z( Prefix )( Matvec_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 2 >= 0 ) && ( 2 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 2 >= 0 ) && ( 2 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 2 >= 0 ) && ( 2 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 2 >= 0 ) && ( 2 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*matvec).a[2] = value;
+   (*current).a[2] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1422,24 +1438,24 @@ Matvec_vector_put_z( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
 */
 
 void
-Matvec_vector_put_z_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type value )
+Matvec_vector_put_z_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( ( 2 >= 0 ) && ( 2 < (*matvec).n_rows ) ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( ( 2 >= 0 ) && ( 2 < (*matvec).n_columns ) ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( ( 2 >= 0 ) && ( 2 < (*current).n_rows ) ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( ( 2 >= 0 ) && ( 2 < (*current).n_columns ) ) : 1 );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // dispose of current item
-   DISPOSE_FUNCTION( (*matvec).a[2] );
+   DISPOSE_FUNCTION( (*current).a[2] );
 
    // set item with value
-   (*matvec).a[2] = value;
+   (*current).a[2] = value;
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1449,33 +1465,33 @@ Matvec_vector_put_z_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Type v
 */
 
 void
-Matvec_set_from( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_set_from( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         SET_FROM( pa[i*columns + j], pa_other[i*columns + j] );
+         SET_FROM( pa[i * columns + j], pa_other[i * columns + j] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1485,34 +1501,34 @@ Matvec_set_from( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) 
 */
 
 void
-Matvec_set_from_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_set_from_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         DISPOSE_FUNCTION( pa[i*columns + j] );
-         SET_FROM( pa[i*columns + j], pa_other[i*columns + j] );
+         DISPOSE_FUNCTION( pa[i * columns + j] );
+         SET_FROM( pa[i * columns + j], pa_other[i * columns + j] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1522,30 +1538,30 @@ Matvec_set_from_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_typ
 */
 
 void
-Matvec_do_and_set_all( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_func( Prefix ) func )
+Matvec_do_and_set_all( Prefix )( Matvec_type( Prefix ) *current, Matvec_func( Prefix ) func )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "func not null", func != NULL );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         SET_FROM( pa[i*columns + j], func( pa[i*columns + j] ) );
+         SET_FROM( pa[i * columns + j], func( pa[i * columns + j] ) );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1555,35 +1571,35 @@ Matvec_do_and_set_all( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_func( Pre
 */
 
 void
-Matvec_do_and_set_all_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_func( Prefix ) func )
+Matvec_do_and_set_all_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Matvec_func( Prefix ) func )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "func not null", func != NULL );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
    int32_t index = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    Type item = DEFAULT_VALUE;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         index = i*columns + j;
+         index = i * columns + j;
          item = func( pa[index] );
          DISPOSE_FUNCTION( ( pa[index] ) );
          pa[index] = item;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1593,36 +1609,36 @@ Matvec_do_and_set_all_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matv
 */
 
 void
-Matvec_do_and_set_if( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_func( Prefix ) func, Matvec_test_func( Prefix ) test_func )
+Matvec_do_and_set_if( Prefix )( Matvec_type( Prefix ) *current, Matvec_func( Prefix ) func, Matvec_test_func( Prefix ) test_func )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "func not null", func != NULL );
    PRECONDITION( "test_func not null", test_func != NULL );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
    int32_t flag = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         flag = test_func( pa[i*columns + j] );
+         flag = test_func( pa[i * columns + j] );
          if( flag == 1 )
          {
-            SET_FROM( pa[i*columns + j], func( pa[i*columns + j] ) );
+            SET_FROM( pa[i * columns + j], func( pa[i * columns + j] ) );
          }
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1632,29 +1648,29 @@ Matvec_do_and_set_if( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_func( Pref
 */
 
 void
-Matvec_do_and_set_if_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_func( Prefix ) func, Matvec_test_func( Prefix ) test_func )
+Matvec_do_and_set_if_and_dispose( Prefix )( Matvec_type( Prefix ) *current, Matvec_func( Prefix ) func, Matvec_test_func( Prefix ) test_func )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "func not null", func != NULL );
    PRECONDITION( "test_func not null", test_func != NULL );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
    int32_t flag = 0;
    int32_t index = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    Type item = DEFAULT_VALUE;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         index = i*columns + j;
+         index = i * columns + j;
          flag = test_func( pa[index] );
 
          if ( flag == 1 )
@@ -1666,8 +1682,8 @@ Matvec_do_and_set_if_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matve
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1677,41 +1693,41 @@ Matvec_do_and_set_if_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec, Matve
 */
 
 Matvec_type( Prefix ) *
-Matvec_one( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_one( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    Type *pa = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
          if ( i == j )
          {
-            pa[ i*columns + j ] = ONE_VALUE;
+            pa[ i * columns + j ] = ONE_VALUE;
          }
          else
          {
-            pa[ i*columns + j ] = DEFAULT_VALUE;
+            pa[ i * columns + j ] = DEFAULT_VALUE;
          }
 
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1721,33 +1737,33 @@ Matvec_one( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_zero( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_zero( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    Type *pa = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa[ i*columns + j ] = DEFAULT_VALUE;
+         pa[ i * columns + j ] = DEFAULT_VALUE;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1757,37 +1773,37 @@ Matvec_zero( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_set_to_one( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_set_to_one( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
          if ( i == j )
          {
-            SET_FROM( pa[ i*columns + j ], ONE_VALUE );
+            SET_FROM( pa[ i * columns + j ], ONE_VALUE );
          }
          else
          {
-            SET_FROM( pa[ i*columns + j ], DEFAULT_VALUE );
+            SET_FROM( pa[ i * columns + j ], DEFAULT_VALUE );
          }
 
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1797,38 +1813,38 @@ Matvec_set_to_one( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_set_to_one_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_set_to_one_and_dispose( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         DISPOSE_FUNCTION( pa[ i*columns + j ] );
+         DISPOSE_FUNCTION( pa[ i * columns + j ] );
          if ( i == j )
          {
-            pa[ i*columns + j ] = ONE_VALUE;
+            pa[ i * columns + j ] = ONE_VALUE;
          }
          else
          {
-            pa[ i*columns + j ] = DEFAULT_VALUE;
+            pa[ i * columns + j ] = DEFAULT_VALUE;
          }
 
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1838,29 +1854,29 @@ Matvec_set_to_one_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_set_to_zero( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_set_to_zero( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         SET_FROM( pa[ i*columns + j ], DEFAULT_VALUE );
+         SET_FROM( pa[ i * columns + j ], DEFAULT_VALUE );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1870,30 +1886,30 @@ Matvec_set_to_zero( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_set_to_zero_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_set_to_zero_and_dispose( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         DISPOSE_FUNCTION( pa[ i*columns + j ] );
-         pa[ i*columns + j ] = DEFAULT_VALUE;
+         DISPOSE_FUNCTION( pa[ i * columns + j ] );
+         pa[ i * columns + j ] = DEFAULT_VALUE;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1903,34 +1919,34 @@ Matvec_set_to_zero_and_dispose( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_copied( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_copied( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa_result[ i*columns + j ] = DUPLICATE_FUNCTION( pa[ i*columns + j ] );
+         pa_result[ i * columns + j ] = DUPLICATE_FUNCTION( pa[ i * columns + j ] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1942,43 +1958,43 @@ Matvec_copied( Prefix )( Matvec_type( Prefix ) *matvec )
 Matvec_type( Prefix ) *
 Matvec_subcopied( Prefix )
 (
-   Matvec_type( Prefix ) *matvec,
+   Matvec_type( Prefix ) *current,
    int32_t i_row,
    int32_t n_row,
    int32_t i_column,
    int32_t n_column
 )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   PRECONDITION( "n_row OK", ( ( i_row + n_row - 1 >= 0 ) && ( i_row + n_row - 1 < (*matvec).n_rows ) ) );
-   PRECONDITION( "n_column OK", ( ( i_column + n_column - 1 >= 0 ) && ( i_column + n_column - 1 < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   PRECONDITION( "n_row OK", ( ( i_row + n_row - 1 >= 0 ) && ( i_row + n_row - 1 < (*current).n_rows ) ) );
+   PRECONDITION( "n_column OK", ( ( i_column + n_column - 1 >= 0 ) && ( i_column + n_column - 1 < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
    result = Matvec_make( Prefix )( n_row, n_column );
    pa_result = (*result).a;
 
-   for ( i=0; i<n_column; i++ )
+   for ( i = 0; i < n_column; i++ )
    {
-      for ( j=0; j<n_row; j++ )
+      for ( j = 0; j < n_row; j++ )
       {
-         pa_result[ i*n_row + j ]
-            = DUPLICATE_FUNCTION( pa[ ( i + i_row )*rows + j + i_column] );
+         pa_result[ i * n_row + j ]
+            = DUPLICATE_FUNCTION( pa[ ( i + i_row ) * rows + j + i_column] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1990,7 +2006,7 @@ Matvec_subcopied( Prefix )
 void
 Matvec_subcopy( Prefix )
 (
-   Matvec_type( Prefix ) *matvec,
+   Matvec_type( Prefix ) *current,
    Matvec_type( Prefix ) *other,
    int32_t i_row,
    int32_t i_row_other,
@@ -2000,39 +2016,39 @@ Matvec_subcopy( Prefix )
    int32_t n_column_other
 )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
    PRECONDITION( "i_row_other OK", ( ( i_row_other >= 0 ) && ( i_row_other < (*other).n_rows ) ) );
    PRECONDITION( "i_column_other OK", ( ( i_column_other >= 0 ) && ( i_column_other < (*other).n_columns ) ) );
    PRECONDITION( "n_row_other OK", ( ( i_row_other + n_row_other - 1 >= 0 ) && ( i_row_other + n_row_other - 1 < (*other).n_rows ) ) );
    PRECONDITION( "n_column_other OK", ( ( i_column_other + n_column_other - 1 >= 0 ) && ( i_column_other + n_column_other - 1 < (*other).n_columns ) ) );
-   PRECONDITION( "n_row_other in matvec OK", ( ( i_row + n_row_other - 1 >= 0 ) && ( i_row + n_row_other - 1 < (*matvec).n_rows ) ) );
-   PRECONDITION( "n_column_other in matvec OK", ( ( i_column + n_column_other - 1 >= 0 ) && ( i_column + n_column_other - 1 < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "n_row_other in current OK", ( ( i_row + n_row_other - 1 >= 0 ) && ( i_row + n_row_other - 1 < (*current).n_rows ) ) );
+   PRECONDITION( "n_column_other in current OK", ( ( i_column + n_column_other - 1 >= 0 ) && ( i_column + n_column_other - 1 < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t columns = (*matvec).n_columns;
+   int32_t columns = (*current).n_columns;
    int32_t columns_other = (*other).n_columns;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   // write over part of matvec
-   for ( i=0; i<n_column_other; i++ )
+   // write over part of current
+   for ( i = 0; i < n_column_other; i++ )
    {
-      for ( j=0; j<n_row_other; j++ )
+      for ( j = 0; j < n_row_other; j++ )
       {
-         SET_FROM( pa[ ( i + i_row)*columns + j + i_column], pa_other[ ( i + i_row_other )*columns_other + j + i_column_other] );
+         SET_FROM( pa[ ( i + i_row )*columns + j + i_column], pa_other[ ( i + i_row_other )*columns_other + j + i_column_other] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2044,7 +2060,7 @@ Matvec_subcopy( Prefix )
 void
 Matvec_subcopy_and_dispose( Prefix )
 (
-   Matvec_type( Prefix ) *matvec,
+   Matvec_type( Prefix ) *current,
    Matvec_type( Prefix ) *other,
    int32_t i_row,
    int32_t i_row_other,
@@ -2054,41 +2070,41 @@ Matvec_subcopy_and_dispose( Prefix )
    int32_t n_column_other
 )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
    PRECONDITION( "i_row_other OK", ( ( i_row_other >= 0 ) && ( i_row_other < (*other).n_rows ) ) );
    PRECONDITION( "i_column_other OK", ( ( i_column_other >= 0 ) && ( i_column_other < (*other).n_columns ) ) );
    PRECONDITION( "n_row_other OK", ( ( i_row_other + n_row_other - 1 >= 0 ) && ( i_row_other + n_row_other - 1 < (*other).n_rows ) ) );
    PRECONDITION( "n_column_other OK", ( ( i_column_other + n_column_other - 1 >= 0 ) && ( i_column_other + n_column_other - 1 < (*other).n_columns ) ) );
-   PRECONDITION( "n_row_other in matvec OK", ( ( i_row + n_row_other - 1 >= 0 ) && ( i_row + n_row_other - 1 < (*matvec).n_rows ) ) );
-   PRECONDITION( "n_column_other in matvec OK", ( ( i_column + n_column_other - 1 >= 0 ) && ( i_column + n_column_other - 1 < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "n_row_other in current OK", ( ( i_row + n_row_other - 1 >= 0 ) && ( i_row + n_row_other - 1 < (*current).n_rows ) ) );
+   PRECONDITION( "n_column_other in current OK", ( ( i_column + n_column_other - 1 >= 0 ) && ( i_column + n_column_other - 1 < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
+   int32_t rows = (*current).n_rows;
    int32_t rows_other = (*other).n_rows;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   // write over part of matvec
-   for ( i=0; i<n_column_other; i++ )
+   // write over part of current
+   for ( i = 0; i < n_column_other; i++ )
    {
-      for ( j=0; j<n_row_other; j++ )
+      for ( j = 0; j < n_row_other; j++ )
       {
          DISPOSE_FUNCTION( pa[ ( i + i_row )*rows + j + i_column] );
          pa[ ( i + i_row )*rows + j + i_column]
-            = DUPLICATE_FUNCTION( pa_other[ ( i + i_row_other )*rows_other + j + i_column_other] );
+            = DUPLICATE_FUNCTION( pa_other[ ( i + i_row_other ) * rows_other + j + i_column_other] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2098,17 +2114,17 @@ Matvec_subcopy_and_dispose( Prefix )
 */
 
 Type *
-Matvec_as_array( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_as_array( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type *result = (*matvec).a;
-   
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   Type *result = (*current).a;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2118,27 +2134,28 @@ Matvec_as_array( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type *
-Matvec_copy_as_array( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_copy_as_array( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type *result = NULL;
    int32_t i = 0;
-   int32_t count = (*matvec).n_rows*(*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t count = (*current).n_rows * (*current).n_columns;
+   Type *pa = (*current).a;
 
    result = ( Type * ) calloc( count, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
 
-   for ( i=0; i<count; i++ )
+   for ( i = 0; i < count; i++ )
    {
       result[i] = DUPLICATE_FUNCTION( pa[i] );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2148,31 +2165,31 @@ Matvec_copy_as_array( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_vector_from_row( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_column )
+Matvec_vector_from_row( Prefix )( Matvec_type( Prefix ) *current, int32_t i_column )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make_row_vector( Prefix )( (*matvec).n_columns );
+   result = Matvec_make_row_vector( Prefix )( (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      pa_result[i] = DUPLICATE_FUNCTION( pa[ i_column*columns + i] );
+      pa_result[i] = DUPLICATE_FUNCTION( pa[ i_column * columns + i] );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2183,31 +2200,31 @@ Matvec_vector_from_row( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_colum
 
 Matvec_type( Prefix ) *
 Matvec_vector_from_column( Prefix )
-( Matvec_type( Prefix ) *matvec, int32_t i_row )
+( Matvec_type( Prefix ) *current, int32_t i_row )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make_column_vector( Prefix )( (*matvec).n_rows );
+   result = Matvec_make_column_vector( Prefix )( (*current).n_rows );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      pa_result[i] = DUPLICATE_FUNCTION( pa[ i*columns + i_row] );
+      pa_result[i] = DUPLICATE_FUNCTION( pa[ i * columns + i_row] );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2217,33 +2234,33 @@ Matvec_vector_from_column( Prefix )
 */
 
 Type
-Matvec_row_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_row_1, int32_t i_row_2 )
+Matvec_row_vector_dot( Prefix )( Matvec_type( Prefix ) *current, int32_t i_row_1, int32_t i_row_2 )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row_1 OK", ( ( i_row_1 >= 0 ) && ( i_row_1 < (*matvec).n_rows ) ) );
-   PRECONDITION( "i_row_2 OK", ( ( i_row_2 >= 0 ) && ( i_row_2 < (*matvec).n_rows ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row_1 OK", ( ( i_row_1 >= 0 ) && ( i_row_1 < (*current).n_rows ) ) );
+   PRECONDITION( "i_row_2 OK", ( ( i_row_2 >= 0 ) && ( i_row_2 < (*current).n_rows ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    int32_t i = 0;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<columns; i++ )
+   for ( i = 0; i < columns; i++ )
    {
-      item1 = CONJUGATE_FUNCTION( pa[ i_row_2*columns + i] );
-      item2 = MULTIPLY_FUNCTION( pa[ i_row_1*columns + i], item1 );
+      item1 = CONJUGATE_FUNCTION( pa[ i_row_2 * columns + i] );
+      item2 = MULTIPLY_FUNCTION( pa[ i_row_1 * columns + i], item1 );
       result = ADD_FUNCTION( result, item2 );
       DISPOSE_FUNCTION( item1 );
       DISPOSE_FUNCTION( item2 );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2253,26 +2270,26 @@ Matvec_row_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_row_1,
 */
 
 Magnitude_type
-Matvec_row_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_row )
+Matvec_row_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *current, int32_t i_row )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Magnitude_type result = 0;
    int32_t i = 0;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<columns; i++ )
+   for ( i = 0; i < columns; i++ )
    {
-      result = result + SQUARED_MAGNITUDE_FUNCTION( pa[ i_row*columns + i] );
+      result = result + SQUARED_MAGNITUDE_FUNCTION( pa[ i_row * columns + i] );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2282,28 +2299,28 @@ Matvec_row_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec, in
 */
 
 void
-Matvec_row_vector_scale( Prefix )( Matvec_type( Prefix ) *matvec, Type scale, int32_t i_row )
+Matvec_row_vector_scale( Prefix )( Matvec_type( Prefix ) *current, Type scale, int32_t i_row )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*matvec).n_rows ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_row OK", ( ( i_row >= 0 ) && ( i_row < (*current).n_rows ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<columns; i++ )
+   for ( i = 0; i < columns; i++ )
    {
-      item = MULTIPLY_FUNCTION( scale, pa[ i_row*columns + i] );
-      SET_FROM( pa[ i_row*columns + i], item );
+      item = MULTIPLY_FUNCTION( scale, pa[ i_row * columns + i] );
+      SET_FROM( pa[ i_row * columns + i], item );
       DISPOSE_FUNCTION( item );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2313,34 +2330,34 @@ Matvec_row_vector_scale( Prefix )( Matvec_type( Prefix ) *matvec, Type scale, in
 */
 
 Type
-Matvec_column_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_column_1, int32_t i_column_2 )
+Matvec_column_vector_dot( Prefix )( Matvec_type( Prefix ) *current, int32_t i_column_1, int32_t i_column_2 )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_column_1 OK", ( ( i_column_1 >= 0 ) && ( i_column_1 < (*matvec).n_columns ) ) );
-   PRECONDITION( "i_column_2 OK", ( ( i_column_2 >= 0 ) && ( i_column_2 < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_column_1 OK", ( ( i_column_1 >= 0 ) && ( i_column_1 < (*current).n_columns ) ) );
+   PRECONDITION( "i_column_2 OK", ( ( i_column_2 >= 0 ) && ( i_column_2 < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    int32_t i = 0;
-   int32_t columns = (*matvec).n_columns;
-   int32_t rows = (*matvec).n_rows;
-   Type *pa = (*matvec).a;
+   int32_t columns = (*current).n_columns;
+   int32_t rows = (*current).n_rows;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      item1 = CONJUGATE_FUNCTION( pa[ i*columns + i_column_2] );
-      item2 = MULTIPLY_FUNCTION( pa[ i*columns + i_column_1], item1 );
+      item1 = CONJUGATE_FUNCTION( pa[ i * columns + i_column_2] );
+      item2 = MULTIPLY_FUNCTION( pa[ i * columns + i_column_1], item1 );
       result = ADD_FUNCTION( result, item2 );
       DISPOSE_FUNCTION( item1 );
       DISPOSE_FUNCTION( item2 );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2350,27 +2367,27 @@ Matvec_column_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_col
 */
 
 Magnitude_type
-Matvec_column_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec, int32_t i_column )
+Matvec_column_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *current, int32_t i_column )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Magnitude_type result = 0;
    int32_t i = 0;
-   int32_t columns = (*matvec).n_columns;
-   int32_t rows = (*matvec).n_rows;
-   Type *pa = (*matvec).a;
+   int32_t columns = (*current).n_columns;
+   int32_t rows = (*current).n_rows;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      result = result + SQUARED_MAGNITUDE_FUNCTION( pa[ i*columns + i_column] );
+      result = result + SQUARED_MAGNITUDE_FUNCTION( pa[ i * columns + i_column] );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2380,29 +2397,29 @@ Matvec_column_vector_squared_magnitude( Prefix )( Matvec_type( Prefix ) *matvec,
 */
 
 void
-Matvec_column_vector_scale( Prefix )( Matvec_type( Prefix ) *matvec, Type scale, int32_t i_column )
+Matvec_column_vector_scale( Prefix )( Matvec_type( Prefix ) *current, Type scale, int32_t i_column )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*matvec).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "i_column OK", ( ( i_column >= 0 ) && ( i_column < (*current).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
-   int32_t columns = (*matvec).n_columns;
-   int32_t rows = (*matvec).n_rows;
-   Type *pa = (*matvec).a;
+   int32_t columns = (*current).n_columns;
+   int32_t rows = (*current).n_rows;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      item = MULTIPLY_FUNCTION( scale, pa[ i*columns + i_column] );
-      SET_FROM( pa[ i*columns + i_column], item );
+      item = MULTIPLY_FUNCTION( scale, pa[ i * columns + i_column] );
+      SET_FROM( pa[ i * columns + i_column], item );
       DISPOSE_FUNCTION( item );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2412,33 +2429,33 @@ Matvec_column_vector_scale( Prefix )( Matvec_type( Prefix ) *matvec, Type scale,
 */
 
 void
-Matvec_add( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_add( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         SET_FROM( pa[i*columns + j], ADD_FUNCTION( pa[i*columns + j], pa_other[i*columns + j] ) );
+         SET_FROM( pa[i * columns + j], ADD_FUNCTION( pa[i * columns + j], pa_other[i * columns + j] ) );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2448,38 +2465,38 @@ Matvec_add( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *othe
 */
 
 Matvec_type( Prefix ) *
-Matvec_added( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_added( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         pa_result[i*columns + j] = ADD_FUNCTION( pa[i*columns + j], pa_other[i*columns + j] );
+         pa_result[i * columns + j] = ADD_FUNCTION( pa[i * columns + j], pa_other[i * columns + j] );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2489,39 +2506,39 @@ Matvec_added( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *ot
 */
 
 void
-Matvec_subtract( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_subtract( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item1 = NEGATE_FUNCTION( pa_other[i*columns + j] );
-         item2 = ADD_FUNCTION( pa[i*columns + j], item1 );
-         SET_FROM( pa[i*columns + j], item2 );
+         item1 = NEGATE_FUNCTION( pa_other[i * columns + j] );
+         item2 = ADD_FUNCTION( pa[i * columns + j], item1 );
+         SET_FROM( pa[i * columns + j], item2 );
          DISPOSE_FUNCTION( item1 );
          DISPOSE_FUNCTION( item2 );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2531,41 +2548,41 @@ Matvec_subtract( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) 
 */
 
 Matvec_type( Prefix ) *
-Matvec_subtracted( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_subtracted( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item1 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item1 = NEGATE_FUNCTION( pa_other[i*columns + j] );
-         pa_result[i*columns + j] = ADD_FUNCTION( pa[i*columns + j], item1 );
+         item1 = NEGATE_FUNCTION( pa_other[i * columns + j] );
+         pa_result[i * columns + j] = ADD_FUNCTION( pa[i * columns + j], item1 );
          DISPOSE_FUNCTION( item1 );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2575,62 +2592,62 @@ Matvec_subtracted( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix 
 */
 
 void
-Matvec_multiply( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_multiply( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
    PRECONDITION( "other is square", ( (*other).n_rows == (*other).n_columns ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *temp = NULL;
    Type item1 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
    int32_t k = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    int32_t other_rows = (*other).n_rows;
    int32_t other_columns = (*other).n_columns;
    Type item = DEFAULT_VALUE;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_temp = NULL;
 
-   temp = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   temp = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_temp = (*temp).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<other_columns; j++ )
+      for ( j = 0; j < other_columns; j++ )
       {
          item = DEFAULT_VALUE;
-         for( k=0; k<columns; k++ )
+         for( k = 0; k < columns; k++ )
          {
-            item1 = MULTIPLY_FUNCTION( pa[i*columns + k], pa_other[k*columns + j] );
+            item1 = MULTIPLY_FUNCTION( pa[i * columns + k], pa_other[k * columns + j] );
             item = ADD_FUNCTION( item, item1 );
             DISPOSE_FUNCTION( item1 );
          }
-         pa_temp[i*columns + j] = item;
+         pa_temp[i * columns + j] = item;
       }
    }
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<other_rows; j++ )
+      for ( j = 0; j < other_rows; j++ )
       {
-         SET_FROM( pa[i*columns + j], pa_temp[i*columns + j] );
+         SET_FROM( pa[i * columns + j], pa_temp[i * columns + j] );
       }
    }
 
-   Matvec_dispose_with_contents( Prefix )( temp );
+   Matvec_deep_dispose( Prefix )( &temp );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2640,49 +2657,49 @@ Matvec_multiply( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) 
 */
 
 Matvec_type( Prefix ) *
-Matvec_multiplied( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_multiplied( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are sized OK", ( (*matvec).n_columns == (*other).n_rows ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are sized OK", ( (*current).n_columns == (*other).n_rows ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item1 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
    int32_t k = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    int32_t other_columns = (*other).n_columns;
    Type item = DEFAULT_VALUE;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_result = NULL;
 
-   result  = Matvec_make( Prefix )( (*matvec).n_rows, (*other).n_columns );
+   result  = Matvec_make( Prefix )( (*current).n_rows, (*other).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<other_columns; j++ )
+      for ( j = 0; j < other_columns; j++ )
       {
          item = DEFAULT_VALUE;
-         for( k=0; k<columns; k++ )
+         for( k = 0; k < columns; k++ )
          {
-            item1 = MULTIPLY_FUNCTION( pa[i*columns + k], pa_other[k*other_columns + j] );
+            item1 = MULTIPLY_FUNCTION( pa[i * columns + k], pa_other[k * other_columns + j] );
             item = ADD_FUNCTION( item, item1 );
             DISPOSE_FUNCTION( item1 );
          }
-         pa_result[i*other_columns + j] = item;
+         pa_result[i * other_columns + j] = item;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2692,27 +2709,27 @@ Matvec_multiplied( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix 
 */
 
 void
-Matvec_vector_normalize( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_normalize( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item1 = DEFAULT_VALUE;
    Magnitude_type scale = 0;
    int32_t i = 0;
    int32_t n = 0;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
 
-   if ( (*matvec).n_rows > (*matvec).n_columns )
+   if ( (*current).n_rows > (*current).n_columns )
    {
-      n = (*matvec).n_rows;
+      n = (*current).n_rows;
    }
    else
    {
-      n = (*matvec).n_columns;
+      n = (*current).n_columns;
    }
 
    // get magnitude inverse for scaling factor
@@ -2721,7 +2738,7 @@ Matvec_vector_normalize( Prefix )( Matvec_type( Prefix ) *matvec )
       scale = scale + SQUARED_MAGNITUDE_FUNCTION( pa[i] );
    }
 
-   scale = 1.0/sqrt( scale );
+   scale = 1.0 / sqrt( scale );
 
    for ( i = 0; i < n; i++ )
    {
@@ -2730,8 +2747,8 @@ Matvec_vector_normalize( Prefix )( Matvec_type( Prefix ) *matvec )
       DISPOSE_FUNCTION( item1 );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2741,29 +2758,29 @@ Matvec_vector_normalize( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_vector_normalized( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_vector_normalized( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Magnitude_type scale = 0;
    int32_t i = 0;
    int32_t n = 0;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   if ( (*matvec).n_rows > (*matvec).n_columns )
+   if ( (*current).n_rows > (*current).n_columns )
    {
-      n = (*matvec).n_rows;
+      n = (*current).n_rows;
       result = Matvec_make_column_vector( Prefix )( n );
    }
    else
    {
-      n = (*matvec).n_columns;
+      n = (*current).n_columns;
       result = Matvec_make_row_vector( Prefix )( n );
    }
 
@@ -2775,15 +2792,15 @@ Matvec_vector_normalized( Prefix )( Matvec_type( Prefix ) *matvec )
       scale = scale + SQUARED_MAGNITUDE_FUNCTION( pa[i] );
    }
 
-   scale = 1.0/sqrt( scale );
+   scale = 1.0 / sqrt( scale );
 
    for ( i = 0; i < n; i++ )
    {
       pa_result[i] = MULTIPLY_FUNCTION( scale, pa[i] );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2793,36 +2810,36 @@ Matvec_vector_normalized( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type
-Matvec_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_vector_dot( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
-   PRECONDITION( "other not null", matvec != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
+   PRECONDITION( "other not null", current != NULL );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
    PRECONDITION( "other is vector", ( ( (*other).n_rows == 1 ) || ( (*other).n_columns == 1  ) ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t n = 0;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   if ( (*matvec).n_rows == 1 )
+   if ( (*current).n_rows == 1 )
    {
-      n = (*matvec).n_columns;
+      n = (*current).n_columns;
    }
    else
    {
-      n = (*matvec).n_rows;
+      n = (*current).n_rows;
    }
 
-   for ( i=0; i<n; i++ )
+   for ( i = 0; i < n; i++ )
    {
       item1 = CONJUGATE_FUNCTION( pa_other[i] );
       item2 = MULTIPLY_FUNCTION( pa[i], item1 );
@@ -2831,8 +2848,8 @@ Matvec_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix 
       DISPOSE_FUNCTION( item2 );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2842,20 +2859,20 @@ Matvec_vector_dot( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix 
 */
 
 void
-Matvec_vector_cross( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_vector_cross( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
    PRECONDITION( "other is vector", ( ( (*other).n_rows == 1 ) || ( (*other).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( (*matvec).n_rows == 3 ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( (*matvec).n_columns == 3 ) : 1 );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( (*current).n_rows == 3 ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( (*current).n_columns == 3 ) : 1 );
    PRECONDITION( "i_row_other OK",    ( (*other).n_columns == 1 ) ? ( (*other).n_rows == 3 ) : 1 );
    PRECONDITION( "i_column_other OK", ( (*other).n_rows == 1 )    ? ( (*other).n_columns == 3 ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *temp = NULL;
    Type item1 = DEFAULT_VALUE;
@@ -2863,11 +2880,11 @@ Matvec_vector_cross( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefi
    Type item3 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t n = 0;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_temp = NULL;
 
-   if ( (*matvec).n_rows > (*matvec).n_columns )
+   if ( (*current).n_rows > (*current).n_columns )
    {
       n = 3;
       temp = Matvec_make_column_vector( Prefix )( n );
@@ -2904,15 +2921,15 @@ Matvec_vector_cross( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefi
    DISPOSE_FUNCTION( item2 );
    DISPOSE_FUNCTION( item3 );
 
-   for ( i = 0; i<n; i++ )
+   for ( i = 0; i < n; i++ )
    {
       SET_FROM( pa[i], pa_temp[i] );
    }
 
-   Matvec_dispose_with_contents( Prefix )( temp );
+   Matvec_deep_dispose( Prefix )( &temp );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2922,30 +2939,30 @@ Matvec_vector_cross( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefi
 */
 
 Matvec_type( Prefix ) *
-Matvec_vector_crossed( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_vector_crossed( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is vector", ( ( (*matvec).n_rows == 1 ) || ( (*matvec).n_columns == 1  ) ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is vector", ( ( (*current).n_rows == 1 ) || ( (*current).n_columns == 1  ) ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
    PRECONDITION( "other is vector", ( ( (*other).n_rows == 1 ) || ( (*other).n_columns == 1  ) ) );
-   PRECONDITION( "i_row OK",    ( (*matvec).n_columns == 1 ) ? ( (*matvec).n_rows == 3 ) : 1 );
-   PRECONDITION( "i_column OK", ( (*matvec).n_rows == 1 )    ? ( (*matvec).n_columns == 3 ) : 1 );
+   PRECONDITION( "i_row OK",    ( (*current).n_columns == 1 ) ? ( (*current).n_rows == 3 ) : 1 );
+   PRECONDITION( "i_column OK", ( (*current).n_rows == 1 )    ? ( (*current).n_columns == 3 ) : 1 );
    PRECONDITION( "i_row_other OK",    ( (*other).n_columns == 1 ) ? ( (*other).n_rows == 3 ) : 1 );
    PRECONDITION( "i_column_other OK", ( (*other).n_rows == 1 )    ? ( (*other).n_columns == 3 ) : 1 );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    Type item3 = DEFAULT_VALUE;
-   Type *pa = (*matvec).a;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_result = NULL;
 
-   if ( (*matvec).n_rows > (*matvec).n_columns )
+   if ( (*current).n_rows > (*current).n_columns )
    {
       result = Matvec_make_column_vector( Prefix )( 3 );
    }
@@ -2980,8 +2997,8 @@ Matvec_vector_crossed( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Pre
    DISPOSE_FUNCTION( item2 );
    DISPOSE_FUNCTION( item3 );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2991,36 +3008,36 @@ Matvec_vector_crossed( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Pre
 */
 
 void
-Matvec_item_by_item_multiply( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_item_by_item_multiply( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = MULTIPLY_FUNCTION( pa[i*columns + j], pa_other[i*columns + j ] );
-         SET_FROM( pa[i*columns + j], item );
+         item = MULTIPLY_FUNCTION( pa[i * columns + j], pa_other[i * columns + j ] );
+         SET_FROM( pa[i * columns + j], item );
          DISPOSE_FUNCTION( item );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3030,40 +3047,40 @@ Matvec_item_by_item_multiply( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_ty
 */
 
 Matvec_type( Prefix ) *
-Matvec_item_by_item_multiplied( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_type( Prefix ) *other )
+Matvec_item_by_item_multiplied( Prefix )( Matvec_type( Prefix ) *current, Matvec_type( Prefix ) *other )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == MATVEC_TYPE ) && ( (*other).item_type == Type_Code ) );
-   PRECONDITION( "matvec and other are same size", ( ( (*matvec).n_rows == (*other).n_rows ) && ( (*matvec).n_columns == (*other).n_columns ) ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "other type OK", ( (*other)._type == MATVEC_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   PRECONDITION( "current and other are same size", ( ( (*current).n_rows == (*other).n_rows ) && ( (*current).n_columns == (*other).n_columns ) ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_other = (*other).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = MULTIPLY_FUNCTION( pa[i*columns + j], pa_other[i*columns + j ] );
-         pa_result[i*columns + j] =  item ;
+         item = MULTIPLY_FUNCTION( pa[i * columns + j], pa_other[i * columns + j ] );
+         pa_result[i * columns + j] =  item ;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3073,32 +3090,32 @@ Matvec_item_by_item_multiplied( Prefix )( Matvec_type( Prefix ) *matvec, Matvec_
 */
 
 void
-Matvec_scale( Prefix )( Matvec_type( Prefix ) *matvec, Type scale )
+Matvec_scale( Prefix )( Matvec_type( Prefix ) *current, Type scale )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = MULTIPLY_FUNCTION( scale, pa[i*columns + j] );
-         SET_FROM( pa[i*columns + j], item );
+         item = MULTIPLY_FUNCTION( scale, pa[i * columns + j] );
+         SET_FROM( pa[i * columns + j], item );
          DISPOSE_FUNCTION( item );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3108,36 +3125,36 @@ Matvec_scale( Prefix )( Matvec_type( Prefix ) *matvec, Type scale )
 */
 
 Matvec_type( Prefix ) *
-Matvec_scaled( Prefix )( Matvec_type( Prefix ) *matvec, Type scale )
+Matvec_scaled( Prefix )( Matvec_type( Prefix ) *current, Type scale )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = MULTIPLY_FUNCTION( scale, pa[i*columns + j] );
-         pa_result[i*columns + j] = item ;
+         item = MULTIPLY_FUNCTION( scale, pa[i * columns + j] );
+         pa_result[i * columns + j] = item ;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3147,32 +3164,32 @@ Matvec_scaled( Prefix )( Matvec_type( Prefix ) *matvec, Type scale )
 */
 
 void
-Matvec_negate( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_negate( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = NEGATE_FUNCTION( pa[i*columns + j] );
-         SET_FROM( pa[i*columns + j], item );
+         item = NEGATE_FUNCTION( pa[i * columns + j] );
+         SET_FROM( pa[i * columns + j], item );
          DISPOSE_FUNCTION( item );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3182,36 +3199,36 @@ Matvec_negate( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_negated( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_negated( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = NEGATE_FUNCTION( pa[i*columns + j] );
-         pa_result[i*columns + j] = item ;
+         item = NEGATE_FUNCTION( pa[i * columns + j] );
+         pa_result[i * columns + j] = item ;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3221,35 +3238,35 @@ Matvec_negated( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_transpose( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_transpose( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=i; j<columns; j++ )
+      for ( j = i; j < columns; j++ )
       {
-         item1 = pa[i*columns + j];
-         item2 = pa[j*columns + i];
-         pa[i*columns + j] = item2;
-         pa[j*columns + i] = item1;
+         item1 = pa[i * columns + j];
+         item2 = pa[j * columns + i];
+         pa[i * columns + j] = item2;
+         pa[j * columns + i] = item1;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3259,36 +3276,36 @@ Matvec_transpose( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_transposed( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_transposed( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_columns, (*matvec).n_rows );
+   result = Matvec_make( Prefix )( (*current).n_columns, (*current).n_rows );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = pa[i*columns + j];
-         pa_result[j*rows + i] = DUPLICATE_FUNCTION( item );
+         item = pa[i * columns + j];
+         pa_result[j * rows + i] = DUPLICATE_FUNCTION( item );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3298,37 +3315,37 @@ Matvec_transposed( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_hermitian_transpose( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_hermitian_transpose( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item1 = DEFAULT_VALUE;
    Type item2 = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=i; j<rows; j++ )
+      for ( j = i; j < rows; j++ )
       {
-         item1 = CONJUGATE_FUNCTION( pa[i*columns + j] );
-         item2 = CONJUGATE_FUNCTION( pa[j*columns + i] );
-         SET_FROM( pa[i*columns + j], item2 );
-         SET_FROM( pa[j*columns + i], item1 );
+         item1 = CONJUGATE_FUNCTION( pa[i * columns + j] );
+         item2 = CONJUGATE_FUNCTION( pa[j * columns + i] );
+         SET_FROM( pa[i * columns + j], item2 );
+         SET_FROM( pa[j * columns + i], item1 );
          DISPOSE_FUNCTION( item1 );
          DISPOSE_FUNCTION( item2 );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3338,36 +3355,36 @@ Matvec_hermitian_transpose( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_hermitian_transposed( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_hermitian_transposed( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_columns, (*matvec).n_rows );
+   result = Matvec_make( Prefix )( (*current).n_columns, (*current).n_rows );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = CONJUGATE_FUNCTION( pa[i*columns + j] );
-         pa_result[j*rows + i] = item;
+         item = CONJUGATE_FUNCTION( pa[i * columns + j] );
+         pa_result[j * rows + i] = item;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3377,32 +3394,32 @@ Matvec_hermitian_transposed( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_conjugate( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_conjugate( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = CONJUGATE_FUNCTION( pa[i*columns + j] );
-         SET_FROM( pa[i*columns + j], item );
+         item = CONJUGATE_FUNCTION( pa[i * columns + j] );
+         SET_FROM( pa[i * columns + j], item );
          DISPOSE_FUNCTION( item );
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3412,36 +3429,36 @@ Matvec_conjugate( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_conjugated( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_conjugated( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *result = NULL;
    Type item = DEFAULT_VALUE;
    int32_t i = 0;
    int32_t j = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
    Type *pa_result = NULL;
 
-   result = Matvec_make( Prefix )( (*matvec).n_rows, (*matvec).n_columns );
+   result = Matvec_make( Prefix )( (*current).n_rows, (*current).n_columns );
    pa_result = (*result).a;
 
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item = CONJUGATE_FUNCTION( pa[i*columns + j] );
-         pa_result[i*columns + j] = item ;
+         item = CONJUGATE_FUNCTION( pa[i * columns + j] );
+         pa_result[i * columns + j] = item ;
       }
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3451,13 +3468,13 @@ Matvec_conjugated( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 void
-Matvec_invert( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_invert( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *a = NULL;
    Matvec_type( Prefix ) *b = NULL;
@@ -3470,53 +3487,53 @@ Matvec_invert( Prefix )( Matvec_type( Prefix ) *matvec )
    int32_t i = 0;
    int32_t j = 0;
    int32_t k = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa_matvec = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa_current = (*current).a;
    Type *pa = NULL;
    Type *pb = NULL;
 
 
-   a = Matvec_make_from( Prefix )( matvec );
+   a = Matvec_make_from( Prefix )( current );
    pa = (*a).a;
 
-   b = Matvec_make( Prefix )( (*matvec).n_columns, (*matvec).n_rows );
+   b = Matvec_make( Prefix )( (*current).n_columns, (*current).n_rows );
    pb = (*b).a;
 
    // set b to identity matrix
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
          if ( i == j )
          {
-            pb[i*columns + j ] = ONE_VALUE;
+            pb[i * columns + j ] = ONE_VALUE;
          }
          else
          {
-            pb[i*columns + j ] = DEFAULT_VALUE;
+            pb[i * columns + j ] = DEFAULT_VALUE;
          }
       }
    }
 
    // compute inverse by elimination
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
       // if main diagonal value is zero, resort the remaining columns
-      if ( EQUAL_FUNCTION( pa_matvec[i*columns + i], DEFAULT_VALUE ) == 1 )
+      if ( EQUAL_FUNCTION( pa_current[i * columns + i], DEFAULT_VALUE ) == 1 )
       {
-         for ( j=i+1; ( ( j<rows ) && ( flag == 0 ) ); j++ )
+         for ( j = i + 1; ( ( j < rows ) && ( flag == 0 ) ); j++ )
          {
-            if ( EQUAL_FUNCTION( pa[j*columns + i], DEFAULT_VALUE ) == 0 )
+            if ( EQUAL_FUNCTION( pa[j * columns + i], DEFAULT_VALUE ) == 0 )
             {
-               for( k=0; k<rows; k++ )
+               for( k = 0; k < rows; k++ )
                {
-                  item = pa[i*columns + k];
-                  pa[i*columns + k] = pa[j*columns + k];
-                  pa[j*columns + k] = item;
-                  item = pb[i*columns + k];
-                  pb[i*columns + k] = pb[j*columns + k];
-                  pb[j*columns + k] = item;
+                  item = pa[i * columns + k];
+                  pa[i * columns + k] = pa[j * columns + k];
+                  pa[j * columns + k] = item;
+                  item = pb[i * columns + k];
+                  pb[i * columns + k] = pb[j * columns + k];
+                  pb[j * columns + k] = item;
                }
                flag = 1;
             }
@@ -3524,69 +3541,69 @@ Matvec_invert( Prefix )( Matvec_type( Prefix ) *matvec )
       }
 
       // get the inverse of the element on the diagonal, want to make it one
-      item1 = INVERSE_FUNCTION( pa[i*columns + i] );
+      item1 = INVERSE_FUNCTION( pa[i * columns + i] );
 
       // do same thing to original matrix and identity matrix
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item2 = MULTIPLY_FUNCTION( pa[i*columns + j], item1 );
-         SET_FROM( pa[i*columns + j], item2 );
+         item2 = MULTIPLY_FUNCTION( pa[i * columns + j], item1 );
+         SET_FROM( pa[i * columns + j], item2 );
          DISPOSE_FUNCTION( item2 );
 
-         item2 = MULTIPLY_FUNCTION( pb[i*columns + j], item1 );
-         SET_FROM( pb[i*columns + j], item2 );
+         item2 = MULTIPLY_FUNCTION( pb[i * columns + j], item1 );
+         SET_FROM( pb[i * columns + j], item2 );
          DISPOSE_FUNCTION( item2 );
       }
 
-     DISPOSE_FUNCTION( item1 );
+      DISPOSE_FUNCTION( item1 );
 
-     // now subtract multiple of row i to make other elements in column i zero
-     for ( k=0; k<rows; k++ )
-     {
-        if ( k != i )
-        {
-           item1 = pa[k*columns + i];
+      // now subtract multiple of row i to make other elements in column i zero
+      for ( k = 0; k < rows; k++ )
+      {
+         if ( k != i )
+         {
+            item1 = pa[k * columns + i];
 
-           for( j=0; j<columns; j++ )
-           {
-              item2 = MULTIPLY_FUNCTION( pa[i*columns + j], item1 );
-              item3 = NEGATE_FUNCTION( item2 );
-              item4 = ADD_FUNCTION( pa[k*columns + j], item3 );
-              SET_FROM( pa[k*columns + j], item4 );
-              DISPOSE_FUNCTION( item2 );
-              DISPOSE_FUNCTION( item3 );
-              DISPOSE_FUNCTION( item4 );
+            for( j = 0; j < columns; j++ )
+            {
+               item2 = MULTIPLY_FUNCTION( pa[i * columns + j], item1 );
+               item3 = NEGATE_FUNCTION( item2 );
+               item4 = ADD_FUNCTION( pa[k * columns + j], item3 );
+               SET_FROM( pa[k * columns + j], item4 );
+               DISPOSE_FUNCTION( item2 );
+               DISPOSE_FUNCTION( item3 );
+               DISPOSE_FUNCTION( item4 );
 
-              item2 = MULTIPLY_FUNCTION( pb[i*columns + j], item1 );
-              item3 = NEGATE_FUNCTION( item2 );
-              item4 = ADD_FUNCTION( pb[k*columns + j], item3 );
-              SET_FROM( pb[k*columns + j], item4 );
-              DISPOSE_FUNCTION( item2 );
-              DISPOSE_FUNCTION( item3 );
-              DISPOSE_FUNCTION( item4 );
+               item2 = MULTIPLY_FUNCTION( pb[i * columns + j], item1 );
+               item3 = NEGATE_FUNCTION( item2 );
+               item4 = ADD_FUNCTION( pb[k * columns + j], item3 );
+               SET_FROM( pb[k * columns + j], item4 );
+               DISPOSE_FUNCTION( item2 );
+               DISPOSE_FUNCTION( item3 );
+               DISPOSE_FUNCTION( item4 );
 
-           }
+            }
 
-           DISPOSE_FUNCTION( item1 );
-        }
-     }
+            DISPOSE_FUNCTION( item1 );
+         }
+      }
 
    }
 
-   // set matvec from a
-   for ( i=0; i<rows; i++ )
+   // set current from a
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         SET_FROM( pa_matvec[i*columns + j], pb[i*columns + j] );
+         SET_FROM( pa_current[i * columns + j], pb[i * columns + j] );
       }
    }
 
-   Matvec_dispose_with_contents( Prefix )( a );
-   Matvec_dispose_with_contents( Prefix )( b );
+   Matvec_deep_dispose( Prefix )( &a );
+   Matvec_deep_dispose( Prefix )( &b );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3596,13 +3613,13 @@ Matvec_invert( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Matvec_type( Prefix ) *
-Matvec_inverse( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_inverse( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *a = NULL;
    Matvec_type( Prefix ) *b = NULL;
@@ -3615,110 +3632,110 @@ Matvec_inverse( Prefix )( Matvec_type( Prefix ) *matvec )
    int32_t i = 0;
    int32_t j = 0;
    int32_t k = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa_matvec = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa_current = (*current).a;
    Type *pa = NULL;
    Type *pb = NULL;
 
-   a = Matvec_make_from( Prefix )( matvec );
+   a = Matvec_make_from( Prefix )( current );
    pa = (*a).a;
 
-   b = Matvec_make( Prefix )( (*matvec).n_columns, (*matvec).n_rows );
+   b = Matvec_make( Prefix )( (*current).n_columns, (*current).n_rows );
    pb = (*b).a;
 
    // set b to identity matrix
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
          if ( i == j )
          {
-            pb[i*columns + j ] = ONE_VALUE;
+            pb[i * columns + j ] = ONE_VALUE;
          }
          else
          {
-            pb[i*columns + j ] = DEFAULT_VALUE;
+            pb[i * columns + j ] = DEFAULT_VALUE;
          }
       }
    }
 
    // compute inverse by elimination
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
       // if main diagonal value is zero, resort the remaining columns
-      if ( EQUAL_FUNCTION( pa_matvec[i*columns + i], DEFAULT_VALUE ) == 1 )
+      if ( EQUAL_FUNCTION( pa_current[i * columns + i], DEFAULT_VALUE ) == 1 )
       {
          flag = 0;
-         for ( j=i; ( ( j<rows ) && ( flag == 0 ) ); j++ )
+         for ( j = i; ( ( j < rows ) && ( flag == 0 ) ); j++ )
          {
-            if ( EQUAL_FUNCTION( pa[j*columns + i], DEFAULT_VALUE ) == 0 )
+            if ( EQUAL_FUNCTION( pa[j * columns + i], DEFAULT_VALUE ) == 0 )
             {
-               for( k=0; k<rows; k++ )
+               for( k = 0; k < rows; k++ )
                {
-                  item = pa[i*columns + k];
-                  pa[i*columns + k] = pa[j*columns + k];
-                  pa[j*columns + k] = item;
-                  item = pb[i*columns + k];
-                  pb[i*columns + k] = pb[j*columns + k ];
-                  pb[j*columns + k] = item;
+                  item = pa[i * columns + k];
+                  pa[i * columns + k] = pa[j * columns + k];
+                  pa[j * columns + k] = item;
+                  item = pb[i * columns + k];
+                  pb[i * columns + k] = pb[j * columns + k ];
+                  pb[j * columns + k] = item;
                }
                flag = 1;
             }
          }
       }
 
-      item1 = INVERSE_FUNCTION( pa[i*columns + i] );
+      item1 = INVERSE_FUNCTION( pa[i * columns + i] );
 
-      for ( j=0; j<columns; j++ )
+      for ( j = 0; j < columns; j++ )
       {
-         item2 = MULTIPLY_FUNCTION( pa[i*columns +j], item1 );
-         SET_FROM( pa[i*columns + j], item2 );
+         item2 = MULTIPLY_FUNCTION( pa[i * columns + j], item1 );
+         SET_FROM( pa[i * columns + j], item2 );
          DISPOSE_FUNCTION( item2 );
 
-         item2 = MULTIPLY_FUNCTION( pb[i*columns +j], item1 );
-         SET_FROM( pb[i*columns + j], item2 );
+         item2 = MULTIPLY_FUNCTION( pb[i * columns + j], item1 );
+         SET_FROM( pb[i * columns + j], item2 );
          DISPOSE_FUNCTION( item2 );
       }
 
-     DISPOSE_FUNCTION( item1 );
+      DISPOSE_FUNCTION( item1 );
 
-     for ( k=0; k<rows; k++ )
-     {
-        if ( k != i )
-        {
-           item1 = pa[k*columns + i];
+      for ( k = 0; k < rows; k++ )
+      {
+         if ( k != i )
+         {
+            item1 = pa[k * columns + i];
 
-           for( j=0; j<columns; j++ )
-           {
-              item2 = MULTIPLY_FUNCTION( pa[i*columns +j], item1 );
-              item3 = NEGATE_FUNCTION( item2 );
-              item4 = ADD_FUNCTION( pa[k*columns + j], item3 );
-              SET_FROM( pa[k*columns +j], item4 );
-              DISPOSE_FUNCTION( item2 );
-              DISPOSE_FUNCTION( item3 );
-              DISPOSE_FUNCTION( item4 );
+            for( j = 0; j < columns; j++ )
+            {
+               item2 = MULTIPLY_FUNCTION( pa[i * columns + j], item1 );
+               item3 = NEGATE_FUNCTION( item2 );
+               item4 = ADD_FUNCTION( pa[k * columns + j], item3 );
+               SET_FROM( pa[k * columns + j], item4 );
+               DISPOSE_FUNCTION( item2 );
+               DISPOSE_FUNCTION( item3 );
+               DISPOSE_FUNCTION( item4 );
 
-              item2 = MULTIPLY_FUNCTION( pb[i*columns +j], item1 );
-              item3 = NEGATE_FUNCTION( item2 );
-              item4 = ADD_FUNCTION( pb[k*columns + j], item3 );
-              SET_FROM( pb[k*columns +j], item4 );
-              DISPOSE_FUNCTION( item2 );
-              DISPOSE_FUNCTION( item3 );
-              DISPOSE_FUNCTION( item4 );
+               item2 = MULTIPLY_FUNCTION( pb[i * columns + j], item1 );
+               item3 = NEGATE_FUNCTION( item2 );
+               item4 = ADD_FUNCTION( pb[k * columns + j], item3 );
+               SET_FROM( pb[k * columns + j], item4 );
+               DISPOSE_FUNCTION( item2 );
+               DISPOSE_FUNCTION( item3 );
+               DISPOSE_FUNCTION( item4 );
 
-           }
+            }
 
-           DISPOSE_FUNCTION( item1 );
-        }
-     }
+            DISPOSE_FUNCTION( item1 );
+         }
+      }
 
    }
 
-   Matvec_dispose_with_contents( Prefix )( a );
+   Matvec_deep_dispose( Prefix )( &a );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return b;
 }
@@ -3728,13 +3745,13 @@ Matvec_inverse( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type
-Matvec_determinant( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_determinant( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Prefix ) *a = NULL;
    Type result = ONE_VALUE;
@@ -3746,10 +3763,10 @@ Matvec_determinant( Prefix )( Matvec_type( Prefix ) *matvec )
    int32_t i = 0;
    int32_t j = 0;
    int32_t k = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
    int32_t flag = 0;
-   Type *pa_matvec = (*matvec).a;
+   Type *pa_current = (*current).a;
    Type *pa = NULL;
 
    // Use Gauss-Jordan elimination to transform the matrix into
@@ -3758,25 +3775,25 @@ Matvec_determinant( Prefix )( Matvec_type( Prefix ) *matvec )
    // is equal to the product of the entries on the main diagonal, and
    // is also equal to the determinant of the original matrix.
 
-   a = Matvec_make_from( Prefix )( matvec );
+   a = Matvec_make_from( Prefix )( current );
    pa = (*a).a;
 
-   for ( i=0; ( (i<rows) && ( EQUAL_FUNCTION( result, DEFAULT_VALUE ) == 0 ) ); i++ )
+   for ( i = 0; ( ( i < rows ) && ( EQUAL_FUNCTION( result, DEFAULT_VALUE ) == 0 ) ); i++ )
    {
 
       // if main diagonal value is zero, resort with one of the remaining columns
-      if ( EQUAL_FUNCTION( pa_matvec[i*columns + i], DEFAULT_VALUE ) == 1 )
+      if ( EQUAL_FUNCTION( pa_current[i * columns + i], DEFAULT_VALUE ) == 1 )
       {
          flag = 0;
-         for ( j=i+1; ( ( j<rows ) && ( flag == 0 ) ); j++ )
+         for ( j = i + 1; ( ( j < rows ) && ( flag == 0 ) ); j++ )
          {
-            if ( EQUAL_FUNCTION( pa[j*columns + i], DEFAULT_VALUE ) == 0 )
+            if ( EQUAL_FUNCTION( pa[j * columns + i], DEFAULT_VALUE ) == 0 )
             {
-               for( k=0; k<rows; k++ )
+               for( k = 0; k < rows; k++ )
                {
-                  item = pa[i*columns + k];
-                  pa[i*columns + k] = pa[j*columns + k];
-                  pa[j*columns + k] = item;
+                  item = pa[i * columns + k];
+                  pa[i * columns + k] = pa[j * columns + k];
+                  pa[j * columns + k] = item;
                }
                // For Gauss-Jordan elimination,
                // if we swap columns, the determinant
@@ -3791,23 +3808,23 @@ Matvec_determinant( Prefix )( Matvec_type( Prefix ) *matvec )
 
       // if after the resorting attempts, the main diagonal value is
       // still zero, then the determinant is definitely zero
-      if ( EQUAL_FUNCTION( pa[i*columns + i], DEFAULT_VALUE ) == 0 )
+      if ( EQUAL_FUNCTION( pa[i * columns + i], DEFAULT_VALUE ) == 0 )
       {
          // eliminate the items below the main diagonal to transform
          // to upper triangular form
-         for( j=i+1; j<rows; j++ )
+         for( j = i + 1; j < rows; j++ )
          {
-            if ( EQUAL_FUNCTION( pa[j*columns + i], DEFAULT_VALUE ) == 0 )
+            if ( EQUAL_FUNCTION( pa[j * columns + i], DEFAULT_VALUE ) == 0 )
             {
-               item1 = INVERSE_FUNCTION( pa[i*columns + i] );
-               factor = MULTIPLY_FUNCTION( pa[j*columns + i], item1 );
+               item1 = INVERSE_FUNCTION( pa[i * columns + i] );
+               factor = MULTIPLY_FUNCTION( pa[j * columns + i], item1 );
                DISPOSE_FUNCTION( item1 );
-               for( k=0; k<rows; k++ )
+               for( k = 0; k < rows; k++ )
                {
-                  item1 = MULTIPLY_FUNCTION( factor, pa[i*columns + k] );
+                  item1 = MULTIPLY_FUNCTION( factor, pa[i * columns + k] );
                   item2 = NEGATE_FUNCTION( item1 );
-                  item3 = ADD_FUNCTION( pa[j*columns + k], item2 );
-                  SET_FROM( pa[j*columns + k], item3 );
+                  item3 = ADD_FUNCTION( pa[j * columns + k], item2 );
+                  SET_FROM( pa[j * columns + k], item3 );
                   DISPOSE_FUNCTION( item1 );
                   DISPOSE_FUNCTION( item2 );
                   DISPOSE_FUNCTION( item3 );
@@ -3824,17 +3841,17 @@ Matvec_determinant( Prefix )( Matvec_type( Prefix ) *matvec )
    }
 
    // calculate the product of the entries on the main diagonal as the determinant
-   for( i=0; i<rows; i++ )
+   for( i = 0; i < rows; i++ )
    {
-      item1 = MULTIPLY_FUNCTION( result, pa[i*columns + i ] );
+      item1 = MULTIPLY_FUNCTION( result, pa[i * columns + i ] );
       SET_FROM( result, item1 );
       DISPOSE_FUNCTION( item1 );
    }
 
-   Matvec_dispose_with_contents( Prefix )( a );
+   Matvec_deep_dispose( Prefix )( &a );
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -3844,31 +3861,31 @@ Matvec_determinant( Prefix )( Matvec_type( Prefix ) *matvec )
 */
 
 Type
-Matvec_trace( Prefix )( Matvec_type( Prefix ) *matvec )
+Matvec_trace( Prefix )( Matvec_type( Prefix ) *current )
 {
-   PRECONDITION( "matvec not null", matvec != NULL );
-   PRECONDITION( "matvec type OK", ( (*matvec).type == MATVEC_TYPE ) && ( (*matvec).item_type == Type_Code ) );
-   PRECONDITION( "matvec is square", ( (*matvec).n_rows == (*matvec).n_columns ) );
-   LOCK( (*matvec).mutex );
-   INVARIANT( matvec );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == MATVEC_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   PRECONDITION( "current is square", ( (*current).n_rows == (*current).n_columns ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = DEFAULT_VALUE;
    Type item1 = DEFAULT_VALUE;
    int32_t i = 0;
-   int32_t rows = (*matvec).n_rows;
-   int32_t columns = (*matvec).n_columns;
-   Type *pa = (*matvec).a;
+   int32_t rows = (*current).n_rows;
+   int32_t columns = (*current).n_columns;
+   Type *pa = (*current).a;
 
    // sum the entries on the main diagonal
-   for ( i=0; i<rows; i++ )
+   for ( i = 0; i < rows; i++ )
    {
-      item1 = ADD_FUNCTION( result, pa[i*columns + i] );
+      item1 = ADD_FUNCTION( result, pa[i * columns + i] );
       SET_FROM( result, item1 );
       DISPOSE_FUNCTION( item1 );
    }
 
-   INVARIANT( matvec );
-   UNLOCK( (*matvec).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }

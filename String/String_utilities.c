@@ -1,17 +1,17 @@
 /**
  @file String_utilites.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Character String utility functions"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the string_t utilities.
@@ -46,7 +46,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
-#include <time.h>   
+#include <time.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -73,16 +73,16 @@ string_from_file( string_t *filename )
 
    if ( fp != NULL )
    {
-     fseek( fp, 0, SEEK_END );
-     length = ftell( fp );
-     fseek( fp, 0, SEEK_SET );
+      fseek( fp, 0, SEEK_END );
+      length = ftell( fp );
+      fseek( fp, 0, SEEK_SET );
 
-     buf = ( char_t * ) calloc( length + 1, sizeof( char_t ) );
-     fread( buf, 1, length, fp );
-     string = string_make_from_cstring( buf );
-     free( buf );
+      buf = ( char_t * ) calloc( length + 1, sizeof( char_t ) );
+      fread( buf, 1, length, fp );
+      string = string_make_from_cstring( buf );
+      free( buf );
 
-     fclose( fp );
+      fclose( fp );
    }
 
    return string;
@@ -105,16 +105,16 @@ string_from_file_cstring( char_t *filename )
 
    if ( fp != NULL )
    {
-     fseek( fp, 0, SEEK_END );
-     length = ftell( fp );
-     fseek( fp, 0, SEEK_SET );
+      fseek( fp, 0, SEEK_END );
+      length = ftell( fp );
+      fseek( fp, 0, SEEK_SET );
 
-     buf = ( char_t * ) calloc( length + 1, sizeof( char_t ) );
-     fread( buf, 1, length, fp );
-     string = string_make_from_cstring( buf );
-     free( buf );
+      buf = ( char_t * ) calloc( length + 1, sizeof( char_t ) );
+      fread( buf, 1, length, fp );
+      string = string_make_from_cstring( buf );
+      free( buf );
 
-     fclose( fp );
+      fclose( fp );
    }
 
    return string;
@@ -134,9 +134,9 @@ string_to_file( string_t *string, string_t *filename )
 
    if ( fp != NULL )
    {
-     fwrite( string_as_cstring( string ), 1, string_count( string ), fp );
+      fwrite( string_as_cstring( string ), 1, string_count( string ), fp );
 
-     fclose( fp );
+      fclose( fp );
    }
 
    return;
@@ -156,9 +156,9 @@ string_to_file_cstring( string_t *string, char_t *filename )
 
    if ( fp != NULL )
    {
-     fwrite( string_as_cstring( string ), 1, string_count( string ), fp );
+      fwrite( string_as_cstring( string ), 1, string_count( string ), fp );
 
-     fclose( fp );
+      fclose( fp );
    }
 
    return;
@@ -178,9 +178,75 @@ cstring_to_file_cstring( char_t *string, char_t *filename )
 
    if ( fp != NULL )
    {
-     fwrite( string, 1, strlen( string ), fp );
+      fwrite( string, 1, strlen( string ), fp );
 
-     fclose( fp );
+      fclose( fp );
+   }
+
+   return;
+}
+
+/**
+   string_append_to_file
+*/
+
+void
+string_append_to_file( string_t *string, string_t *filename )
+{
+   PRECONDITION( "string ok", string != NULL );
+   PRECONDITION( "filename ok", filename != NULL );
+
+   FILE *fp = fopen( string_as_cstring( filename ), "a" );
+
+   if ( fp != NULL )
+   {
+      fwrite( string_as_cstring( string ), 1, string_count( string ), fp );
+
+      fclose( fp );
+   }
+
+   return;
+}
+
+/**
+   string_append_to_file_cstring
+*/
+
+void
+string_append_to_file_cstring( string_t *string, char_t *filename )
+{
+   PRECONDITION( "string ok", string != NULL );
+   PRECONDITION( "filename ok", filename != NULL );
+
+   FILE *fp = fopen( filename, "a" );
+
+   if ( fp != NULL )
+   {
+      fwrite( string_as_cstring( string ), 1, string_count( string ), fp );
+
+      fclose( fp );
+   }
+
+   return;
+}
+
+/**
+   cstring_append_to_file_cstring
+*/
+
+void
+cstring_append_to_file_cstring( char_t *string, char_t *filename )
+{
+   PRECONDITION( "string ok", string != NULL );
+   PRECONDITION( "filename ok", filename != NULL );
+
+   FILE *fp = fopen( filename, "a" );
+
+   if ( fp != NULL )
+   {
+      fwrite( string, 1, strlen( string ), fp );
+
+      fclose( fp );
    }
 
    return;
@@ -203,7 +269,7 @@ file_exists( string_t *filename )
 
    if ( file != NULL )
    {
-      fclose(file);
+      fclose( file );
       result = 1;
    }
 
@@ -227,7 +293,7 @@ file_exists_cstring( char_t *filename )
 
    if ( file != NULL )
    {
-      fclose(file);
+      fclose( file );
       result = 1;
    }
 
@@ -251,7 +317,7 @@ current_time_as_string( void )
    gettimeofday( &tv, NULL );
 
    // translate to date-time in local time
-   timeinfo = localtime( &(tv.tv_sec) );
+   timeinfo = localtime( &( tv.tv_sec ) );
 
    // format date-time to include fractional seconds
    // yyyy-mm-dd hh:mm:ss.fff
@@ -281,7 +347,7 @@ current_time_as_cstring( void )
    gettimeofday( &tv, NULL );
 
    // translate to date-time in local time
-   timeinfo = localtime( &(tv.tv_sec) );
+   timeinfo = localtime( &( tv.tv_sec ) );
 
    // format date-time to include fractional seconds
    // yyyy-mm-dd hh:mm:ss.fff
@@ -308,7 +374,7 @@ current_time_as_cstring1( void )
    gettimeofday( &tv, NULL );
 
    // translate to date-time in local time
-   timeinfo = localtime( &(tv.tv_sec) );
+   timeinfo = localtime( &( tv.tv_sec ) );
 
    // format date-time to include fractional seconds
    // yyyy-mm-dd hh:mm:ss.fff
@@ -319,7 +385,7 @@ current_time_as_cstring1( void )
 
    result[10] = '_';
    result[19] = ':';
-   
+
    return result;
 }
 
@@ -379,22 +445,22 @@ string_hex_to_uint8( string_t *string )
    (
       "string at 0 ok",
       (
-         ( ( string_item( string, 0 ) >= '0') && ( string_item( string, 0 ) <= '9') )
+         ( ( string_item( string, 0 ) >= '0' ) && ( string_item( string, 0 ) <= '9' ) )
          ||
-         ( ( string_item( string, 0 ) >= 'a') && ( string_item( string, 0 ) <= 'f') )
+         ( ( string_item( string, 0 ) >= 'a' ) && ( string_item( string, 0 ) <= 'f' ) )
          ||
-         ( ( string_item( string, 0 ) >= 'A') && ( string_item( string, 0 ) <= 'F') )
+         ( ( string_item( string, 0 ) >= 'A' ) && ( string_item( string, 0 ) <= 'F' ) )
       )
    );
    PRECONDITION
    (
       "string at 1 ok",
       (
-         ( ( string_item( string, 1 ) >= '0') && ( string_item( string, 1 ) <= '9') )
+         ( ( string_item( string, 1 ) >= '0' ) && ( string_item( string, 1 ) <= '9' ) )
          ||
-         ( ( string_item( string, 1 ) >= 'a') && ( string_item( string, 1 ) <= 'f') )
+         ( ( string_item( string, 1 ) >= 'a' ) && ( string_item( string, 1 ) <= 'f' ) )
          ||
-         ( ( string_item( string, 1 ) >= 'A') && ( string_item( string, 1 ) <= 'F') )
+         ( ( string_item( string, 1 ) >= 'A' ) && ( string_item( string, 1 ) <= 'F' ) )
       )
    );
 
@@ -419,7 +485,7 @@ string_hex_to_uint8( string_t *string )
       result = c1 - 'A' + 10;
    }
 
-   result = result*16;
+   result = result * 16;
 
    if ( ( c2 >= '0' ) && ( c2 <= '9' ) )
    {
@@ -451,22 +517,22 @@ cstring_hex_to_uint8( char_t *string )
    (
       "string at 0 ok",
       (
-         ( ( string[0] >= '0') && ( string[0] <= '9') )
+         ( ( string[0] >= '0' ) && ( string[0] <= '9' ) )
          ||
-         ( ( string[0] >= 'a') && ( string[0] <= 'f') )
+         ( ( string[0] >= 'a' ) && ( string[0] <= 'f' ) )
          ||
-         ( ( string[0] >= 'A') && ( string[0] <= 'F') )
+         ( ( string[0] >= 'A' ) && ( string[0] <= 'F' ) )
       )
    );
    PRECONDITION
    (
       "string at 1 ok",
       (
-         ( ( string[1] >= '0') && ( string[1] <= '9') )
+         ( ( string[1] >= '0' ) && ( string[1] <= '9' ) )
          ||
-         ( ( string[1] >= 'a') && ( string[1] <= 'f') )
+         ( ( string[1] >= 'a' ) && ( string[1] <= 'f' ) )
          ||
-         ( ( string[1] >= 'A') && ( string[1] <= 'F') )
+         ( ( string[1] >= 'A' ) && ( string[1] <= 'F' ) )
       )
    );
 
@@ -491,7 +557,7 @@ cstring_hex_to_uint8( char_t *string )
       result = c1 - 'A' + 10;
    }
 
-   result = result*16;
+   result = result * 16;
 
    if ( ( c2 >= '0' ) && ( c2 <= '9' ) )
    {

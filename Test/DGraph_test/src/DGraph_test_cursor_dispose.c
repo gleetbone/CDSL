@@ -1,7 +1,7 @@
 /**
  @file DGraph_test_cursor_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for DGraph_make_Depth"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for DGraph_cursor_dispose.
+ Unit tests for DGraph_t
 
 */
 
@@ -38,12 +38,21 @@ void test_cursor_dispose_1( void )
 {
    ii_dgraph_t *dgraph = NULL;
    ii_dgraph_cursor_t *cursor = NULL;
+   
+   int32_t v = 0;
 
-   dgraph = ii_dgraph_make_depth();
-   cursor = ii_dgraph_cursor_make_depth( dgraph );
-
-   ii_dgraph_cursor_dispose( cursor );
-   ii_dgraph_dispose( dgraph );
+   dgraph = ii_dgraph_make();
+   
+   v = ii_dgraph_vertex_add( dgraph, 19 );
+   
+   CU_ASSERT( ii_dgraph_vertex_count( dgraph ) == 1 );
+   
+   cursor = ii_dgraph_make_cursor( dgraph );
+   
+   ii_dgraph_cursor_vertex_start( cursor );
+   CU_ASSERT( ii_dgraph_cursor_vertex_off( cursor ) == 0 );
+   
+   ii_dgraph_dispose( &dgraph );
 
    return;
 }
@@ -56,22 +65,111 @@ void test_cursor_dispose_2( void )
 {
    ii_dgraph_t *dgraph = NULL;
    ii_dgraph_cursor_t *cursor = NULL;
-   ii_dgraph_cursor_t *cursor1 = NULL;
-   ii_dgraph_cursor_t *cursor2 = NULL;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t v3 = 0;
+   int32_t v4 = 0;
+   int32_t v5 = 0;
 
-   dgraph = ii_dgraph_make_depth();
-   cursor = ii_dgraph_cursor_make_depth( dgraph );
-   cursor1 = ii_dgraph_cursor_make_depth( dgraph );
-   cursor2 = ii_dgraph_cursor_make_depth( dgraph );
-
-   ii_dgraph_cursor_dispose( cursor1 );
-   ii_dgraph_cursor_dispose( cursor2 );
-   ii_dgraph_cursor_dispose( cursor );
-
-   ii_dgraph_dispose( dgraph );
+   dgraph = ii_dgraph_make();
+   
+   v1 = ii_dgraph_vertex_add( dgraph, 19 );
+   v2 = ii_dgraph_vertex_add( dgraph, 23 );
+   v3 = ii_dgraph_vertex_add( dgraph, 29 );
+   v4 = ii_dgraph_vertex_add( dgraph, 31 );
+   v5 = ii_dgraph_vertex_add( dgraph, 37 );
+   
+   CU_ASSERT( ii_dgraph_vertex_count( dgraph ) == 5 );
+   
+   cursor = ii_dgraph_make_cursor( dgraph );
+   
+   ii_dgraph_cursor_vertex_start( cursor );
+   CU_ASSERT( ii_dgraph_cursor_vertex_off( cursor ) == 0 );
+   
+   ii_dgraph_dispose( &dgraph );
 
    return;
 }
+
+/**
+   test_cursor_dispose_3
+*/
+
+void test_cursor_dispose_3( void )
+{
+   ii_dgraph_t *dgraph = NULL;
+   ii_dgraph_t *cursor1 = NULL;
+   ii_dgraph_t *cursor2 = NULL;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t v3 = 0;
+   int32_t v4 = 0;
+   int32_t v5 = 0;
+
+   dgraph = ii_dgraph_make();
+   
+   v1 = ii_dgraph_vertex_add( dgraph, 19 );
+   v2 = ii_dgraph_vertex_add( dgraph, 23 );
+   v3 = ii_dgraph_vertex_add( dgraph, 29 );
+   v4 = ii_dgraph_vertex_add( dgraph, 31 );
+   
+   ii_dgraph_vertex_remove( dgraph, v2 );
+   
+   v5 = ii_dgraph_vertex_add( dgraph, 37 );
+   
+   CU_ASSERT( ii_dgraph_vertex_count( dgraph ) == 4 );
+   
+   cursor1 = ii_dgraph_make_cursor( dgraph );
+   cursor2 = ii_dgraph_make_cursor( dgraph );
+   
+   ii_dgraph_cursor_vertex_start( cursor1 );
+   CU_ASSERT( ii_dgraph_cursor_vertex_off( cursor1 ) == 0 );
+   
+   ii_dgraph_cursor_dispose( &cursor1 );
+   
+   ii_dgraph_dispose( &dgraph );
+
+   return;
+}
+
+/**
+   test_cursor_dispose_4
+*/
+
+void test_cursor_dispose_4( void )
+{
+   ii_dgraph_t *dgraph = NULL;
+   ii_dgraph_t *cursor = NULL;
+   int32_t v1 = 0;
+   int32_t v2 = 0;
+   int32_t v3 = 0;
+   int32_t v4 = 0;
+   int32_t v5 = 0;
+
+   dgraph = ii_dgraph_make();
+   
+   v1 = ii_dgraph_vertex_add( dgraph, 19 );
+   v2 = ii_dgraph_vertex_add( dgraph, 23 );
+   v3 = ii_dgraph_vertex_add( dgraph, 29 );
+   v4 = ii_dgraph_vertex_add( dgraph, 31 );
+   
+   ii_dgraph_vertex_remove( dgraph, v2 );
+   
+   v5 = ii_dgraph_vertex_add( dgraph, 37 );
+   
+   CU_ASSERT( ii_dgraph_vertex_count( dgraph ) == 4 );
+   
+   cursor = ii_dgraph_make_cursor( dgraph );
+   
+   ii_dgraph_cursor_vertex_start( cursor );
+   CU_ASSERT( ii_dgraph_cursor_vertex_off( cursor ) == 0 );
+   
+   ii_dgraph_cursor_dispose( &cursor );
+   ii_dgraph_dispose( &dgraph );
+
+   return;
+}
+   
 
 int
 add_test_cursor_dispose( void )
@@ -93,6 +191,12 @@ add_test_cursor_dispose( void )
 
    // test_cursor_dispose_2
    add_test_to_suite( p_suite, test_cursor_dispose_2, "test_cursor_dispose_2" );
+
+   // test_cursor_dispose_3
+   add_test_to_suite( p_suite, test_cursor_dispose_3, "test_cursor_dispose_3" );
+
+   // test_cursor_dispose_4
+   add_test_to_suite( p_suite, test_cursor_dispose_4, "test_cursor_dispose_4" );
 
    return CUE_SUCCESS;
 

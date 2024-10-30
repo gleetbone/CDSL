@@ -1,8 +1,8 @@
 /**
  @file Fft_test_dispose.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Fft_make"
+ @version 2.0.0
+ @brief: "tests for Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Fft_make.
+ Unit tests for Fft_t
 
 */
 
@@ -61,14 +61,14 @@ void test_dispose_1( void )
    phase = cf_fft_phase( cffft );
    phase_degrees = cf_fft_phase_degrees( cffft );
 
-   cf_fft_dispose( cffft );
+   cf_fft_dispose( &cffft );
 
-   cf_matvec_dispose( input );
-   cf_matvec_dispose( output );
-   f_matvec_dispose( psd );
-   f_matvec_dispose( log_psd );
-   f_matvec_dispose( phase );
-   f_matvec_dispose( phase_degrees );
+   cf_matvec_dispose( &input );
+   cf_matvec_dispose( &output );
+   f_matvec_dispose( &psd );
+   f_matvec_dispose( &log_psd );
+   f_matvec_dispose( &phase );
+   f_matvec_dispose( &phase_degrees );
 
    return;
 }
@@ -98,14 +98,14 @@ void test_dispose_2( void )
    phase = cd_fft_phase( cdfft );
    phase_degrees = cd_fft_phase_degrees( cdfft );
 
-   cd_fft_dispose( cdfft );
+   cd_fft_dispose( &cdfft );
 
-   cd_matvec_dispose( input );
-   cd_matvec_dispose( output );
-   d_matvec_dispose( psd );
-   d_matvec_dispose( log_psd );
-   d_matvec_dispose( phase );
-   d_matvec_dispose( phase_degrees );
+   cd_matvec_dispose( &input );
+   cd_matvec_dispose( &output );
+   d_matvec_dispose( &psd );
+   d_matvec_dispose( &log_psd );
+   d_matvec_dispose( &phase );
+   d_matvec_dispose( &phase_degrees );
 
    return;
 }

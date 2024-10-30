@@ -1,8 +1,8 @@
 /**
  @file Fft_test_phase_degrees.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Fft_make"
+ @version 2.0.0
+ @brief: "tests for Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Fft_make.
+ Unit tests for Fft_t
 
 */
 
@@ -62,9 +62,9 @@ void test_phase_degrees_1( void )
    CU_ASSERT( v2 != NULL );
    CU_ASSERT( f_matvec_is_approximately_equal( v1, v2, 0.000001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   f_matvec_dispose( v2 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   f_matvec_dispose( &v2 );
 
    return;
 }
@@ -93,9 +93,9 @@ void test_phase_degrees_2( void )
    CU_ASSERT( v2 != NULL );
    CU_ASSERT( d_matvec_is_approximately_equal( v1, v2, 0.000001 ) == 1 );
 
-   cd_fft_dispose_with_contents( cdfft );
-   cd_matvec_dispose( v );
-   d_matvec_dispose( v2 );
+   cd_fft_deep_dispose( &cdfft );
+   cd_matvec_dispose( &v );
+   d_matvec_dispose( &v2 );
 
    return;
 }

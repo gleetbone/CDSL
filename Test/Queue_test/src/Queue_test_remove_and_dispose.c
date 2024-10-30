@@ -1,7 +1,7 @@
 /**
  @file Queue_test_remove_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Queue_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_Queue.h"
+#include "s_Queue.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -52,7 +53,7 @@ void test_remove_and_dispose_1( void )
 
    CU_ASSERT( int_queue_count( queue ) == 0 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }
@@ -81,7 +82,41 @@ void test_remove_and_dispose_2( void )
 
    CU_ASSERT( int_queue_count( queue ) == 0 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
+
+   return;
+}
+
+/**
+   test_remove_and_dispose_3
+*/
+
+void test_remove_and_dispose_3( void )
+{
+   s_queue_t *queue = NULL;
+   string_t *s1 = NULL;
+   string_t *s2 = NULL;
+
+   queue = s_queue_make();
+
+   s1 = string_make_from_cstring( "1" );
+   s2 = string_make_from_cstring( "2" );
+   
+   s_queue_put( queue, s1 );
+
+   s_queue_put( queue, s2 );
+
+   CU_ASSERT( s_queue_count( queue ) == 2 );
+
+   s_queue_remove_and_dispose( queue );
+
+   CU_ASSERT( s_queue_count( queue ) == 1 );
+
+   s_queue_remove_and_dispose( queue );
+
+   CU_ASSERT( s_queue_count( queue ) == 0 );
+
+   s_queue_dispose( &queue );
 
    return;
 }
@@ -106,6 +141,9 @@ add_test_remove_and_dispose( void )
 
    // test_remove_and_dispose_2
    add_test_to_suite( p_suite, test_remove_and_dispose_2, "test_remove_and_dispose_2" );
+
+   // test_remove_and_dispose_3
+   add_test_to_suite( p_suite, test_remove_and_dispose_3, "test_remove_and_dispose_3" );
 
    return CUE_SUCCESS;
 

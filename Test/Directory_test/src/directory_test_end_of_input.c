@@ -1,8 +1,8 @@
 /**
  @file directory_test_end_of_input.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_make_from_cstring"
+ @version 2.0.0
+ @brief: "tests for directory_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for directory_t
 
 */
 
@@ -65,8 +65,8 @@ void test_end_of_input_1( void )
 
    CU_ASSERT( i == 9 );
 
-   string_dispose_with_contents( name );
-   directory_dispose( dir );
+   string_deep_dispose ( &name );
+   directory_dispose( &dir );
 
    return;
 }

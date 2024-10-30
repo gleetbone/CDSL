@@ -1,8 +1,8 @@
 /**
  @file AVLTree_test_make.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for BSTree_make"
+ @version 2.0.0
+ @brief: "tests for AVLTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for AVLTree_kv_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_AVLTree_kv.h"
+#include "ss_AVLTree_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -44,7 +45,7 @@ void test_make_1( void )
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 0 );
    CU_ASSERT( ii_avltree_kv_is_empty( avltree ) == 1 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -55,65 +56,15 @@ void test_make_1( void )
 
 void test_make_2( void )
 {
-   ii_avltree_kv_t *avltree = NULL;
-   ii_avltree_kv_t *avltree1 = NULL;
+   ss_avltree_kv_t *avltree = NULL;
    
-   avltree = ii_avltree_kv_make();
-   ii_avltree_kv_put( avltree, 130, 13 );
+   avltree = ss_avltree_kv_make();
    
-   avltree1 = ii_avltree_kv_make_duplicate_from( avltree );
-   
-   CU_ASSERT( avltree1 != NULL );
-   CU_ASSERT( ii_avltree_kv_count( avltree1 ) == 1 );
-   CU_ASSERT( ii_avltree_kv_has( avltree1, 13 ) == 1 );
- 
-   ii_avltree_kv_dispose( avltree );
-   ii_avltree_kv_dispose( avltree1 );
-
-   return;
-}
-
-/**
-   test_make_3
-*/
-
-void test_make_3( void )
-{
-   ii_avltree_kv_t *avltree = NULL;
-   ii_avltree_kv_t *avltree1 = NULL;
-
-   avltree = ii_avltree_kv_make();
-   ii_avltree_kv_put( avltree, 130, 13 );
-
-   avltree1 = ii_avltree_kv_make_from( avltree );
-
-   CU_ASSERT( avltree1 != NULL );
-   CU_ASSERT( ii_avltree_kv_count( avltree1 ) == 1 );
-   CU_ASSERT( ii_avltree_kv_has( avltree1, 13 ) == 1 );
-
-   ii_avltree_kv_dispose( avltree );
-   ii_avltree_kv_dispose( avltree1 );
-
-   return;
-}
-
-/**
-   test_make_4
-*/
-
-void test_make_4( void )
-{
-   ii_avltree_kv_t *avltree = NULL;
-   int32_t key_array[3] = { 13, 0, 0 };
-   int32_t value_array[3] = { 130, 0, 0 };
-
-   avltree = ii_avltree_kv_make_from_array( key_array, value_array, 1 );
-
    CU_ASSERT( avltree != NULL );
-   CU_ASSERT( ii_avltree_kv_count( avltree ) == 1 );
-   CU_ASSERT( ii_avltree_kv_has( avltree, 13 ) == 1 );
-
-   ii_avltree_kv_dispose( avltree );
+   CU_ASSERT( ss_avltree_kv_count( avltree ) == 0 );
+   CU_ASSERT( ss_avltree_kv_is_empty( avltree ) == 1 );
+ 
+   ss_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -138,12 +89,6 @@ add_test_make( void )
 
    // test_make_2
    add_test_to_suite( p_suite, test_make_2, "test_make_2" );
-
-   // test_make_3
-   add_test_to_suite( p_suite, test_make_3, "test_make_3" );
-
-   // test_make_4
-   add_test_to_suite( p_suite, test_make_4, "test_make_4" );
 
    return CUE_SUCCESS;
    

@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_remove_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -43,14 +44,14 @@ void test_remove_and_dispose_1( void )
    
    i_bstree_put( bstree, 1 );
    
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
    
    CU_ASSERT( i_bstree_count( bstree ) == 0 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 0 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -70,7 +71,7 @@ void test_remove_and_dispose_2( void )
    i_bstree_put( bstree, 1 );
    i_bstree_put( bstree, 3 );
    
-   i_bstree_remove_and_dispose( bstree, 2 );
+   i_bstree_remove_and_dispose( bstree, 1 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -83,7 +84,7 @@ void test_remove_and_dispose_2( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -103,7 +104,7 @@ void test_remove_and_dispose_2a( void )
    i_bstree_put( bstree, 1 );
    i_bstree_put( bstree, 3 );
    
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
  
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -116,7 +117,7 @@ void test_remove_and_dispose_2a( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -136,7 +137,7 @@ void test_remove_and_dispose_2b( void )
    i_bstree_put( bstree, 1 );
    i_bstree_put( bstree, 3 );
    
-   i_bstree_remove_and_dispose( bstree, 3 );
+   i_bstree_remove_and_dispose( bstree, 2 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -149,7 +150,7 @@ void test_remove_and_dispose_2b( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -169,7 +170,7 @@ void test_remove_and_dispose_3( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 1 );
    
-   i_bstree_remove_and_dispose( bstree, 2 );
+   i_bstree_remove_and_dispose( bstree, 1 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -182,7 +183,7 @@ void test_remove_and_dispose_3( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -202,7 +203,7 @@ void test_remove_and_dispose_3a( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 1 );
    
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
  
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -215,7 +216,7 @@ void test_remove_and_dispose_3a( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -235,7 +236,7 @@ void test_remove_and_dispose_3b( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 1 );
    
-   i_bstree_remove_and_dispose( bstree, 2 );
+   i_bstree_remove_and_dispose( bstree, 1 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -248,7 +249,7 @@ void test_remove_and_dispose_3b( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -268,7 +269,7 @@ void test_remove_and_dispose_4( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 3 );
    
-   i_bstree_remove_and_dispose( bstree, 2 );
+   i_bstree_remove_and_dispose( bstree, 1 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -281,7 +282,7 @@ void test_remove_and_dispose_4( void )
   
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -301,7 +302,7 @@ void test_remove_and_dispose_4a( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 3 );
    
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
  
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -314,7 +315,7 @@ void test_remove_and_dispose_4a( void )
   
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -334,7 +335,7 @@ void test_remove_and_dispose_4b( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 3 );
    
-   i_bstree_remove_and_dispose( bstree, 3 );
+   i_bstree_remove_and_dispose( bstree, 2 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -347,7 +348,7 @@ void test_remove_and_dispose_4b( void )
   
    CU_ASSERT( i_bstree_count( bstree ) == 2 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -375,7 +376,7 @@ void test_remove_and_dispose_5( void )
    i_bstree_put( bstree, 5 );
    i_bstree_put( bstree, 7 );
    
-   i_bstree_remove_and_dispose( bstree, 4 );
+   i_bstree_remove_and_dispose( bstree, 3 );
  
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -400,7 +401,7 @@ void test_remove_and_dispose_5( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -428,7 +429,7 @@ void test_remove_and_dispose_5a( void )
    i_bstree_put( bstree, 5 );
    i_bstree_put( bstree, 7 );
    
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
  
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -453,7 +454,7 @@ void test_remove_and_dispose_5a( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -481,7 +482,7 @@ void test_remove_and_dispose_5b( void )
    i_bstree_put( bstree, 5 );
    i_bstree_put( bstree, 7 );
    
-   i_bstree_remove_and_dispose( bstree, 2 );
+   i_bstree_remove_and_dispose( bstree, 1 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -506,7 +507,7 @@ void test_remove_and_dispose_5b( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -534,7 +535,7 @@ void test_remove_and_dispose_5c( void )
    i_bstree_put( bstree, 5 );
    i_bstree_put( bstree, 7 );
    
-   i_bstree_remove_and_dispose( bstree, 3 );
+   i_bstree_remove_and_dispose( bstree, 2 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -559,7 +560,7 @@ void test_remove_and_dispose_5c( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -587,7 +588,7 @@ void test_remove_and_dispose_5d( void )
    i_bstree_put( bstree, 5 );
    i_bstree_put( bstree, 7 );
    
-   i_bstree_remove_and_dispose( bstree, 5 );
+   i_bstree_remove_and_dispose( bstree, 4 );
  
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 1 );
@@ -612,7 +613,7 @@ void test_remove_and_dispose_5d( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -626,6 +627,59 @@ void test_remove_and_dispose_5d( void )
 */
 
 void test_remove_and_dispose_5e( void )
+{
+   i_bstree_t *bstree = NULL;
+   int32_t result = 0;
+   
+   bstree = i_bstree_make();
+   
+   i_bstree_put( bstree, 4 );
+   i_bstree_put( bstree, 2 );
+   i_bstree_put( bstree, 6 );
+   i_bstree_put( bstree, 1 );
+   i_bstree_put( bstree, 3 );
+   i_bstree_put( bstree, 5 );
+   i_bstree_put( bstree, 7 );
+   
+   i_bstree_remove_and_dispose( bstree, 5 );
+ 
+   result = i_bstree_has( bstree, 1 );
+   CU_ASSERT( result == 1 );
+ 
+   result = i_bstree_has( bstree, 5 );
+   CU_ASSERT( result == 1 );
+ 
+   result = i_bstree_has( bstree, 4 );
+   CU_ASSERT( result == 1 );
+ 
+   result = i_bstree_has( bstree, 2 );
+   CU_ASSERT( result == 1 );
+ 
+   result = i_bstree_has( bstree, 3 );
+   CU_ASSERT( result == 1 );
+ 
+   result = i_bstree_has( bstree, 7 );
+   CU_ASSERT( result == 1 );
+ 
+   result = i_bstree_has( bstree, 6 );
+   CU_ASSERT( result == 0 );
+ 
+   CU_ASSERT( i_bstree_count( bstree ) == 6 );
+   
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_remove_and_dispose_5f
+   
+            4
+         2      6
+       1   3  5   7
+*/
+
+void test_remove_and_dispose_5f( void )
 {
    i_bstree_t *bstree = NULL;
    int32_t result = 0;
@@ -657,59 +711,6 @@ void test_remove_and_dispose_5e( void )
    result = i_bstree_has( bstree, 3 );
    CU_ASSERT( result == 1 );
  
-   result = i_bstree_has( bstree, 7 );
-   CU_ASSERT( result == 1 );
- 
-   result = i_bstree_has( bstree, 6 );
-   CU_ASSERT( result == 0 );
- 
-   CU_ASSERT( i_bstree_count( bstree ) == 6 );
-   
-   i_bstree_dispose( bstree );
-
-   return;
-}
-
-/**
-   test_remove_and_dispose_5f
-   
-            4
-         2      6
-       1   3  5   7
-*/
-
-void test_remove_and_dispose_5f( void )
-{
-   i_bstree_t *bstree = NULL;
-   int32_t result = 0;
-   
-   bstree = i_bstree_make();
-   
-   i_bstree_put( bstree, 4 );
-   i_bstree_put( bstree, 2 );
-   i_bstree_put( bstree, 6 );
-   i_bstree_put( bstree, 1 );
-   i_bstree_put( bstree, 3 );
-   i_bstree_put( bstree, 5 );
-   i_bstree_put( bstree, 7 );
-   
-   i_bstree_remove_and_dispose( bstree, 7 );
- 
-   result = i_bstree_has( bstree, 1 );
-   CU_ASSERT( result == 1 );
- 
-   result = i_bstree_has( bstree, 5 );
-   CU_ASSERT( result == 1 );
- 
-   result = i_bstree_has( bstree, 4 );
-   CU_ASSERT( result == 1 );
- 
-   result = i_bstree_has( bstree, 2 );
-   CU_ASSERT( result == 1 );
- 
-   result = i_bstree_has( bstree, 3 );
-   CU_ASSERT( result == 1 );
- 
    result = i_bstree_has( bstree, 6 );
    CU_ASSERT( result == 1 );
  
@@ -718,7 +719,7 @@ void test_remove_and_dispose_5f( void )
  
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
    
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -749,7 +750,7 @@ void test_remove_and_dispose_6( void )
    i_bstree_put( bstree, 7 );
 
    i_bstree_cursor_start( cursor );
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
 
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -774,7 +775,7 @@ void test_remove_and_dispose_6( void )
 
    CU_ASSERT( i_bstree_count( bstree ) == 6 );
 
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -797,7 +798,7 @@ void test_remove_and_dispose_6a( void )
    i_bstree_put( bstree, 4 );
    i_bstree_put( bstree, 2 );
 
-   i_bstree_remove_and_dispose( bstree, 4 );
+   i_bstree_remove_and_dispose( bstree, 1 );
 
    result = i_bstree_has( bstree, 2 );
    CU_ASSERT( result == 1 );
@@ -807,7 +808,7 @@ void test_remove_and_dispose_6a( void )
 
    CU_ASSERT( i_bstree_count( bstree ) == 1 );
 
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -832,7 +833,7 @@ void test_remove_and_dispose_6b( void )
    i_bstree_put( bstree, 7 );
    i_bstree_put( bstree, 6 );
 
-   i_bstree_remove_and_dispose( bstree, 8 );
+   i_bstree_remove_and_dispose( bstree, 3 );
 
    result = i_bstree_has( bstree, 4 );
    CU_ASSERT( result == 1 );
@@ -848,7 +849,7 @@ void test_remove_and_dispose_6b( void )
 
    CU_ASSERT( i_bstree_count( bstree ) == 3 );
 
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -873,7 +874,7 @@ void test_remove_and_dispose_6c( void )
    i_bstree_put( bstree, 2 );
    i_bstree_put( bstree, 3 );
 
-   i_bstree_remove_and_dispose( bstree, 1 );
+   i_bstree_remove_and_dispose( bstree, 0 );
 
    result = i_bstree_has( bstree, 1 );
    CU_ASSERT( result == 0 );
@@ -889,7 +890,136 @@ void test_remove_and_dispose_6c( void )
 
    CU_ASSERT( i_bstree_count( bstree ) == 3 );
 
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_remove_and_dispose_6d
+
+            4
+         2      6
+       1   3  5   7
+*/
+
+void test_remove_and_dispose_6d( void )
+{
+   i_bstree_t *bstree = NULL;
+   int32_t result = 0;
+
+   bstree = i_bstree_make();
+
+   i_bstree_put( bstree, 4 );
+   i_bstree_put( bstree, 1 );
+   i_bstree_put( bstree, 2 );
+   i_bstree_put( bstree, 3 );
+
+   i_bstree_finish( bstree );
+   i_bstree_remove_and_dispose( bstree, 0 );
+
+   result = i_bstree_has( bstree, 1 );
+   CU_ASSERT( result == 0 );
+
+   result = i_bstree_has( bstree, 2 );
+   CU_ASSERT( result == 1 );
+
+   result = i_bstree_has( bstree, 3 );
+   CU_ASSERT( result == 1 );
+
+   result = i_bstree_has( bstree, 4 );
+   CU_ASSERT( result == 1 );
+
+   CU_ASSERT( i_bstree_count( bstree ) == 3 );
+
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_remove_and_dispose_7
+*/
+
+void test_remove_and_dispose_7( void )
+{
+   s_bstree_t *bstree = NULL;
+   int32_t result = 0;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s1a = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   
+   bstree = s_bstree_make();
+
+   s_bstree_put( bstree, s4 );
+   s_bstree_put( bstree, s1 );
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s3 );
+
+   s_bstree_finish( bstree );
+   s_bstree_remove_and_dispose( bstree, 0 );
+
+   result = s_bstree_has( bstree, s1a );
+   CU_ASSERT( result == 0 );
+
+   result = s_bstree_has( bstree, s2 );
+   CU_ASSERT( result == 1 );
+
+   result = s_bstree_has( bstree, s3 );
+   CU_ASSERT( result == 1 );
+
+   result = s_bstree_has( bstree, s4 );
+   CU_ASSERT( result == 1 );
+
+   CU_ASSERT( s_bstree_count( bstree ) == 3 );
+
+   string_deep_dispose( &s1a );
+   
+   s_bstree_deep_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_remove_and_dispose_7a
+*/
+
+void test_remove_and_dispose_7a( void )
+{
+   s_bstree_t *bstree = NULL;
+   int32_t result = 0;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s2a = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   
+   bstree = s_bstree_make();
+
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s1 );
+   s_bstree_put( bstree, s3 );
+
+   s_bstree_start( bstree );
+   s_bstree_forth( bstree );
+   s_bstree_remove_and_dispose( bstree, 1 );
+ 
+   result = s_bstree_has( bstree, s1 );
+   CU_ASSERT( result == 1 );
+ 
+   result = s_bstree_has( bstree, s3 );
+   CU_ASSERT( result == 1 );
+ 
+   result = s_bstree_has( bstree, s2a );
+   CU_ASSERT( result == 0 );
+ 
+   CU_ASSERT( s_bstree_count( bstree ) == 2 );
+   
+   s_bstree_deep_dispose( &bstree );
+   string_dispose( &s2a );
 
    return;
 }
@@ -941,7 +1071,12 @@ add_test_remove_and_dispose( void )
    add_test_to_suite( p_suite, test_remove_and_dispose_6a, "test_remove_and_dispose_6a" );
    add_test_to_suite( p_suite, test_remove_and_dispose_6b, "test_remove_and_dispose_6b" );
    add_test_to_suite( p_suite, test_remove_and_dispose_6c, "test_remove_and_dispose_6c" );
+   add_test_to_suite( p_suite, test_remove_and_dispose_6d, "test_remove_and_dispose_6d" );
 
+   // test_remove_and_dispose_7
+   add_test_to_suite( p_suite, test_remove_and_dispose_7, "test_remove_and_dispose_7" );
+   add_test_to_suite( p_suite, test_remove_and_dispose_7a, "test_remove_and_dispose_7a" );
+   
    return CUE_SUCCESS;
    
 }

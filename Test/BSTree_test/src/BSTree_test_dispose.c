@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -44,7 +45,7 @@ void test_dispose_1( void )
    CU_ASSERT( i_bstree_count( bstree ) == 0 );
    CU_ASSERT( i_bstree_is_empty( bstree ) == 1 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
    
    return;
 }
@@ -63,7 +64,29 @@ void test_dispose_2( void )
    CU_ASSERT( bstree != NULL );
    CU_ASSERT( i_bstree_count( bstree ) == 1 );
  
-   i_bstree_dispose_with_contents( bstree );
+   i_bstree_dispose( &bstree );
+   
+   return;
+}
+
+/**
+   test_dispose_3
+*/
+
+void test_dispose_3( void )
+{
+   s_bstree_t *bstree = NULL;
+   
+   string_t *s1 = string_make_from_cstring( "1" );
+   
+   bstree = s_bstree_make();
+   s_bstree_put( bstree, s1 );
+   
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( s_bstree_count( bstree ) == 1 );
+
+   s_bstree_dispose( &bstree );
+   string_deep_dispose( &s1 );
    
    return;
 }
@@ -88,6 +111,9 @@ add_test_dispose( void )
 
    // test_dispose_2
    add_test_to_suite( p_suite, test_dispose_2, "test_dispose_2" );
+
+   // test_dispose_3
+   add_test_to_suite( p_suite, test_dispose_3, "test_dispose_3" );
 
    return CUE_SUCCESS;
    

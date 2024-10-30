@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_cursor_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for RBTree_kv_t
 
 */
 
@@ -44,7 +44,7 @@ void test_cursor_make_1( void )
    
    CU_ASSERT( cursor != NULL );
  
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }
@@ -66,7 +66,7 @@ void test_cursor_make_2( void )
    CU_ASSERT( cursor1 != NULL );
    CU_ASSERT( cursor2 != NULL );
 
-   ii_rbtree_kv_dispose( rbtree );
+   ii_rbtree_kv_dispose( &rbtree );
    
    return;
 }

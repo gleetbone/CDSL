@@ -1,7 +1,7 @@
 /**
  @file DList_test_append.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for DList_append"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for DList_item_at.
+ Unit tests for DList_t.
 
 */
 
@@ -25,7 +25,8 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_DList.h"
+#include "i_DList.h"
+#include "s_DList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,25 +37,49 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_append_1( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
+   list = i_dlist_make();
    
-   int_dlist_t *list1 = NULL;
+   i_dlist_t *list1 = NULL;
 
-   list1 = int_dlist_make();
-   int_dlist_put_last( list1, 24 );
+   list1 = i_dlist_make();
    
-   int_dlist_append( list, list1, 0 );
+   i_dlist_append( list, list1, 0 );
 
-   int_dlist_start( list );
+   CU_ASSERT( i_dlist_count( list ) == 0 );
 
-   CU_ASSERT( int_dlist_count( list ) == 1 );
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 24 );
+   return;
+}
 
-   int_dlist_dispose( list );
-   int_dlist_dispose( list1 );
+/**
+   test_append_1a
+*/
+
+void test_append_1a( void )
+{
+   i_dlist_t *list = NULL;
+
+   list = i_dlist_make();
+   
+   i_dlist_t *list1 = NULL;
+
+   list1 = i_dlist_make();
+   i_dlist_put_last( list1, 24 );
+   
+   i_dlist_append( list, list1, 0 );
+
+   i_dlist_start( list );
+
+   CU_ASSERT( i_dlist_count( list ) == 1 );
+
+   CU_ASSERT( i_dlist_item_at( list ) == 24 );
+
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
 
    return;
 }
@@ -65,32 +90,32 @@ void test_append_1( void )
 
 void test_append_2( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
+   list = i_dlist_make();
    
-   int_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 24 );
    
-   int_dlist_t *list1 = NULL;
+   i_dlist_t *list1 = NULL;
 
-   list1 = int_dlist_make();
+   list1 = i_dlist_make();
    
-   int_dlist_put_last( list1, 13 );
+   i_dlist_put_last( list1, 13 );
    
-   int_dlist_append( list, list1, 0 );
+   i_dlist_append( list, list1, 0 );
 
-   int_dlist_start( list );
+   i_dlist_start( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 24 );
+   CU_ASSERT( i_dlist_item_at( list ) == 24 );
 
-   CU_ASSERT( int_dlist_count( list ) == 2 );
+   CU_ASSERT( i_dlist_count( list ) == 2 );
 
-   int_dlist_dispose( list );
-   int_dlist_dispose( list1 );
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
 
    return;
 }
@@ -101,32 +126,32 @@ void test_append_2( void )
 
 void test_append_3( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
+   list = i_dlist_make();
    
-   int_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 24 );
    
-   int_dlist_t *list1 = NULL;
+   i_dlist_t *list1 = NULL;
 
-   list1 = int_dlist_make();
+   list1 = i_dlist_make();
    
-   int_dlist_put_last( list1, 13 );
+   i_dlist_put_last( list1, 13 );
    
-   int_dlist_append( list, list1, 1 );
+   i_dlist_append( list, list1, 1 );
    
-   int_dlist_start( list );
+   i_dlist_start( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 24 );
+   CU_ASSERT( i_dlist_item_at( list ) == 24 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   CU_ASSERT( int_dlist_count( list ) == 2 );
+   CU_ASSERT( i_dlist_count( list ) == 2 );
 
-   int_dlist_dispose( list );
-   int_dlist_dispose( list1 );
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
 
    return;
 }
@@ -137,40 +162,40 @@ void test_append_3( void )
 
 void test_append_4( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
 
-   int_dlist_t *list1 = NULL;
+   i_dlist_t *list1 = NULL;
 
-   list1 = int_dlist_make();
-   int_dlist_put_last( list1, 7 );
-   int_dlist_put_last( list1, 31 );
+   list1 = i_dlist_make();
+   i_dlist_put_last( list1, 7 );
+   i_dlist_put_last( list1, 31 );
    
-   int_dlist_append( list, list1, 0 );
+   i_dlist_append( list, list1, 0 );
 
-   int_dlist_start( list );
+   i_dlist_start( list );
    
-   CU_ASSERT( int_dlist_item_at( list ) == 7 );
+   CU_ASSERT( i_dlist_item_at( list ) == 7 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 31 );
+   CU_ASSERT( i_dlist_item_at( list ) == 31 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 24 );
+   CU_ASSERT( i_dlist_item_at( list ) == 24 );
    
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   CU_ASSERT( int_dlist_count( list ) == 4 );
+   CU_ASSERT( i_dlist_count( list ) == 4 );
 
-   int_dlist_dispose( list );
-   int_dlist_dispose( list1 );
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
 
    return;
 }
@@ -181,40 +206,40 @@ void test_append_4( void )
 
 void test_append_5( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
 
-   int_dlist_t *list1 = NULL;
+   i_dlist_t *list1 = NULL;
 
-   list1 = int_dlist_make();
-   int_dlist_put_last( list1, 7 );
-   int_dlist_put_last( list1, 31 );
+   list1 = i_dlist_make();
+   i_dlist_put_last( list1, 7 );
+   i_dlist_put_last( list1, 31 );
    
-   int_dlist_append( list, list1, 1 );
+   i_dlist_append( list, list1, 1 );
 
-   int_dlist_start( list );
+   i_dlist_start( list );
    
-   CU_ASSERT( int_dlist_item_at( list ) == 24 );
+   CU_ASSERT( i_dlist_item_at( list ) == 24 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 7 );
+   CU_ASSERT( i_dlist_item_at( list ) == 7 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 31 );
+   CU_ASSERT( i_dlist_item_at( list ) == 31 );
    
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   CU_ASSERT( int_dlist_count( list ) == 4 );
+   CU_ASSERT( i_dlist_count( list ) == 4 );
 
-   int_dlist_dispose( list );
-   int_dlist_dispose( list1 );
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
 
    return;
 }
@@ -225,40 +250,88 @@ void test_append_5( void )
 
 void test_append_6( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
 
-   int_dlist_t *list1 = NULL;
+   i_dlist_t *list1 = NULL;
 
-   list1 = int_dlist_make();
-   int_dlist_put_last( list1, 7 );
-   int_dlist_put_last( list1, 31 );
+   list1 = i_dlist_make();
+   i_dlist_put_last( list1, 7 );
+   i_dlist_put_last( list1, 31 );
    
-   int_dlist_append( list, list1, 2 );
+   i_dlist_append( list, list1, 2 );
 
-   int_dlist_start( list );
+   i_dlist_start( list );
    
-   CU_ASSERT( int_dlist_item_at( list ) == 24 );
+   CU_ASSERT( i_dlist_item_at( list ) == 24 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 7 );
+   CU_ASSERT( i_dlist_item_at( list ) == 7 );
    
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 31 );
+   CU_ASSERT( i_dlist_item_at( list ) == 31 );
 
-   CU_ASSERT( int_dlist_count( list ) == 4 );
+   CU_ASSERT( i_dlist_count( list ) == 4 );
 
-   int_dlist_dispose( list );
-   int_dlist_dispose( list1 );
+   i_dlist_dispose( &list );
+   i_dlist_dispose( &list1 );
+
+   return;
+}
+
+/**
+   test_append_7
+*/
+
+void test_append_7( void )
+{
+   s_dlist_t *list = NULL;
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   string_t *s4 = string_make_from_cstring( "4" );
+
+   list = s_dlist_make();
+   s_dlist_put_last( list, s1 );
+   s_dlist_put_last( list, s2 );
+
+   s_dlist_t *list1 = NULL;
+
+   list1 = s_dlist_make();
+   s_dlist_put_last( list1, s3 );
+   s_dlist_put_last( list1, s4 );
+   
+   s_dlist_append( list, list1, 2 );
+
+   s_dlist_start( list );
+   
+   CU_ASSERT( s_dlist_item_at( list ) == s1 );
+
+   s_dlist_forth( list );
+
+   CU_ASSERT( s_dlist_item_at( list ) == s2 );
+
+   s_dlist_forth( list );
+
+   CU_ASSERT( s_dlist_item_at( list ) == s3 );
+   
+   s_dlist_forth( list );
+
+   CU_ASSERT( s_dlist_item_at( list ) == s4 );
+
+   CU_ASSERT( s_dlist_count( list ) == 4 );
+
+   s_dlist_deep_dispose( &list );
+   s_dlist_dispose( &list1 );
 
    return;
 }
@@ -281,6 +354,9 @@ add_test_append( void )
    // test_append_1
    add_test_to_suite( p_suite, test_append_1, "test_append_1" );
 
+   // test_append_1a
+   add_test_to_suite( p_suite, test_append_1a, "test_append_1a" );
+
    // test_append_2
    add_test_to_suite( p_suite, test_append_2, "test_append_2" );
 
@@ -295,6 +371,9 @@ add_test_append( void )
 
    // test_append_6
    add_test_to_suite( p_suite, test_append_6, "test_append_6" );
+
+   // test_append_7
+   add_test_to_suite( p_suite, test_append_7, "test_append_7" );
 
    return CUE_SUCCESS;
 

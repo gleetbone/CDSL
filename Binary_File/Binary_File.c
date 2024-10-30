@@ -1,17 +1,17 @@
 /**
  @file Binary_File.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "binary file type"
 
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque binary_file_t type.
@@ -48,7 +48,8 @@ extern "C" {
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <utime.h>
-#include <dirent.h>   
+#include <dirent.h>
+#include <endian.h>
 
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
@@ -60,7 +61,31 @@ extern "C" {
    defines
 */
 
-#define BINARY_FILE_TYPE 0xA5000701
+union Int_16_union
+{
+   uint16_t    u;
+   int16_t     i;
+};
+
+typedef union Int_16_union Int_16_t;
+
+union Int_Float_32_union
+{
+   uint32_t    u;
+   int32_t     i;
+   float32_t   f;
+};
+
+typedef union Int_Float_32_union Int_Float_32_t;
+
+union Int_Float_64_union
+{
+   uint64_t    u;
+   int64_t     i;
+   float64_t   f;
+};
+
+typedef union Int_Float_64_union Int_Float_64_t;
 
 /**
    binary_file structure
@@ -68,8 +93,8 @@ extern "C" {
 
 struct binary_file_struct
 {
-   int32_t type;
-   
+   int32_t _type;
+
    string_t *name;
    FILE *file;
    int32_t is_open_read;
@@ -95,7 +120,7 @@ name_not_null( binary_file_t *p )
 static
 void invariant( binary_file_t *p )
 {
-   assert(((void) "name not null", name_not_null( p ) ));
+   assert( ( ( void ) "name not null", name_not_null( p ) ) );
    return;
 }
 
@@ -107,29 +132,29 @@ void invariant( binary_file_t *p )
 
 static
 int32_t
-is_file_end_of_file( binary_file_t *binary_file )
+is_file_end_of_file( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-  
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+
    int64_t pos = 0;
    int64_t count = 0;
    int32_t result = 0;
 
    // get current position
-   pos = ftell( (*binary_file).file );
+   pos = ftell( (*current).file );
 
    // move to end of file
-   fseek( (*binary_file).file, 0, SEEK_END );
+   fseek( (*current).file, 0, SEEK_END );
 
    // get position = size of file
-   count = ftell( (*binary_file).file );
+   count = ftell( (*current).file );
 
    // return to original position
-   fseek( (*binary_file).file, pos, SEEK_SET );
+   fseek( (*current).file, pos, SEEK_SET );
 
    // return true if file at eof or file is empty
-   result = ( feof( (*binary_file).file ) != 0 ) || ( count == pos );
+   result = ( feof( (*current).file ) != 0 ) || ( count == pos );
 
    return result;
 }
@@ -144,27 +169,27 @@ binary_file_make( string_t *name )
    PRECONDITION( "name not null", name != NULL );
 
    // allocate binary_file struct
-   binary_file_t * binary_file = ( binary_file_t * ) calloc( 1, sizeof( binary_file_t ) );
+   binary_file_t * result = ( binary_file_t * ) calloc( 1, sizeof( binary_file_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*binary_file).type = BINARY_FILE_TYPE;
+   (*result)._type = BINARY_FILE_TYPE;
 
    // set name
-   (*binary_file).name = string_make_from( name );
+   (*result).name = string_clone( name );
 
    // set file
-   (*binary_file).file = NULL;
+   (*result).file = NULL;
 
    // set flags
-   (*binary_file).is_open_read = 0;
-   (*binary_file).is_open_write = 0;
-   (*binary_file).is_open_append = 0;
+   (*result).is_open_write = 0;
+   (*result).is_open_append = 0;
 
-   MULTITHREAD_MUTEX_INIT( (*binary_file).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( binary_file );
+   INVARIANT( result );
 
-   return binary_file;
+   return result;
 }
 
 /**
@@ -177,27 +202,28 @@ binary_file_make_cstring( char_t *name )
    PRECONDITION( "name not null", name != NULL );
 
    // allocate binary_file struct
-   binary_file_t * binary_file = ( binary_file_t * ) calloc( 1, sizeof( binary_file_t ) );
+   binary_file_t * result = ( binary_file_t * ) calloc( 1, sizeof( binary_file_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*binary_file).type = BINARY_FILE_TYPE;
+   (*result)._type = BINARY_FILE_TYPE;
 
    // set name
-   (*binary_file).name = string_make_from_cstring( name );
+   (*result).name = string_make_from_cstring( name );
 
    // set file
-   (*binary_file).file = NULL;
+   (*result).file = NULL;
 
    // set flags
-   (*binary_file).is_open_read = 0;
-   (*binary_file).is_open_write = 0;
-   (*binary_file).is_open_append = 0;
+   (*result).is_open_read = 0;
+   (*result).is_open_write = 0;
+   (*result).is_open_append = 0;
 
-   MULTITHREAD_MUTEX_INIT( (*binary_file).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( binary_file );
+   INVARIANT( result );
 
-   return binary_file;
+   return result;
 }
 
 /**
@@ -220,10 +246,10 @@ binary_file_make_open_read( string_t *name )
 }
 
 /**
-   binary_file_make_cstring_open_read
+   binary_file_make_open_read_cstring
 */
 binary_file_t *
-binary_file_make_cstring_open_read( char_t *name )
+binary_file_make_open_read_cstring( char_t *name )
 {
    PRECONDITION( "name not null", name != NULL );
 
@@ -258,10 +284,10 @@ binary_file_make_open_write( string_t *name )
 }
 
 /**
-   binary_file_make_cstring_open_write
+   binary_file_make_open_write_cstring
 */
 binary_file_t *
-binary_file_make_cstring_open_write( char_t *name )
+binary_file_make_open_write_cstring( char_t *name )
 {
    PRECONDITION( "name not null", name != NULL );
 
@@ -297,10 +323,10 @@ binary_file_make_open_read_write( string_t *name )
 }
 
 /**
-   binary_file_make_cstring_open_read_write
+   binary_file_make_open_read_write_cstring
 */
 binary_file_t *
-binary_file_make_cstring_open_read_write( char_t *name )
+binary_file_make_open_read_write_cstring( char_t *name )
 {
    PRECONDITION( "name not null", name != NULL );
 
@@ -337,10 +363,10 @@ binary_file_make_create_read_write( string_t *name )
 }
 
 /**
-   binary_file_make_cstring_create_read_write
+   binary_file_make_create_read_write_cstring
 */
 binary_file_t *
-binary_file_make_cstring_create_read_write( char_t *name )
+binary_file_make_create_read_write_cstring( char_t *name )
 {
    PRECONDITION( "name not null", name != NULL );
 
@@ -376,10 +402,10 @@ binary_file_make_open_append( string_t *name )
 }
 
 /**
-   binary_file_make_cstring_open_append
+   binary_file_make_open_append_cstring
 */
 binary_file_t *
-binary_file_make_cstring_open_append( char_t *name )
+binary_file_make_open_append_cstring( char_t *name )
 {
    PRECONDITION( "name not null", name != NULL );
 
@@ -415,10 +441,10 @@ binary_file_make_open_read_append( string_t *name )
 }
 
 /**
-   binary_file_make_cstring_open_read_append
+   binary_file_make_open_read_append_cstring
 */
 binary_file_t *
-binary_file_make_cstring_open_read_append( char_t *name )
+binary_file_make_open_read_append_cstring( char_t *name )
 {
    PRECONDITION( "name not null", name != NULL );
 
@@ -441,30 +467,34 @@ binary_file_make_cstring_open_read_append( char_t *name )
 */
 
 void
-binary_file_dispose( binary_file_t *binary_file )
+binary_file_dispose( binary_file_t **current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "current type OK", (**current)._type == BINARY_FILE_TYPE );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
    // delete binary_file name
-   string_dispose_with_contents( (*binary_file).name );
+   string_deep_dispose( &(**current).name );
 
    // if file is not NULL, close it
-   if ( (*binary_file).file != NULL )
+   if ( (**current).file != NULL )
    {
-      fclose( (*binary_file).file );
-      (*binary_file).file = NULL;
-      (*binary_file).is_open_read = 0;
-      (*binary_file).is_open_write = 0;
-      (*binary_file).is_open_append = 0;
+      fclose( (**current).file );
+      (**current).file = NULL;
+      (**current).is_open_read = 0;
+      (**current).is_open_write = 0;
+      (**current).is_open_append = 0;
    }
 
-   MULTITHREAD_MUTEX_DESTROY( (*binary_file).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
    // delete binary_file struct
-   free( binary_file );
+   free(*current);
+
+   // set pointer to null
+   *current = NULL;
 
    return;
 }
@@ -475,17 +505,17 @@ binary_file_dispose( binary_file_t *binary_file )
 */
 
 string_t *
-binary_file_name( binary_file_t *binary_file )
+binary_file_name( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   string_t *result = (*binary_file).name;
+   string_t *result = (*current).name;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -495,17 +525,17 @@ binary_file_name( binary_file_t *binary_file )
 */
 
 char_t *
-binary_file_name_cstring( binary_file_t *binary_file )
+binary_file_name_cstring( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   char_t *result = string_as_cstring( (*binary_file).name );
+   char_t *result = string_as_cstring( (*current).name );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -515,18 +545,18 @@ binary_file_name_cstring( binary_file_t *binary_file )
 */
 
 int64_t
-binary_file_position( binary_file_t *binary_file )
+binary_file_position( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   int64_t result = ftell( (*binary_file).file );
+   int64_t result = ftell( (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -536,31 +566,31 @@ binary_file_position( binary_file_t *binary_file )
 */
 
 int64_t
-binary_file_count( binary_file_t *binary_file )
+binary_file_count( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int64_t pos = 0;
    int64_t result = 0;
 
    // get current position
-   pos = ftell( (*binary_file).file );
+   pos = ftell( (*current).file );
 
    // move to end of file
-   fseek( (*binary_file).file, 0, SEEK_END );
+   fseek( (*current).file, 0, SEEK_END );
 
    // get position = size of file
-   result = ftell( (*binary_file).file );
+   result = ftell( (*current).file );
 
    // return to original position
-   fseek( (*binary_file).file, pos, SEEK_SET );
+   fseek( (*current).file, pos, SEEK_SET );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -570,35 +600,35 @@ binary_file_count( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_after( binary_file_t *binary_file )
+binary_file_after( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int64_t pos = 0;
    int64_t count = 0;
    int32_t result = 0;
 
    // get current position
-   pos = ftell( (*binary_file).file );
+   pos = ftell( (*current).file );
 
    // move to end of file
-   fseek( (*binary_file).file, 0, SEEK_END );
+   fseek( (*current).file, 0, SEEK_END );
 
    // get position = size of file
-   count = ftell( (*binary_file).file );
+   count = ftell( (*current).file );
 
    // return to original position
-   fseek( (*binary_file).file, pos, SEEK_SET );
+   fseek( (*current).file, pos, SEEK_SET );
 
    // return true if file at eof or file is empty
-   result = ( is_file_end_of_file( binary_file ) != 0 ) || ( count == 0 );
+   result = ( is_file_end_of_file( current ) != 0 ) || ( count == 0 );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -608,19 +638,19 @@ binary_file_after( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_before( binary_file_t *binary_file )
+binary_file_before( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
    int64_t pos = 0;
 
    // return file position
-   pos = ftell( (*binary_file).file );
+   pos = ftell( (*current).file );
 
    // return 1 if pos is zero
    if ( pos == 0 )
@@ -628,8 +658,8 @@ binary_file_before( binary_file_t *binary_file )
       result = 1;
    }
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -639,25 +669,25 @@ binary_file_before( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_off( binary_file_t *binary_file )
+binary_file_off( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
    int64_t pos = 0;
 
    // return file position
-   pos = ftell( (*binary_file).file );
+   pos = ftell( (*current).file );
 
    // return true if pos at 0 or pos at eof
-   result = ( pos == 0 ) || ( is_file_end_of_file( binary_file ) != 0 );
+   result = ( pos == 0 ) || ( is_file_end_of_file( current ) != 0 );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -667,21 +697,21 @@ binary_file_off( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_end_of_file( binary_file_t *binary_file )
+binary_file_end_of_file( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
 
    // return true if file at eof or file is empty
-   result = is_file_end_of_file( binary_file );
+   result = is_file_end_of_file( current );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -691,23 +721,23 @@ binary_file_end_of_file( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_exists( binary_file_t *binary_file )
+binary_file_exists( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
 
-   if ( access( string_as_cstring( (*binary_file).name ), F_OK ) != -1 )
+   if ( access( string_as_cstring( (*current).name ), F_OK ) != -1 )
    {
       result = 1;
    }
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -717,18 +747,18 @@ binary_file_exists( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_is_closed( binary_file_t *binary_file )
+binary_file_is_closed( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // true if file struct member is NULL
-   int32_t result = ( (*binary_file).file == NULL );
+   int32_t result = ( (*current).file == NULL );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -738,18 +768,18 @@ binary_file_is_closed( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_is_open_read( binary_file_t *binary_file )
+binary_file_is_open_read( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // return struct member
-   int32_t result = (*binary_file).is_open_read;
+   int32_t result = (*current).is_open_read;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -759,18 +789,18 @@ binary_file_is_open_read( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_is_open_write( binary_file_t *binary_file )
+binary_file_is_open_write( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // return struct member
-   int32_t result = (*binary_file).is_open_write;
+   int32_t result = (*current).is_open_write;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -780,18 +810,18 @@ binary_file_is_open_write( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_is_open_append( binary_file_t *binary_file )
+binary_file_is_open_append( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // return struct member
-   int32_t result = (*binary_file).is_open_append;
+   int32_t result = (*current).is_open_append;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -801,20 +831,20 @@ binary_file_is_open_append( binary_file_t *binary_file )
 */
 
 void
-binary_file_open_read( binary_file_t *binary_file )
+binary_file_open_read( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // open file
-   (*binary_file).file = fopen( string_as_cstring( (*binary_file).name ), "rb" );
-   (*binary_file).is_open_read = 1;
+   (*current).file = fopen( string_as_cstring( (*current).name ), "rb" );
+   (*current).is_open_read = 1;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -824,20 +854,20 @@ binary_file_open_read( binary_file_t *binary_file )
 */
 
 void
-binary_file_open_write( binary_file_t *binary_file )
+binary_file_open_write( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // open file
-   (*binary_file).file = fopen( string_as_cstring( (*binary_file).name ), "wb" );
-   (*binary_file).is_open_write = 1;
+   (*current).file = fopen( string_as_cstring( (*current).name ), "wb" );
+   (*current).is_open_write = 1;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -847,20 +877,20 @@ binary_file_open_write( binary_file_t *binary_file )
 */
 
 void
-binary_file_open_append( binary_file_t *binary_file )
+binary_file_open_append( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // open file
-   (*binary_file).file = fopen( string_as_cstring( (*binary_file).name ), "ab" );
-   (*binary_file).is_open_append = 1;
+   (*current).file = fopen( string_as_cstring( (*current).name ), "ab" );
+   (*current).is_open_append = 1;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -870,21 +900,21 @@ binary_file_open_append( binary_file_t *binary_file )
 */
 
 void
-binary_file_open_read_write( binary_file_t *binary_file )
+binary_file_open_read_write( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // open file
-   (*binary_file).file = fopen( string_as_cstring( (*binary_file).name ), "r+b" );
-   (*binary_file).is_open_read = 1;
-   (*binary_file).is_open_write = 1;
+   (*current).file = fopen( string_as_cstring( (*current).name ), "r+b" );
+   (*current).is_open_read = 1;
+   (*current).is_open_write = 1;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -894,21 +924,21 @@ binary_file_open_read_write( binary_file_t *binary_file )
 */
 
 void
-binary_file_create_read_write( binary_file_t *binary_file )
+binary_file_create_read_write( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // open file
-   (*binary_file).file = fopen( string_as_cstring( (*binary_file).name ), "w+b" );
-   (*binary_file).is_open_read = 1;
-   (*binary_file).is_open_write = 1;
+   (*current).file = fopen( string_as_cstring( (*current).name ), "w+b" );
+   (*current).is_open_read = 1;
+   (*current).is_open_write = 1;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -918,21 +948,21 @@ binary_file_create_read_write( binary_file_t *binary_file )
 */
 
 void
-binary_file_open_read_append( binary_file_t *binary_file )
+binary_file_open_read_append( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // open file
-   (*binary_file).file = fopen( string_as_cstring( (*binary_file).name ), "a+b" );
-   (*binary_file).is_open_read = 1;
-   (*binary_file).is_open_append = 1;
+   (*current).file = fopen( string_as_cstring( (*current).name ), "a+b" );
+   (*current).is_open_read = 1;
+   (*current).is_open_append = 1;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -942,26 +972,26 @@ binary_file_open_read_append( binary_file_t *binary_file )
 */
 
 void
-binary_file_close( binary_file_t *binary_file )
+binary_file_close( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // close file, if open
-   if ( (*binary_file).file != NULL )
+   if ( (*current).file != NULL )
    {
-      fclose( (*binary_file).file );
-      (*binary_file).file = NULL;
-      (*binary_file).is_open_read = 0;
-      (*binary_file).is_open_write = 0;
-      (*binary_file).is_open_append = 0;
+      fclose( (*current).file );
+      (*current).file = NULL;
+      (*current).is_open_read = 0;
+      (*current).is_open_write = 0;
+      (*current).is_open_append = 0;
    }
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -971,18 +1001,18 @@ binary_file_close( binary_file_t *binary_file )
 */
 
 void
-binary_file_start( binary_file_t *binary_file )
+binary_file_start( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, 0, SEEK_SET );
+   fseek( (*current).file, 0, SEEK_SET );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -992,18 +1022,18 @@ binary_file_start( binary_file_t *binary_file )
 */
 
 void
-binary_file_finish( binary_file_t *binary_file )
+binary_file_finish( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, 0, SEEK_END );
+   fseek( (*current).file, 0, SEEK_END );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1013,18 +1043,18 @@ binary_file_finish( binary_file_t *binary_file )
 */
 
 void
-binary_file_forth( binary_file_t *binary_file )
+binary_file_forth( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, 1, SEEK_CUR );
+   fseek( (*current).file, 1, SEEK_CUR );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1034,18 +1064,18 @@ binary_file_forth( binary_file_t *binary_file )
 */
 
 void
-binary_file_back( binary_file_t *binary_file )
+binary_file_back( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, -1, SEEK_CUR );
+   fseek( (*current).file, -1, SEEK_CUR );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1055,18 +1085,18 @@ binary_file_back( binary_file_t *binary_file )
 */
 
 void
-binary_file_move( binary_file_t *binary_file, int64_t offset )
+binary_file_move( binary_file_t *current, int64_t offset )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, offset, SEEK_CUR );
+   fseek( (*current).file, offset, SEEK_CUR );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1076,18 +1106,18 @@ binary_file_move( binary_file_t *binary_file, int64_t offset )
 */
 
 void
-binary_file_go( binary_file_t *binary_file, int64_t pos )
+binary_file_go( binary_file_t *current, int64_t pos )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, pos, SEEK_SET );
+   fseek( (*current).file, pos, SEEK_SET );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1097,18 +1127,18 @@ binary_file_go( binary_file_t *binary_file, int64_t pos )
 */
 
 void
-binary_file_recede( binary_file_t *binary_file, int64_t pos )
+binary_file_recede( binary_file_t *current, int64_t pos )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fseek( (*binary_file).file, -pos, SEEK_END );
+   fseek( (*current).file, -pos, SEEK_END );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1118,18 +1148,18 @@ binary_file_recede( binary_file_t *binary_file, int64_t pos )
 */
 
 void
-binary_file_flush( binary_file_t *binary_file )
+binary_file_flush( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fflush( (*binary_file).file );
+   fflush( (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1139,18 +1169,18 @@ binary_file_flush( binary_file_t *binary_file )
 */
 
 void
-binary_file_touch( binary_file_t *binary_file )
+binary_file_touch( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   utime( string_as_cstring( (*binary_file).name ), NULL );
+   utime( string_as_cstring( (*current).name ), NULL );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1160,22 +1190,22 @@ binary_file_touch( binary_file_t *binary_file )
 */
 
 void
-binary_file_rename( binary_file_t *binary_file, string_t *name )
+binary_file_rename( binary_file_t *current, string_t *name )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
    PRECONDITION( "name not null", name != NULL );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   rename( string_as_cstring( (*binary_file).name ), string_as_cstring( name ) );
+   rename( string_as_cstring( (*current).name ), string_as_cstring( name ) );
 
-   string_dispose_with_contents( (*binary_file).name );
-   (*binary_file).name = string_make_from( name );
+   string_deep_dispose( &(*current).name );
+   (*current).name = string_clone( name );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1185,22 +1215,22 @@ binary_file_rename( binary_file_t *binary_file, string_t *name )
 */
 
 void
-binary_file_rename_cstring( binary_file_t *binary_file, char_t *name )
+binary_file_rename_cstring( binary_file_t *current, char_t *name )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
    PRECONDITION( "name not null", name != NULL );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   rename( string_as_cstring( (*binary_file).name ), name );
+   rename( string_as_cstring( (*current).name ), name );
 
-   string_dispose_with_contents( (*binary_file).name );
-   (*binary_file).name = string_make_from_cstring( name );
+   string_deep_dispose( &(*current).name );
+   (*current).name = string_make_from_cstring( name );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1210,18 +1240,18 @@ binary_file_rename_cstring( binary_file_t *binary_file, char_t *name )
 */
 
 void
-binary_file_put_int8( binary_file_t *binary_file, int8_t arg )
+binary_file_put_int8( binary_file_t *current, int8_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( int8_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( int8_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1231,18 +1261,18 @@ binary_file_put_int8( binary_file_t *binary_file, int8_t arg )
 */
 
 void
-binary_file_put_int16( binary_file_t *binary_file, int16_t arg )
+binary_file_put_int16( binary_file_t *current, int16_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( int16_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( int16_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1252,18 +1282,18 @@ binary_file_put_int16( binary_file_t *binary_file, int16_t arg )
 */
 
 void
-binary_file_put_int32( binary_file_t *binary_file, int32_t arg )
+binary_file_put_int32( binary_file_t *current, int32_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( int32_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( int32_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1273,18 +1303,18 @@ binary_file_put_int32( binary_file_t *binary_file, int32_t arg )
 */
 
 void
-binary_file_put_int64( binary_file_t *binary_file, int64_t arg )
+binary_file_put_int64( binary_file_t *current, int64_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( int64_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( int64_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1294,18 +1324,18 @@ binary_file_put_int64( binary_file_t *binary_file, int64_t arg )
 */
 
 void
-binary_file_put_uint8( binary_file_t *binary_file, uint8_t arg )
+binary_file_put_uint8( binary_file_t *current, uint8_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( uint8_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( uint8_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1315,18 +1345,18 @@ binary_file_put_uint8( binary_file_t *binary_file, uint8_t arg )
 */
 
 void
-binary_file_put_uint16( binary_file_t *binary_file, uint16_t arg )
+binary_file_put_uint16( binary_file_t *current, uint16_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( uint16_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( uint16_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1336,18 +1366,18 @@ binary_file_put_uint16( binary_file_t *binary_file, uint16_t arg )
 */
 
 void
-binary_file_put_uint32( binary_file_t *binary_file, uint32_t arg )
+binary_file_put_uint32( binary_file_t *current, uint32_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( uint32_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( uint32_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1357,18 +1387,18 @@ binary_file_put_uint32( binary_file_t *binary_file, uint32_t arg )
 */
 
 void
-binary_file_put_uint64( binary_file_t *binary_file, uint64_t arg )
+binary_file_put_uint64( binary_file_t *current, uint64_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( uint64_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( uint64_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1378,18 +1408,18 @@ binary_file_put_uint64( binary_file_t *binary_file, uint64_t arg )
 */
 
 void
-binary_file_put_float32( binary_file_t *binary_file, float32_t arg )
+binary_file_put_float32( binary_file_t *current, float32_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( float32_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( float32_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1399,18 +1429,502 @@ binary_file_put_float32( binary_file_t *binary_file, float32_t arg )
 */
 
 void
-binary_file_put_float64( binary_file_t *binary_file, float64_t arg )
+binary_file_put_float64( binary_file_t *current, float64_t arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   fwrite( &arg, sizeof( float64_t ), 1, (*binary_file).file );
+   fwrite( &arg, sizeof( float64_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int8_be
+*/
+
+void
+binary_file_put_int8_be( binary_file_t *current, int8_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   fwrite( &arg, sizeof( int8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int16_be
+*/
+
+void
+binary_file_put_int16_be( binary_file_t *current, int16_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_16_t u = {0};
+   u.i = arg;
+   u.u = htobe16( u.u );
+
+   fwrite( &u.u, sizeof( int16_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int32_be
+*/
+
+void
+binary_file_put_int32_be( binary_file_t *current, int32_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t u = {0};
+   u.i = arg;
+   u.u = htobe32( u.u );
+
+   fwrite( &u.u, sizeof( int32_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int64_be
+*/
+
+void
+binary_file_put_int64_be( binary_file_t *current, int64_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t u = {0};
+   u.i = arg;
+   u.u = htobe64( u.u );
+
+   fwrite( &u.u, sizeof( int64_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint8_be
+*/
+
+void
+binary_file_put_uint8_be( binary_file_t *current, uint8_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   fwrite( &arg, sizeof( uint8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint16_be
+*/
+
+void
+binary_file_put_uint16_be( binary_file_t *current, uint16_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint16_t i = 0;
+
+   i = htobe16( arg );
+
+   fwrite( &i, sizeof( uint16_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint32_be
+*/
+
+void
+binary_file_put_uint32_be( binary_file_t *current, uint32_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint32_t i = 0;
+
+   i = htobe32( arg );
+
+   fwrite( &i, sizeof( uint32_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint64_be
+*/
+
+void
+binary_file_put_uint64_be( binary_file_t *current, uint64_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint64_t i = 0;
+
+   i = htobe64( arg );
+
+   fwrite( &i, sizeof( uint64_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_float32_be
+*/
+
+void
+binary_file_put_float32_be( binary_file_t *current, float32_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t u = {0};
+   u.f = arg;
+   u.u = htobe32( u.u );
+
+   fwrite( &u.u, sizeof( float32_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_float64_be
+*/
+
+void
+binary_file_put_float64_be( binary_file_t *current, float64_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t u = {0};
+   u.f = arg;
+   u.u = htobe64( u.u );
+
+   fwrite( &u.u, sizeof( float64_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int8_le
+*/
+
+void
+binary_file_put_int8_le( binary_file_t *current, int8_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   fwrite( &arg, sizeof( int8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int16_le
+*/
+
+void
+binary_file_put_int16_le( binary_file_t *current, int16_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_16_t u = {0};
+   u.i = arg;
+   u.u = htole16( u.u );
+
+   fwrite( &u.u, sizeof( int16_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int32_le
+*/
+
+void
+binary_file_put_int32_le( binary_file_t *current, int32_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t u = {0};
+   u.i = arg;
+   u.u = htole32( u.u );
+
+   fwrite( &u.u, sizeof( int32_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_int64_le
+*/
+
+void
+binary_file_put_int64_le( binary_file_t *current, int64_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t u = {0};
+   u.i = arg;
+   u.u = htole64( u.u );
+
+   fwrite( &u.u, sizeof( int64_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint8_le
+*/
+
+void
+binary_file_put_uint8_le( binary_file_t *current, uint8_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   fwrite( &arg, sizeof( uint8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint16_le
+*/
+
+void
+binary_file_put_uint16_le( binary_file_t *current, uint16_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint16_t i = 0;
+
+   i = htole16( arg );
+
+   fwrite( &i, sizeof( uint16_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint32_le
+*/
+
+void
+binary_file_put_uint32_le( binary_file_t *current, uint32_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint32_t i = 0;
+
+   i = htole32( arg );
+
+   fwrite( &i, sizeof( uint32_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_uint64_le
+*/
+
+void
+binary_file_put_uint64_le( binary_file_t *current, uint64_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint64_t i = 0;
+
+   i = htole64( arg );
+
+   fwrite( &i, sizeof( uint64_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_float32_le
+*/
+
+void
+binary_file_put_float32_le( binary_file_t *current, float32_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t u = {0};
+   u.f = arg;
+   u.u = htole32( u.u );
+
+   fwrite( &u.u, sizeof( float32_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   binary_file_put_float64_le
+*/
+
+void
+binary_file_put_float64_le( binary_file_t *current, float64_t arg )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t u = {0};
+   u.f = arg;
+   u.u = htole64( u.u );
+
+   fwrite( &u.u, sizeof( float64_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1420,25 +1934,25 @@ binary_file_put_float64( binary_file_t *binary_file, float64_t arg )
 */
 
 void
-binary_file_put_raw_buffer( binary_file_t *binary_file, raw_buffer_t *arg )
+binary_file_put_raw_buffer( binary_file_t *current, raw_buffer_t *arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
    PRECONDITION( "arg not null", arg != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    fwrite
    (
       raw_buffer_base( arg ),
       sizeof( uint8_t ),
       raw_buffer_count( arg ),
-      (*binary_file).file
+      (*current).file
    );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1448,25 +1962,25 @@ binary_file_put_raw_buffer( binary_file_t *binary_file, raw_buffer_t *arg )
 */
 
 void
-binary_file_put_string( binary_file_t *binary_file, string_t *arg )
+binary_file_put_string( binary_file_t *current, string_t *arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
    PRECONDITION( "arg not null", arg != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    fwrite
    (
       string_as_cstring( arg ),
       sizeof( char_t ),
       string_count( arg ) + 1,
-      (*binary_file).file
+      (*current).file
    );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1476,25 +1990,25 @@ binary_file_put_string( binary_file_t *binary_file, string_t *arg )
 */
 
 void
-binary_file_put_cstring( binary_file_t *binary_file, char_t *arg )
+binary_file_put_cstring( binary_file_t *current, char_t *arg )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
    PRECONDITION( "arg not null", arg != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    fwrite
    (
       arg,
       sizeof( char_t ),
       strlen( arg ) + 1,
-      (*binary_file).file
+      (*current).file
    );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1504,25 +2018,25 @@ binary_file_put_cstring( binary_file_t *binary_file, char_t *arg )
 */
 
 void
-binary_file_put_bytes( binary_file_t *binary_file, uint8_t *arg, int32_t count )
+binary_file_put_bytes( binary_file_t *current, uint8_t *arg, int32_t count )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
    PRECONDITION( "arg not null", arg != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    fwrite
    (
       arg,
       sizeof( uint8_t ),
       count,
-      (*binary_file).file
+      (*current).file
    );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1532,19 +2046,19 @@ binary_file_put_bytes( binary_file_t *binary_file, uint8_t *arg, int32_t count )
 */
 
 int8_t
-binary_file_read_int8( binary_file_t *binary_file )
+binary_file_read_int8( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int8_t result = 0;
-   fread( &result, sizeof( int8_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( int8_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1554,19 +2068,19 @@ binary_file_read_int8( binary_file_t *binary_file )
 */
 
 int16_t
-binary_file_read_int16( binary_file_t *binary_file )
+binary_file_read_int16( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int16_t result = 0;
-   fread( &result, sizeof( int16_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( int16_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1576,19 +2090,19 @@ binary_file_read_int16( binary_file_t *binary_file )
 */
 
 int32_t
-binary_file_read_int32( binary_file_t *binary_file )
+binary_file_read_int32( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
-   fread( &result, sizeof( int32_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( int32_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1598,19 +2112,19 @@ binary_file_read_int32( binary_file_t *binary_file )
 */
 
 int64_t
-binary_file_read_int64( binary_file_t *binary_file )
+binary_file_read_int64( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int64_t result = 0;
-   fread( &result, sizeof( int64_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( int64_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1620,19 +2134,20 @@ binary_file_read_int64( binary_file_t *binary_file )
 */
 
 uint8_t
-binary_file_read_uint8( binary_file_t *binary_file )
+binary_file_read_uint8( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint8_t result = 0;
-   fread( &result, sizeof( uint8_t ), 1, (*binary_file).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   fread( &result, sizeof( uint8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1642,19 +2157,19 @@ binary_file_read_uint8( binary_file_t *binary_file )
 */
 
 uint16_t
-binary_file_read_uint16( binary_file_t *binary_file )
+binary_file_read_uint16( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint16_t result = 0;
-   fread( &result, sizeof( uint16_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( uint16_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1664,19 +2179,19 @@ binary_file_read_uint16( binary_file_t *binary_file )
 */
 
 uint32_t
-binary_file_read_uint32( binary_file_t *binary_file )
+binary_file_read_uint32( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint32_t result = 0;
-   fread( &result, sizeof( uint32_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( uint32_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1686,19 +2201,19 @@ binary_file_read_uint32( binary_file_t *binary_file )
 */
 
 uint64_t
-binary_file_read_uint64( binary_file_t *binary_file )
+binary_file_read_uint64( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint64_t result = 0;
-   fread( &result, sizeof( uint64_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( uint64_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1708,19 +2223,19 @@ binary_file_read_uint64( binary_file_t *binary_file )
 */
 
 float32_t
-binary_file_read_float32( binary_file_t *binary_file )
+binary_file_read_float32( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    float32_t result = 0;
-   fread( &result, sizeof( float32_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( float32_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1730,21 +2245,511 @@ binary_file_read_float32( binary_file_t *binary_file )
 */
 
 float64_t
-binary_file_read_float64( binary_file_t *binary_file )
+binary_file_read_float64( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    float64_t result = 0;
-   fread( &result, sizeof( float64_t ), 1, (*binary_file).file );
+   fread( &result, sizeof( float64_t ), 1, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
+}
+
+/**
+   binary_file_read_int8_be
+*/
+
+int8_t
+binary_file_read_int8_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int8_t result = 0;
+   fread( &result, sizeof( int8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_int16_be
+*/
+
+int16_t
+binary_file_read_int16_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_16_t result = {0};
+
+   fread( &result.u, sizeof( int16_t ), 1, (*current).file );
+
+   result.u = be16toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.i;
+}
+
+/**
+   binary_file_read_int32_be
+*/
+
+int32_t
+binary_file_read_int32_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t result = {0};
+
+   fread( &result.u, sizeof( int32_t ), 1, (*current).file );
+
+   result.u = be32toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.i;
+}
+
+/**
+   binary_file_read_int64_be
+*/
+
+int64_t
+binary_file_read_int64_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t result = {0};
+
+   fread( &result.u, sizeof( int64_t ), 1, (*current).file );
+
+   result.u = be64toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.i;
+}
+
+/**
+   binary_file_read_uint8_be
+*/
+
+uint8_t
+binary_file_read_uint8_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint8_t result = 0;
+
+   fread( &result, sizeof( uint8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_uint16_be
+*/
+
+uint16_t
+binary_file_read_uint16_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint16_t result = 0;
+
+   fread( &result, sizeof( uint16_t ), 1, (*current).file );
+
+   result = be16toh( result );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_uint32_be
+*/
+
+uint32_t
+binary_file_read_uint32_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint32_t result = 0;
+
+   fread( &result, sizeof( uint32_t ), 1, (*current).file );
+
+   result = be32toh( result );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_uint64_be
+*/
+
+uint64_t
+binary_file_read_uint64_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint64_t result = 0;
+
+   fread( &result, sizeof( uint64_t ), 1, (*current).file );
+
+   result = be64toh( result );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_float32_be
+*/
+
+float32_t
+binary_file_read_float32_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t result = {0};
+
+   fread( &result.u, sizeof( float32_t ), 1, (*current).file );
+
+   result.u = be32toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.f;
+}
+
+/**
+   binary_file_read_float64_be
+*/
+
+float64_t
+binary_file_read_float64_be( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t result = {0};
+
+   fread( &result.u, sizeof( float64_t ), 1, (*current).file );
+
+   result.u = be64toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.f;
+}
+
+/**
+   binary_file_read_int8_le
+*/
+
+int8_t
+binary_file_read_int8_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int8_t result = 0;
+   fread( &result, sizeof( int8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_int16_le
+*/
+
+int16_t
+binary_file_read_int16_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_16_t result = {0};
+
+   fread( &result.u, sizeof( int16_t ), 1, (*current).file );
+
+   result.u = le16toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.i;
+}
+
+/**
+   binary_file_read_int32_le
+*/
+
+int32_t
+binary_file_read_int32_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t result = {0};
+
+   fread( &result.u, sizeof( int32_t ), 1, (*current).file );
+
+   result.u = le32toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.i;
+}
+
+/**
+   binary_file_read_int64_le
+*/
+
+int64_t
+binary_file_read_int64_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t result = {0};
+
+   fread( &result.u, sizeof( int64_t ), 1, (*current).file );
+
+   result.u = le64toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.i;
+}
+
+/**
+   binary_file_read_uint8_le
+*/
+
+uint8_t
+binary_file_read_uint8_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint8_t result = 0;
+
+   fread( &result, sizeof( uint8_t ), 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_uint16_le
+*/
+
+uint16_t
+binary_file_read_uint16_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint16_t result = 0;
+
+   fread( &result, sizeof( uint16_t ), 1, (*current).file );
+
+   result = le16toh( result );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_uint32_le
+*/
+
+uint32_t
+binary_file_read_uint32_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint32_t result = 0;
+
+   fread( &result, sizeof( uint32_t ), 1, (*current).file );
+
+   result = le32toh( result );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_uint64_le
+*/
+
+uint64_t
+binary_file_read_uint64_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   uint64_t result = 0;
+
+   fread( &result, sizeof( uint64_t ), 1, (*current).file );
+
+   result = le64toh( result );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   binary_file_read_float32_le
+*/
+
+float32_t
+binary_file_read_float32_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_32_t result = {0};
+
+   fread( &result.u, sizeof( float32_t ), 1, (*current).file );
+
+   result.u = le32toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.f;
+}
+
+/**
+   binary_file_read_float64_le
+*/
+
+float64_t
+binary_file_read_float64_le( binary_file_t *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   Int_Float_64_t result = {0};
+
+   fread( &result.u, sizeof( float64_t ), 1, (*current).file );
+
+   result.u = le64toh( result.u );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result.f;
 }
 
 /**
@@ -1752,19 +2757,19 @@ binary_file_read_float64( binary_file_t *binary_file )
 */
 
 raw_buffer_t *
-binary_file_read_raw_buffer( binary_file_t *binary_file, int32_t count )
+binary_file_read_raw_buffer( binary_file_t *current, int32_t count )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    raw_buffer_t *result = raw_buffer_make( count );
-   fread( raw_buffer_base( result ), sizeof( uint8_t ), count, (*binary_file).file );
+   fread( raw_buffer_base( result ), sizeof( uint8_t ), count, (*current).file );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1774,22 +2779,24 @@ binary_file_read_raw_buffer( binary_file_t *binary_file, int32_t count )
 */
 
 string_t *
-binary_file_read_string( binary_file_t *binary_file, int32_t count )
+binary_file_read_string( binary_file_t *current, int32_t count )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    string_t *result = string_make_n( count + 1 );
    char *s = ( char * ) calloc( count + 1, sizeof( char_t ) );
-   fread( s, sizeof( char_t ), count + 1, (*binary_file).file );
+   CHECK( "s allocated correctly", s != NULL );
+
+   fread( s, sizeof( char_t ), count + 1, (*current).file );
    string_append_cstring( result, s );
    free( s );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1799,19 +2806,21 @@ binary_file_read_string( binary_file_t *binary_file, int32_t count )
 */
 
 char_t *
-binary_file_read_cstring( binary_file_t *binary_file, int32_t count )
+binary_file_read_cstring( binary_file_t *current, int32_t count )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    char_t *result = ( char_t * ) calloc( count + 1, sizeof( char_t ) );
-   fread( result, sizeof( char_t ), count + 1, (*binary_file).file );
+   CHECK( "result allocated correctly", result != NULL );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   fread( result, sizeof( char_t ), count + 1, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1821,19 +2830,21 @@ binary_file_read_cstring( binary_file_t *binary_file, int32_t count )
 */
 
 uint8_t *
-binary_file_read_bytes( binary_file_t *binary_file, int32_t count )
+binary_file_read_bytes( binary_file_t *current, int32_t count )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file open", (*binary_file).file != NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file open", (*current).file != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    uint8_t *result = ( uint8_t * ) calloc( count, sizeof( uint8_t ) );
-   fread( result, sizeof( uint8_t ), count, (*binary_file).file );
+   CHECK( "result allocated correctly", result != NULL );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   fread( result, sizeof( uint8_t ), count, (*current).file );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1843,26 +2854,26 @@ binary_file_read_bytes( binary_file_t *binary_file, int32_t count )
 */
 
 void
-binary_file_wipe_out( binary_file_t *binary_file )
+binary_file_wipe_out( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    FILE *fp = NULL;
 
    // open as write, then close to eliminate contents
-   fp = fopen( string_as_cstring( (*binary_file).name ), "w" );
+   fp = fopen( string_as_cstring( (*current).name ), "w" );
    fclose( fp );
-   (*binary_file).file = NULL;
-   (*binary_file).is_open_read = 0;
-   (*binary_file).is_open_write = 0;
-   (*binary_file).is_open_append = 0;
+   (*current).file = NULL;
+   (*current).is_open_read = 0;
+   (*current).is_open_write = 0;
+   (*current).is_open_append = 0;
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1872,19 +2883,19 @@ binary_file_wipe_out( binary_file_t *binary_file )
 */
 
 void
-binary_file_delete( binary_file_t *binary_file )
+binary_file_delete( binary_file_t *current )
 {
-   PRECONDITION( "binary_file not null", binary_file != NULL );
-   PRECONDITION( "binary_file type OK", (*binary_file).type == BINARY_FILE_TYPE );
-   PRECONDITION( "binary_file not open", (*binary_file).file == NULL );
-   LOCK( (*binary_file).mutex );
-   INVARIANT( binary_file );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "binary_file type OK", (*current)._type == BINARY_FILE_TYPE );
+   PRECONDITION( "binary_file not open", (*current).file == NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // delete file
-   remove( string_as_cstring( (*binary_file).name ) );
+   remove( string_as_cstring( (*current).name ) );
 
-   INVARIANT( binary_file );
-   UNLOCK( (*binary_file).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }

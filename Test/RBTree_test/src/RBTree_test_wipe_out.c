@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_wipe_out.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_make.
+ Unit tests for RBTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_RBTree.h"
+#include "s_RBTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -46,7 +47,7 @@ void test_wipe_out_1( void )
    
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
   
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -69,7 +70,7 @@ void test_wipe_out_2( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -92,7 +93,7 @@ void test_wipe_out_2a( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -115,7 +116,7 @@ void test_wipe_out_2b( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -138,7 +139,7 @@ void test_wipe_out_3( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -161,7 +162,7 @@ void test_wipe_out_3a( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -184,7 +185,7 @@ void test_wipe_out_3b( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -207,7 +208,7 @@ void test_wipe_out_4( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -230,7 +231,7 @@ void test_wipe_out_4a( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -253,7 +254,7 @@ void test_wipe_out_4b( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -284,7 +285,7 @@ void test_wipe_out_5( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -315,7 +316,7 @@ void test_wipe_out_5a( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -346,7 +347,7 @@ void test_wipe_out_5b( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -377,7 +378,7 @@ void test_wipe_out_5c( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -408,7 +409,7 @@ void test_wipe_out_5d( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -439,7 +440,7 @@ void test_wipe_out_5e( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -470,7 +471,7 @@ void test_wipe_out_5f( void )
  
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -493,8 +494,34 @@ void test_wipe_out_6( void )
 
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
 
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
+   return;
+}
+
+/**
+   test_wipe_out_7
+*/
+
+void test_wipe_out_7( void )
+{
+   s_rbtree_t *rbtree = NULL;
+   s_rbtree_cursor_t *cursor = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   
+   rbtree = s_rbtree_make();
+   cursor = s_rbtree_cursor_make( rbtree );
+
+   s_rbtree_put( rbtree, s1 );
+
+   s_rbtree_wipe_out( rbtree );
+
+   CU_ASSERT( s_rbtree_count( rbtree ) == 0 );
+
+   string_deep_dispose( &s1 );
+   s_rbtree_deep_dispose( &rbtree );
+
    return;
 }
 
@@ -542,6 +569,9 @@ add_test_wipe_out( void )
 
    // test_wipe_out_6
    add_test_to_suite( p_suite, test_wipe_out_6, "test_wipe_out_6" );
+
+   // test_wipe_out_7
+   add_test_to_suite( p_suite, test_wipe_out_7, "test_wipe_out_7" );
 
    return CUE_SUCCESS;
    

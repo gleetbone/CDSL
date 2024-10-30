@@ -17,10 +17,28 @@ int
 add_test_make( void );
 
 int
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
+
+int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
 add_test_item( void );
@@ -101,11 +119,17 @@ int main()
       return CU_get_error();
    }
 
-   // add tests for DList_make
+   // add tests for Stack_make
 
    add_test_make();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_is_equal();
+   add_test_is_deep_equal();
+   add_test_copy();
+   add_test_deep_copy();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_deep_dispose();
    add_test_item();
    add_test_count();
    add_test_is_empty();

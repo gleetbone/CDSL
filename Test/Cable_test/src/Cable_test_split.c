@@ -1,7 +1,7 @@
 /**
  @file Cable_test_split.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -62,22 +62,22 @@ void test_split_1( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "a" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[1];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "b" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[2];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "cd" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    free( acable );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -105,34 +105,34 @@ void test_split_2( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[1];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "a" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[2];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "b" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[3];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "cd" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[4];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    free( acable );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -160,22 +160,22 @@ void test_split_3( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "a" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[1];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "b" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[2];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "cd" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    free( acable );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -203,34 +203,34 @@ void test_split_4( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[1];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "a" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[2];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "b" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[3];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "cd" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[4];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    free( acable );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -258,76 +258,76 @@ void test_split_5( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[1];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "a" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[2];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "b" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[3];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "c" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[4];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "d" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[5];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "e" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[6];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "f" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[7];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "g" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[8];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "h" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[9];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "i" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[10];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "j" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[11];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    free( acable );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -355,52 +355,52 @@ void test_split_6( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[1];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "a" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[2];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "b" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[3];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "c" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[4];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "d" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[5];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "e" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[6];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "f" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = acable[7];
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    free( acable );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

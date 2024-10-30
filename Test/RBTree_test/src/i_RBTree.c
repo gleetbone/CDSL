@@ -1,7 +1,7 @@
 /**
  @file i_RBTree.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "implementation file for binary search tree of ints"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -22,11 +22,12 @@
 extern "C" {
 #endif
  
-#define EQUALITY_FUNCTION( arg1, arg2 ) ( ( arg1 == arg2 ) )
+#define VALUE_DEEP_DISPOSE_FUNCTION( arg )
+#define VALUE_DEEP_CLONE_FUNCTION( arg ) ( arg )
+#define VALUE_DEEP_EQUAL_FUNCTION( arg1, arg2 ) ( (arg1) == (arg2) )
+#define VALUE_DEFAULT 0
 
-#define DISPOSE_FUNCTION( arg )
-#define DUPLICATE_FUNCTION( arg ) ( arg )
-#define ORDER_FUNCTION( arg1, arg2 ) ( ( arg1 < arg2  ) )
+#define ORDER_FUNCTION( arg1, arg2 ) ( ( arg1 <= arg2  ) )
 
 #define PRE_FILE DBC_YES
 #define POST_FILE DBC_YES

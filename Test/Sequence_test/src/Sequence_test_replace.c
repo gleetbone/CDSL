@@ -1,7 +1,7 @@
 /**
  @file Sequence_test_replace.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Sequence_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Sequence_make.
+ Unit tests for Sequence_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_Sequence.h"
+#include "s_Sequence.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -45,7 +46,7 @@ void test_replace_1( void )
    
    CU_ASSERT( int_sequence_item( sequence, 0 ) == 13 );
    
-   int_sequence_dispose( sequence );
+   int_sequence_dispose( &sequence );
 
    return;
 }
@@ -71,7 +72,7 @@ void test_replace_2( void )
    
    CU_ASSERT( int_sequence_item( sequence, 1 ) == 7 );
    
-   int_sequence_dispose( sequence );
+   int_sequence_dispose( &sequence );
 
    return;
 }
@@ -97,7 +98,39 @@ void test_replace_3( void )
    
    CU_ASSERT( int_sequence_item( sequence, 11 ) == 7 );
    
-   int_sequence_dispose( sequence );
+   int_sequence_dispose( &sequence );
+
+   return;
+}
+
+/**
+   test_replace_4
+*/
+
+void test_replace_4( void )
+{
+   s_sequence_t *sequence = NULL;
+   
+   sequence = s_sequence_make_n( 16 );
+   
+   string_t *s1 = string_make_from_cstring( "a" );
+   string_t *s2 = string_make_from_cstring( "b" );
+   string_t *s3 = string_make_from_cstring( "c" );
+   
+   s_sequence_set_count( sequence, 12 );
+   
+   s_sequence_replace( sequence, s1, 0 );
+   s_sequence_replace( sequence, s2, 11 );
+   
+   CU_ASSERT( s_sequence_item( sequence, 0 ) == s1 );
+   CU_ASSERT( s_sequence_item( sequence, 11 ) == s2 );
+   
+   s_sequence_replace( sequence, s3, 11 );
+   
+   CU_ASSERT( s_sequence_item( sequence, 11 ) == s3 );
+   
+   string_deep_dispose( &s2 );
+   s_sequence_deep_dispose( &sequence );
 
    return;
 }
@@ -125,6 +158,9 @@ add_test_replace( void )
 
    // test_replace_3
    add_test_to_suite( p_suite, test_replace_3, "test_replace_3" );
+
+   // test_replace_4
+   add_test_to_suite( p_suite, test_replace_4, "test_replace_4" );
 
    return CUE_SUCCESS;
    

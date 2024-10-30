@@ -1,0 +1,960 @@
+==== Building UGraph_test (debug) ====
+ii_UGraph.c
+UGraph_test_vertex_off.c
+../src/UGraph_test_vertex_off.c: In function ‘test_vertex_off_1’:
+../src/UGraph_test_vertex_off.c:40:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   40 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_vertex_off.c: In function ‘test_vertex_off_2’:
+../src/UGraph_test_vertex_off.c:70:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   70 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:69:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   69 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:68:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:67:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   67 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:66:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   66 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c: In function ‘test_vertex_off_3’:
+../src/UGraph_test_vertex_off.c:116:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  116 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:115:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  115 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:114:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  114 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_off.c:112:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  112 |    int32_t v1 = 0;
+      |            ^~
+UGraph_test_cursor_edge_off.c
+../src/UGraph_test_cursor_edge_off.c: In function ‘test_cursor_edge_off_1’:
+../src/UGraph_test_cursor_edge_off.c:43:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   43 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_cursor_edge_off.c: In function ‘test_cursor_edge_off_2’:
+../src/UGraph_test_cursor_edge_off.c:84:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   84 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_off.c:83:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   83 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_off.c:82:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   82 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_off.c:81:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   81 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_off.c: In function ‘test_cursor_edge_off_3’:
+../src/UGraph_test_cursor_edge_off.c:140:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  140 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_off.c:138:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  138 |    int32_t e1 = 0;
+      |            ^~
+main.c
+UGraph_test_vertex_forth.c
+../src/UGraph_test_vertex_forth.c: In function ‘test_vertex_forth_1’:
+../src/UGraph_test_vertex_forth.c:40:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   40 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_vertex_forth.c: In function ‘test_vertex_forth_2’:
+../src/UGraph_test_vertex_forth.c:70:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   70 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:69:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   69 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:68:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:67:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   67 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:66:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   66 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c: In function ‘test_vertex_forth_3’:
+../src/UGraph_test_vertex_forth.c:116:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  116 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:115:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  115 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:114:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  114 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_forth.c:112:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  112 |    int32_t v1 = 0;
+      |            ^~
+UGraph_test_edge_value.c
+UGraph_test_edge_forth.c
+../src/UGraph_test_edge_forth.c: In function ‘test_edge_forth_1’:
+../src/UGraph_test_edge_forth.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_edge_forth.c: In function ‘test_edge_forth_2’:
+../src/UGraph_test_edge_forth.c:80:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   80 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_edge_forth.c:79:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   79 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_forth.c:78:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   78 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_forth.c:77:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   77 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_edge_forth.c: In function ‘test_edge_forth_3’:
+../src/UGraph_test_edge_forth.c:133:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  133 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_forth.c:131:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  131 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_vertex_id_at.c
+UGraph_test_edge_value_put.c
+UGraph_test_vertex_start.c
+../src/UGraph_test_vertex_start.c: In function ‘test_vertex_start_1’:
+../src/UGraph_test_vertex_start.c:40:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   40 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_vertex_start.c: In function ‘test_vertex_start_2’:
+../src/UGraph_test_vertex_start.c:68:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:67:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   67 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:66:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   66 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:65:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   65 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:64:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   64 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c: In function ‘test_vertex_start_3’:
+../src/UGraph_test_vertex_start.c:99:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   99 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:98:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   98 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:97:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   97 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:95:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   95 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c: In function ‘test_vertex_start_4’:
+../src/UGraph_test_vertex_start.c:133:12: warning: unused variable ‘v5’ [-Wunused-variable]
+  133 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:132:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  132 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_start.c:131:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  131 |    int32_t v3 = 0;
+      |            ^~
+UGraph_test_deep_clone.c
+../src/UGraph_test_deep_clone.c: In function ‘test_deep_clone_2’:
+../src/UGraph_test_deep_clone.c:68:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t e = 0;
+      |            ^
+UGraph_test_connected_vertices_depth_first.c
+../src/UGraph_test_connected_vertices_depth_first.c: In function ‘test_connected_vertices_depth_first_1’:
+../src/UGraph_test_connected_vertices_depth_first.c:67:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   67 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_connected_vertices_depth_first.c: In function ‘test_connected_vertices_depth_first_2’:
+../src/UGraph_test_connected_vertices_depth_first.c:108:12: warning: unused variable ‘e4’ [-Wunused-variable]
+  108 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:107:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  107 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:106:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  106 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:105:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  105 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c: In function ‘test_connected_vertices_depth_first_3’:
+../src/UGraph_test_connected_vertices_depth_first.c:160:12: warning: unused variable ‘e4’ [-Wunused-variable]
+  160 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:159:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  159 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:158:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  158 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:157:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  157 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c: In function ‘test_connected_vertices_depth_first_4’:
+../src/UGraph_test_connected_vertices_depth_first.c:209:12: warning: unused variable ‘e4’ [-Wunused-variable]
+  209 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:208:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  208 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:207:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  207 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_depth_first.c:206:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  206 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_edge_remove.c
+UGraph_test_wipe_out_edges_and_dispose.c
+../src/UGraph_test_wipe_out_edges_and_dispose.c: In function ‘test_wipe_out_edges_and_dispose_1’:
+../src/UGraph_test_wipe_out_edges_and_dispose.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_wipe_out_edges_and_dispose.c: In function ‘test_wipe_out_edges_and_dispose_2’:
+../src/UGraph_test_wipe_out_edges_and_dispose.c:79:12: warning: unused variable ‘e4’ [-Wunused-variable]
+   79 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_edges_and_dispose.c:78:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   78 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_edges_and_dispose.c:77:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   77 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_edges_and_dispose.c:76:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   76 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_edges_and_dispose.c: In function ‘test_wipe_out_edges_and_dispose_3’:
+../src/UGraph_test_wipe_out_edges_and_dispose.c:122:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  122 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_edges_and_dispose.c:121:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  121 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_edges_and_dispose.c:120:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  120 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_deep_copy.c
+../src/UGraph_test_deep_copy.c: In function ‘test_deep_copy_2’:
+../src/UGraph_test_deep_copy.c:69:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   69 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_deep_copy.c: In function ‘test_deep_copy_3’:
+../src/UGraph_test_deep_copy.c:104:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+  104 |    int32_t e = 0;
+      |            ^
+UGraph_test_is_equal.c
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_2’:
+../src/UGraph_test_is_equal.c:71:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_3’:
+../src/UGraph_test_is_equal.c:111:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+  111 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_is_equal.c:110:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  110 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_4’:
+../src/UGraph_test_is_equal.c:154:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  154 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c:153:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  153 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_5’:
+../src/UGraph_test_is_equal.c:195:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  195 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c:194:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  194 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c:193:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  193 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_6’:
+../src/UGraph_test_is_equal.c:235:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  235 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c:234:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  234 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_7’:
+../src/UGraph_test_is_equal.c:276:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  276 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_is_equal.c: In function ‘test_is_equal_8’:
+../src/UGraph_test_is_equal.c:319:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  319 |    int32_t e2 = 0;
+      |            ^~
+UGraph_test_edge_remove_and_dispose.c
+UGraph_test_edge_start.c
+../src/UGraph_test_edge_start.c: In function ‘test_edge_start_1’:
+../src/UGraph_test_edge_start.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_edge_start.c: In function ‘test_edge_start_2’:
+../src/UGraph_test_edge_start.c:77:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   77 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c:76:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   76 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c:75:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   75 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c:74:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   74 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c: In function ‘test_edge_start_3’:
+../src/UGraph_test_edge_start.c:118:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  118 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c:117:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  117 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c:116:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  116 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c: In function ‘test_edge_start_4’:
+../src/UGraph_test_edge_start.c:161:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  161 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_start.c:155:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+  155 |    int32_t v2 = 0;
+      |            ^~
+UGraph_test_edge_vertex_1.c
+In file included from /usr/include/CUnit/Basic.h:36,
+                 from ../src/UGraph_test_edge_vertex_1.c:26:
+../src/UGraph_test_edge_vertex_1.c: In function ‘test_edge_vertex_from_1’:
+../src/UGraph_test_edge_vertex_1.c:54:15: warning: implicit declaration of function ‘ii_ugraph_edge_vertex_from’; did you mean ‘ii_ugraph_edge_vertex_2’? [-Wimplicit-function-declaration]
+   54 |    CU_ASSERT( ii_ugraph_edge_vertex_from( ugraph, e ) == v1 );
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~
+UGraph_test_cursor_edge_forth.c
+../src/UGraph_test_cursor_edge_forth.c: In function ‘test_cursor_edge_forth_1’:
+../src/UGraph_test_cursor_edge_forth.c:43:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   43 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_cursor_edge_forth.c: In function ‘test_cursor_edge_forth_2’:
+../src/UGraph_test_cursor_edge_forth.c:84:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   84 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_forth.c:83:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   83 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_forth.c:82:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   82 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_forth.c:81:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   81 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_forth.c: In function ‘test_cursor_edge_forth_3’:
+../src/UGraph_test_cursor_edge_forth.c:140:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  140 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_forth.c:138:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  138 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_vertex_add.c
+../src/UGraph_test_vertex_add.c: In function ‘test_vertex_add_1’:
+../src/UGraph_test_vertex_add.c:40:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   40 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_vertex_add.c: In function ‘test_vertex_add_2’:
+../src/UGraph_test_vertex_add.c:64:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   64 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:63:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   63 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:62:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   62 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:61:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   61 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:60:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   60 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c: In function ‘test_vertex_add_3’:
+../src/UGraph_test_vertex_add.c:92:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   92 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:91:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   91 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:90:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   90 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_add.c:88:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   88 |    int32_t v1 = 0;
+      |            ^~
+UGraph_test_cursor_vertex_start.c
+../src/UGraph_test_cursor_vertex_start.c: In function ‘test_cursor_vertex_start_1’:
+../src/UGraph_test_cursor_vertex_start.c:41:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   41 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_cursor_vertex_start.c: In function ‘test_cursor_vertex_start_2’:
+../src/UGraph_test_cursor_vertex_start.c:72:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   72 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:71:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:70:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   70 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:69:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   69 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:68:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c: In function ‘test_cursor_vertex_start_3’:
+../src/UGraph_test_cursor_vertex_start.c:106:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  106 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:105:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  105 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:104:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  104 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:102:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  102 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c: In function ‘test_cursor_vertex_start_4’:
+../src/UGraph_test_cursor_vertex_start.c:143:12: warning: unused variable ‘v5’ [-Wunused-variable]
+  143 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:142:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  142 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_start.c:141:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  141 |    int32_t v3 = 0;
+      |            ^~
+UGraph_test_wipe_out_and_dispose.c
+../src/UGraph_test_wipe_out_and_dispose.c: In function ‘test_wipe_out_and_dispose_1’:
+../src/UGraph_test_wipe_out_and_dispose.c:41:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   41 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_wipe_out_and_dispose.c: In function ‘test_wipe_out_and_dispose_2’:
+../src/UGraph_test_wipe_out_and_dispose.c:78:12: warning: unused variable ‘e4’ [-Wunused-variable]
+   78 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_and_dispose.c:77:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   77 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_and_dispose.c:76:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   76 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_and_dispose.c:75:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   75 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_and_dispose.c: In function ‘test_wipe_out_and_dispose_3’:
+../src/UGraph_test_wipe_out_and_dispose.c:121:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  121 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_and_dispose.c:120:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  120 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out_and_dispose.c:119:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  119 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_edge_for_vertices.c
+In file included from /usr/include/CUnit/Basic.h:36,
+                 from ../src/UGraph_test_edge_for_vertices.c:26:
+../src/UGraph_test_edge_for_vertices.c: In function ‘test_edge_for_from_to_1’:
+../src/UGraph_test_edge_for_vertices.c:54:15: warning: implicit declaration of function ‘ii_ugraph_edge_for_from_to’; did you mean ‘ii_ugraph_edge_forth’? [-Wimplicit-function-declaration]
+   54 |    CU_ASSERT( ii_ugraph_edge_for_from_to( ugraph, v1, v2 ) == e );
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~
+UGraph_test_deep_dispose.c
+../src/UGraph_test_deep_dispose.c: In function ‘test_deep_dispose_2’:
+../src/UGraph_test_deep_dispose.c:56:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   56 |    int32_t e = 0;
+      |            ^
+UGraph_test_vertex_value_put.c
+UGraph_test_edge_off.c
+../src/UGraph_test_edge_off.c: In function ‘test_edge_off_1’:
+../src/UGraph_test_edge_off.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_edge_off.c: In function ‘test_edge_off_2’:
+../src/UGraph_test_edge_off.c:80:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   80 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_edge_off.c:79:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   79 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_off.c:78:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   78 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_off.c:77:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   77 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_edge_off.c: In function ‘test_edge_off_3’:
+../src/UGraph_test_edge_off.c:133:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  133 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_off.c:131:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  131 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_vertex_neighbors.c
+../src/UGraph_test_vertex_neighbors.c: In function ‘test_vertex_neighbors_from_1’:
+../src/UGraph_test_vertex_neighbors.c:80:9: warning: implicit declaration of function ‘ii_ugraph_vertex_neighbors_from’; did you mean ‘ii_ugraph_vertex_neighbors’? [-Wimplicit-function-declaration]
+   80 |    ip = ii_ugraph_vertex_neighbors_from( ugraph, v2, &count );
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         ii_ugraph_vertex_neighbors
+../src/UGraph_test_vertex_neighbors.c:80:7: warning: assignment to ‘int32_t *’ {aka ‘int *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+   80 |    ip = ii_ugraph_vertex_neighbors_from( ugraph, v2, &count );
+      |       ^
+../src/UGraph_test_vertex_neighbors.c:66:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   66 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_vertex_neighbors.c: In function ‘test_vertex_neighbors_from_2’:
+../src/UGraph_test_vertex_neighbors.c:128:7: warning: assignment to ‘int32_t *’ {aka ‘int *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  128 |    ip = ii_ugraph_vertex_neighbors_from( ugraph, v5, &count );
+      |       ^
+../src/UGraph_test_vertex_neighbors.c:107:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+  107 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_vertex_neighbors.c:106:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  106 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_neighbors.c:105:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  105 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_vertex_neighbors.c:104:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  104 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_vertex_neighbors.c: In function ‘test_vertex_neighbors_from_3’:
+../src/UGraph_test_vertex_neighbors.c:181:7: warning: assignment to ‘int32_t *’ {aka ‘int *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  181 |    ip = ii_ugraph_vertex_neighbors_from( ugraph, v5, &count );
+      |       ^
+../src/UGraph_test_vertex_neighbors.c:158:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  158 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_vertex_neighbors.c:157:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  157 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_vertex_neighbors.c:156:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  156 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_vertex_value.c
+UGraph_test_cursor_dispose.c
+../src/UGraph_test_cursor_dispose.c: In function ‘test_cursor_dispose_1’:
+../src/UGraph_test_cursor_dispose.c:42:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_cursor_dispose.c: In function ‘test_cursor_dispose_2’:
+../src/UGraph_test_cursor_dispose.c:72:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   72 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:71:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:70:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   70 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:69:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   69 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:68:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c: In function ‘test_cursor_dispose_3’:
+../src/UGraph_test_cursor_dispose.c:122:12: warning: assignment to ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’} from incompatible pointer type ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} [-Wincompatible-pointer-types]
+  122 |    cursor1 = ii_ugraph_make_cursor( ugraph );
+      |            ^
+../src/UGraph_test_cursor_dispose.c:123:12: warning: assignment to ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’} from incompatible pointer type ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} [-Wincompatible-pointer-types]
+  123 |    cursor2 = ii_ugraph_make_cursor( ugraph );
+      |            ^
+../src/UGraph_test_cursor_dispose.c:125:35: warning: passing argument 1 of ‘ii_ugraph_cursor_vertex_start’ from incompatible pointer type [-Wincompatible-pointer-types]
+  125 |    ii_ugraph_cursor_vertex_start( cursor1 );
+      |                                   ^~~~~~~
+      |                                   |
+      |                                   ii_ugraph_t * {aka struct ii_ugraph_struct *}
+In file included from ../src/ii_UGraph.h:35,
+                 from ../src/UGraph_test_cursor_dispose.c:28:
+../../../UGraph/UGraph.h:530:74: note: expected ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} but argument is of type ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’}
+  530 | void UGraph_cursor_vertex_start( Prefix )( UGraph_cursor_type( Prefix ) *cursor );
+In file included from /usr/include/CUnit/Basic.h:36,
+                 from ../src/UGraph_test_cursor_dispose.c:26:
+../src/UGraph_test_cursor_dispose.c:126:44: warning: passing argument 1 of ‘ii_ugraph_cursor_vertex_off’ from incompatible pointer type [-Wincompatible-pointer-types]
+  126 |    CU_ASSERT( ii_ugraph_cursor_vertex_off( cursor1 ) == 0 );
+      |                                            ^~~~~~~
+      |                                            |
+      |                                            ii_ugraph_t * {aka struct ii_ugraph_struct *}
+In file included from ../src/ii_UGraph.h:35,
+                 from ../src/UGraph_test_cursor_dispose.c:28:
+../../../UGraph/UGraph.h:553:76: note: expected ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} but argument is of type ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’}
+  553 | int32_t  UGraph_cursor_vertex_off( Prefix )( UGraph_cursor_type( Prefix ) *cursor );
+../src/UGraph_test_cursor_dispose.c:128:30: warning: passing argument 1 of ‘ii_ugraph_cursor_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  128 |    ii_ugraph_cursor_dispose( &cursor1 );
+      |                              ^~~~~~~~
+      |                              |
+      |                              ii_ugraph_t ** {aka struct ii_ugraph_struct **}
+In file included from ../src/ii_UGraph.h:35,
+                 from ../src/UGraph_test_cursor_dispose.c:28:
+../../../UGraph/UGraph.h:196:70: note: expected ‘ii_ugraph_cursor_t **’ {aka ‘struct ii_ugraph_cursor_struct **’} but argument is of type ‘ii_ugraph_t **’ {aka ‘struct ii_ugraph_struct **’}
+  196 | void UGraph_cursor_dispose( Prefix )( UGraph_cursor_type( Prefix ) **cursor );
+../src/UGraph_test_cursor_dispose.c:107:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  107 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:106:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  106 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:105:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  105 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:103:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  103 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:102:17: warning: variable ‘cursor2’ set but not used [-Wunused-but-set-variable]
+  102 |    ii_ugraph_t *cursor2 = NULL;
+      |                 ^~~~~~~
+../src/UGraph_test_cursor_dispose.c: In function ‘test_cursor_dispose_4’:
+../src/UGraph_test_cursor_dispose.c:162:11: warning: assignment to ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’} from incompatible pointer type ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} [-Wincompatible-pointer-types]
+  162 |    cursor = ii_ugraph_make_cursor( ugraph );
+      |           ^
+../src/UGraph_test_cursor_dispose.c:164:35: warning: passing argument 1 of ‘ii_ugraph_cursor_vertex_start’ from incompatible pointer type [-Wincompatible-pointer-types]
+  164 |    ii_ugraph_cursor_vertex_start( cursor );
+      |                                   ^~~~~~
+      |                                   |
+      |                                   ii_ugraph_t * {aka struct ii_ugraph_struct *}
+In file included from ../src/ii_UGraph.h:35,
+                 from ../src/UGraph_test_cursor_dispose.c:28:
+../../../UGraph/UGraph.h:530:74: note: expected ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} but argument is of type ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’}
+  530 | void UGraph_cursor_vertex_start( Prefix )( UGraph_cursor_type( Prefix ) *cursor );
+In file included from /usr/include/CUnit/Basic.h:36,
+                 from ../src/UGraph_test_cursor_dispose.c:26:
+../src/UGraph_test_cursor_dispose.c:165:44: warning: passing argument 1 of ‘ii_ugraph_cursor_vertex_off’ from incompatible pointer type [-Wincompatible-pointer-types]
+  165 |    CU_ASSERT( ii_ugraph_cursor_vertex_off( cursor ) == 0 );
+      |                                            ^~~~~~
+      |                                            |
+      |                                            ii_ugraph_t * {aka struct ii_ugraph_struct *}
+In file included from ../src/ii_UGraph.h:35,
+                 from ../src/UGraph_test_cursor_dispose.c:28:
+../../../UGraph/UGraph.h:553:76: note: expected ‘ii_ugraph_cursor_t *’ {aka ‘struct ii_ugraph_cursor_struct *’} but argument is of type ‘ii_ugraph_t *’ {aka ‘struct ii_ugraph_struct *’}
+  553 | int32_t  UGraph_cursor_vertex_off( Prefix )( UGraph_cursor_type( Prefix ) *cursor );
+../src/UGraph_test_cursor_dispose.c:167:30: warning: passing argument 1 of ‘ii_ugraph_cursor_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+  167 |    ii_ugraph_cursor_dispose( &cursor );
+      |                              ^~~~~~~
+      |                              |
+      |                              ii_ugraph_t ** {aka struct ii_ugraph_struct **}
+In file included from ../src/ii_UGraph.h:35,
+                 from ../src/UGraph_test_cursor_dispose.c:28:
+../../../UGraph/UGraph.h:196:70: note: expected ‘ii_ugraph_cursor_t **’ {aka ‘struct ii_ugraph_cursor_struct **’} but argument is of type ‘ii_ugraph_t **’ {aka ‘struct ii_ugraph_struct **’}
+  196 | void UGraph_cursor_dispose( Prefix )( UGraph_cursor_type( Prefix ) **cursor );
+../src/UGraph_test_cursor_dispose.c:147:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  147 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:146:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  146 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:145:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  145 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_dispose.c:143:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  143 |    int32_t v1 = 0;
+      |            ^~
+UGraph_test_copy.c
+../src/UGraph_test_copy.c: In function ‘test_copy_2’:
+../src/UGraph_test_copy.c:69:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   69 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_copy.c: In function ‘test_copy_3’:
+../src/UGraph_test_copy.c:104:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+  104 |    int32_t e = 0;
+      |            ^
+UGraph_test_edge_add.c
+../src/UGraph_test_edge_add.c: In function ‘test_edge_add_1’:
+../src/UGraph_test_edge_add.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_edge_add.c: In function ‘test_edge_add_2’:
+../src/UGraph_test_edge_add.c:74:12: warning: unused variable ‘e4’ [-Wunused-variable]
+   74 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_edge_add.c:73:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   73 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_add.c:72:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   72 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_add.c:71:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_edge_add.c: In function ‘test_edge_add_3’:
+../src/UGraph_test_edge_add.c:112:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  112 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_add.c:111:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  111 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_add.c:110:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  110 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_make.c
+UGraph_test_edge_id_at.c
+UGraph_test_edge_vertex_2.c
+In file included from /usr/include/CUnit/Basic.h:36,
+                 from ../src/UGraph_test_edge_vertex_2.c:26:
+../src/UGraph_test_edge_vertex_2.c: In function ‘test_edge_vertex_to_1’:
+../src/UGraph_test_edge_vertex_2.c:54:15: warning: implicit declaration of function ‘ii_ugraph_edge_vertex_to’; did you mean ‘ii_ugraph_edge_vertex_2’? [-Wimplicit-function-declaration]
+   54 |    CU_ASSERT( ii_ugraph_edge_vertex_to( ugraph, e ) == v2 );
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+UGraph_test_wipe_out.c
+../src/UGraph_test_wipe_out.c: In function ‘test_wipe_out_1’:
+../src/UGraph_test_wipe_out.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_wipe_out.c: In function ‘test_wipe_out_2’:
+../src/UGraph_test_wipe_out.c:79:12: warning: unused variable ‘e4’ [-Wunused-variable]
+   79 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out.c:78:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   78 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out.c:77:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   77 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out.c:76:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   76 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out.c: In function ‘test_wipe_out_3’:
+../src/UGraph_test_wipe_out.c:122:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  122 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out.c:121:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  121 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_wipe_out.c:120:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  120 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_edge_count.c
+../src/UGraph_test_edge_count.c: In function ‘test_edge_count_1’:
+../src/UGraph_test_edge_count.c:42:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   42 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_edge_count.c: In function ‘test_edge_count_2’:
+../src/UGraph_test_edge_count.c:74:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   74 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_edge_count.c:73:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   73 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_count.c:72:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   72 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_count.c:71:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_edge_count.c: In function ‘test_edge_count_3’:
+../src/UGraph_test_edge_count.c:112:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  112 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_edge_count.c:111:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  111 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_edge_count.c:110:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  110 |    int32_t e1 = 0;
+      |            ^~
+UGraph_test_clone.c
+../src/UGraph_test_clone.c: In function ‘test_clone_2’:
+../src/UGraph_test_clone.c:68:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   68 |    int32_t e = 0;
+      |            ^
+UGraph_test_cursor_edge_start.c
+../src/UGraph_test_cursor_edge_start.c: In function ‘test_cursor_edge_start_1’:
+../src/UGraph_test_cursor_edge_start.c:43:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   43 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_cursor_edge_start.c: In function ‘test_cursor_edge_start_2’:
+../src/UGraph_test_cursor_edge_start.c:81:12: warning: variable ‘e4’ set but not used [-Wunused-but-set-variable]
+   81 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c:80:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+   80 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c:79:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+   79 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c:78:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+   78 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c: In function ‘test_cursor_edge_start_3’:
+../src/UGraph_test_cursor_edge_start.c:125:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  125 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c:124:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  124 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c:123:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  123 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_edge_start.c: In function ‘test_cursor_edge_start_4’:
+../src/UGraph_test_cursor_edge_start.c:171:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  171 |    int32_t e3 = 0;
+      |            ^~
+UGraph_test_vertex_remove.c
+UGraph_test_vertex_remove_and_dispose.c
+UGraph_test_cursor_vertex_off.c
+../src/UGraph_test_cursor_vertex_off.c: In function ‘test_cursor_vertex_off_1’:
+../src/UGraph_test_cursor_vertex_off.c:41:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   41 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_cursor_vertex_off.c: In function ‘test_cursor_vertex_off_2’:
+../src/UGraph_test_cursor_vertex_off.c:74:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   74 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:73:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   73 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:72:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   72 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:71:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:70:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   70 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c: In function ‘test_cursor_vertex_off_3’:
+../src/UGraph_test_cursor_vertex_off.c:123:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  123 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:122:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  122 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:121:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  121 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_off.c:119:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  119 |    int32_t v1 = 0;
+      |            ^~
+UGraph_test_cursor_vertex_forth.c
+../src/UGraph_test_cursor_vertex_forth.c: In function ‘test_cursor_vertex_forth_1’:
+../src/UGraph_test_cursor_vertex_forth.c:41:12: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+   41 |    int32_t v = 0;
+      |            ^
+../src/UGraph_test_cursor_vertex_forth.c: In function ‘test_cursor_vertex_forth_2’:
+../src/UGraph_test_cursor_vertex_forth.c:74:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+   74 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:73:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+   73 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:72:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+   72 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:71:12: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+   71 |    int32_t v2 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:70:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+   70 |    int32_t v1 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c: In function ‘test_cursor_vertex_forth_3’:
+../src/UGraph_test_cursor_vertex_forth.c:123:12: warning: variable ‘v5’ set but not used [-Wunused-but-set-variable]
+  123 |    int32_t v5 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:122:12: warning: variable ‘v4’ set but not used [-Wunused-but-set-variable]
+  122 |    int32_t v4 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:121:12: warning: variable ‘v3’ set but not used [-Wunused-but-set-variable]
+  121 |    int32_t v3 = 0;
+      |            ^~
+../src/UGraph_test_cursor_vertex_forth.c:119:12: warning: variable ‘v1’ set but not used [-Wunused-but-set-variable]
+  119 |    int32_t v1 = 0;
+      |            ^~
+UGraph_test_connected_vertices_breadth_first.c
+../src/UGraph_test_connected_vertices_breadth_first.c: In function ‘test_connected_vertices_breadth_first_1’:
+../src/UGraph_test_connected_vertices_breadth_first.c:67:12: warning: variable ‘e’ set but not used [-Wunused-but-set-variable]
+   67 |    int32_t e = 0;
+      |            ^
+../src/UGraph_test_connected_vertices_breadth_first.c: In function ‘test_connected_vertices_breadth_first_2’:
+../src/UGraph_test_connected_vertices_breadth_first.c:108:12: warning: unused variable ‘e4’ [-Wunused-variable]
+  108 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:107:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  107 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:106:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  106 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:105:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  105 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c: In function ‘test_connected_vertices_breadth_first_3’:
+../src/UGraph_test_connected_vertices_breadth_first.c:160:12: warning: unused variable ‘e4’ [-Wunused-variable]
+  160 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:159:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  159 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:158:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  158 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:157:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  157 |    int32_t e1 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c: In function ‘test_connected_vertices_breadth_first_4’:
+../src/UGraph_test_connected_vertices_breadth_first.c:209:12: warning: unused variable ‘e4’ [-Wunused-variable]
+  209 |    int32_t e4 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:208:12: warning: variable ‘e3’ set but not used [-Wunused-but-set-variable]
+  208 |    int32_t e3 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:207:12: warning: variable ‘e2’ set but not used [-Wunused-but-set-variable]
+  207 |    int32_t e2 = 0;
+      |            ^~
+../src/UGraph_test_connected_vertices_breadth_first.c:206:12: warning: variable ‘e1’ set but not used [-Wunused-but-set-variable]
+  206 |    int32_t e1 = 0;
+      |            ^~
+Protocol_Base.c
+Linking UGraph_test
+/usr/bin/ld: obj/Debug/main.o: in function `main':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/main.c:225: undefined reference to `add_test_vertex_neighbors_to'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_vertex_1.o: in function `test_edge_vertex_from_1':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_1.c:54: undefined reference to `ii_ugraph_edge_vertex_from'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_vertex_1.o: in function `test_edge_vertex_from_2':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_1.c:95: undefined reference to `ii_ugraph_edge_vertex_from'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_1.c:96: undefined reference to `ii_ugraph_edge_vertex_from'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_1.c:97: undefined reference to `ii_ugraph_edge_vertex_from'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_1.c:98: undefined reference to `ii_ugraph_edge_vertex_from'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_vertex_1.o:/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_1.c:140: more undefined references to `ii_ugraph_edge_vertex_from' follow
+/usr/bin/ld: obj/Debug/UGraph_test_edge_for_vertices.o: in function `test_edge_for_from_to_1':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_for_vertices.c:54: undefined reference to `ii_ugraph_edge_for_from_to'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_for_vertices.o: in function `test_edge_for_from_to_2':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_for_vertices.c:95: undefined reference to `ii_ugraph_edge_for_from_to'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_for_vertices.c:96: undefined reference to `ii_ugraph_edge_for_from_to'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_for_vertices.c:97: undefined reference to `ii_ugraph_edge_for_from_to'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_for_vertices.c:98: undefined reference to `ii_ugraph_edge_for_from_to'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_for_vertices.o:/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_for_vertices.c:140: more undefined references to `ii_ugraph_edge_for_from_to' follow
+/usr/bin/ld: obj/Debug/UGraph_test_vertex_neighbors.o: in function `test_vertex_neighbors_from_1':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_vertex_neighbors.c:80: undefined reference to `ii_ugraph_vertex_neighbors_from'
+/usr/bin/ld: obj/Debug/UGraph_test_vertex_neighbors.o: in function `test_vertex_neighbors_from_2':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_vertex_neighbors.c:128: undefined reference to `ii_ugraph_vertex_neighbors_from'
+/usr/bin/ld: obj/Debug/UGraph_test_vertex_neighbors.o: in function `test_vertex_neighbors_from_3':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_vertex_neighbors.c:181: undefined reference to `ii_ugraph_vertex_neighbors_from'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_vertex_2.o: in function `test_edge_vertex_to_1':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_2.c:54: undefined reference to `ii_ugraph_edge_vertex_to'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_vertex_2.o: in function `test_edge_vertex_to_2':
+/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_2.c:95: undefined reference to `ii_ugraph_edge_vertex_to'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_2.c:96: undefined reference to `ii_ugraph_edge_vertex_to'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_2.c:97: undefined reference to `ii_ugraph_edge_vertex_to'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_2.c:98: undefined reference to `ii_ugraph_edge_vertex_to'
+/usr/bin/ld: obj/Debug/UGraph_test_edge_vertex_2.o:/home/leegr3/Projects/C_data_structures/Test/UGraph_test/build/../src/UGraph_test_edge_vertex_2.c:141: more undefined references to `ii_ugraph_edge_vertex_to' follow
+collect2: error: ld returned 1 exit status
+make[1]: *** [UGraph_test.make:137: ../UGraph_test] Error 1
+make: *** [Makefile:17: UGraph_test] Error 2

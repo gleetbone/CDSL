@@ -1,7 +1,7 @@
 /**
  @file HSet_test_index.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet_forth"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_forth.
+ Unit tests for HSet_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,28 +37,63 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_index_1( void )
 {
-   i_hset_t *list = NULL;
+   i_hset_t *hset = NULL;
 
-   list = i_hset_make();
+   hset = i_hset_make();
    
-   i_hset_put( list, 24 );
-   i_hset_put( list, 13 );
+   i_hset_put( hset, 24 );
+   i_hset_put( hset, 13 );
 
-   CU_ASSERT( i_hset_index( list ) == -1 );
+   CU_ASSERT( i_hset_index( hset ) == -1 );
 
-   i_hset_start( list );
+   i_hset_start( hset );
 
-   CU_ASSERT( i_hset_index( list ) == 0 );
+   CU_ASSERT( i_hset_index( hset ) == 0 );
 
-   i_hset_forth( list );
+   i_hset_forth( hset );
    
-   CU_ASSERT( i_hset_index( list ) == 1 );
+   CU_ASSERT( i_hset_index( hset ) == 1 );
 
-   i_hset_forth( list );
+   i_hset_forth( hset );
 
-   CU_ASSERT( i_hset_index( list ) == -1 );
+   CU_ASSERT( i_hset_index( hset ) == -1 );
 
-   i_hset_dispose( list );
+   i_hset_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_index_2
+*/
+
+void test_index_2( void )
+{
+   s_hset_t *hset = NULL;
+
+   hset = s_hset_make();
+   
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   
+   s_hset_put( hset, s1 );
+   s_hset_put( hset, s2 );
+
+   CU_ASSERT( s_hset_index( hset ) == -1 );
+
+   s_hset_start( hset );
+
+   CU_ASSERT( s_hset_index( hset ) == 0 );
+
+   s_hset_forth( hset );
+   
+   CU_ASSERT( s_hset_index( hset ) == 1 );
+
+   s_hset_forth( hset );
+
+   CU_ASSERT( s_hset_index( hset ) == -1 );
+
+   s_hset_deep_dispose( &hset );
 
    return;
 }
@@ -79,6 +115,9 @@ add_test_index( void )
 
    // test_index_1
    add_test_to_suite( p_suite, test_index_1, "test_index_1" );
+
+   // test_index_2
+   add_test_to_suite( p_suite, test_index_2, "test_index_2" );
 
    return CUE_SUCCESS;
 

@@ -1,7 +1,7 @@
 /**
  @file string_test_copy.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -40,13 +40,14 @@ void test_copy_1( void )
    string_t *string1 = NULL;
    
    string = string_make_from_cstring( "ABC" );
+   string1 = string_make( );
    
-   string1 = string_copy( string );
+   string_copy( string1, string );
    
    CU_ASSERT( string_is_equal( string, string1 ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }
@@ -61,13 +62,14 @@ void test_copy_2( void )
    string_t *string1 = NULL;
    
    string = string_make_from_cstring( "" );
+   string1 = string_make( );
    
-   string1 = string_copy( string );
+   string_copy( string1, string );
    
    CU_ASSERT( string_is_equal( string, string1 ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }
@@ -82,13 +84,14 @@ void test_copy_3( void )
    string_t *string1 = NULL;
    
    string = string_make_from_cstring( "ABCDEF" );
+   string1 = string_make_from_cstring("XYZ" );
    
-   string1 = string_copy( string );
+   string_copy( string1, string );
    
    CU_ASSERT( string_is_equal( string, string1 ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }

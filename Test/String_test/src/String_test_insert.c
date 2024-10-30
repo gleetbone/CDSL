@@ -1,7 +1,7 @@
 /**
  @file string_test_insert.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -49,9 +49,9 @@ void test_insert_1( void )
    
    CU_ASSERT( string_is_equal( string, stringt ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
-   string_dispose_with_contents( stringt );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+   string_deep_dispose( &stringt );
 
    return;
 }
@@ -75,9 +75,9 @@ void test_insert_2( void )
    
    CU_ASSERT( string_is_equal( string, stringt ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
-   string_dispose_with_contents( stringt );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+   string_deep_dispose( &stringt );
 
    return;
 }
@@ -101,9 +101,9 @@ void test_insert_3( void )
    
    CU_ASSERT( string_is_equal( string, stringt ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
-   string_dispose_with_contents( stringt );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+   string_deep_dispose( &stringt );
 
    return;
 }
@@ -127,9 +127,9 @@ void test_insert_4( void )
    
    CU_ASSERT( string_is_equal( string, stringt ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
-   string_dispose_with_contents( stringt );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+   string_deep_dispose( &stringt );
 
    return;
 }
@@ -153,9 +153,9 @@ void test_insert_5( void )
    
    CU_ASSERT( string_is_equal( string, stringt ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
-   string_dispose_with_contents( stringt );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+   string_deep_dispose( &stringt );
 
    return;
 }
@@ -180,9 +180,9 @@ void test_insert_6( void )
 
    CU_ASSERT( string_is_equal( string, stringt ) == 1 );
 
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
-   string_dispose_with_contents( stringt );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+   string_deep_dispose( &stringt );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file ifr_test_one_line.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_make_from_cstring"
+ @version 2.0.0
+ @brief: "tests for ifr_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for ifr_t
 
 */
 
@@ -37,7 +37,7 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 void test_one_line_1( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
+   string_t *file_name = NULL;
    s_dlist_t *list = NULL;
    
    string_t *t1 = NULL;
@@ -48,9 +48,9 @@ void test_one_line_1( void )
    t2 = string_make_from_cstring( "two" );
    t3 = string_make_from_cstring( "three" );
    
-   filename = string_make_from_cstring( "src/input_files/f_one_line.txt" );
+   file_name = string_make_from_cstring( "src/input_files/f_one_line.txt" );
    
-   ifr = ifr_make( filename );
+   ifr = ifr_make( file_name );
 
    ifr_forth( ifr );
    
@@ -70,11 +70,11 @@ void test_one_line_1( void )
    
    CU_ASSERT( string_is_equal( s_dlist_item_at( list ), t3 ) == 1 );
       
-   ifr_dispose( ifr );
-   string_dispose_with_contents( filename );
-   string_dispose_with_contents( t1 );
-   string_dispose_with_contents( t2 );
-   string_dispose_with_contents( t3 );
+   ifr_deep_dispose( &ifr );
+   string_deep_dispose( &file_name );
+   string_deep_dispose( &t1 );
+   string_deep_dispose( &t2 );
+   string_deep_dispose( &t3 );
    
    return;
 }

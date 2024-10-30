@@ -23,7 +23,7 @@
 extern "C" {
 #endif
  
-#include "base.h"
+#define PROTOCOLS_ENABLED
 
 #define Prefix i
 #define Item int32_t

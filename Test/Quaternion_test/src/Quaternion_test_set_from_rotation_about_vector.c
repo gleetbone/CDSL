@@ -1,8 +1,8 @@
 /**
  @file Quaternion_test_set_from_rotation_about_vector.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Quaternion_make"
+ @version 2.0.0
+ @brief: "tests for Quaternion_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Quaternion_make.
+ Unit tests for Quaternion_t
 
 */
 
@@ -53,8 +53,8 @@ void test_set_from_rotation_about_vector_1( void )
    CU_ASSERT( f_quaternion_q2( fq ) == 0.0 );
    CU_ASSERT( f_quaternion_q3( fq ) == 0.0 );
 
-   f_quaternion_dispose( fq );
-   f_matvec_dispose( vector );
+   f_quaternion_dispose( &fq );
+   f_matvec_dispose( &vector );
 
    return;
 }
@@ -80,8 +80,8 @@ void test_set_from_rotation_about_vector_2( void )
    CU_ASSERT( d_quaternion_q2( dq ) == 0.0 );
    CU_ASSERT( d_quaternion_q3( dq ) == 0.0 );
 
-   d_quaternion_dispose( dq );
-   d_matvec_dispose( vector );
+   d_quaternion_dispose( &dq );
+   d_matvec_dispose( &vector );
 
    return;
 }

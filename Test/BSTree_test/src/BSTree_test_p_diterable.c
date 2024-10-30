@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_p_diterable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree P_DIterable"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,8 +26,12 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 #include "Protocol_Base.h"
+#include "P_Basic.h"
+#include "p_Basic.h"
 #include "i_DIterable.h"
+#include "s_DIterable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -38,18 +42,16 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_p_diterable_1( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
    
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
    
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   CU_ASSERT( i_diterable_dispose_f( pb_list ) == i_bstree_dispose );
-
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
  
    return;
 }
@@ -60,18 +62,16 @@ void test_p_diterable_1( void )
 
 void test_p_diterable_2( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   CU_ASSERT( i_diterable_dispose_with_contents_f( pb_list ) == i_bstree_dispose_with_contents );
-
-   i_diterable_dispose_with_contents( pb_list );
+   p_basic_deep_dispose( &pb_bstree );
 
    return;
 }
@@ -82,21 +82,20 @@ void test_p_diterable_2( void )
 
 void test_p_diterable_3( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
+   i_bstree_put( bstree, 24 );
 
-   CU_ASSERT( i_diterable_count_f( pb_list ) == i_bstree_count );
-   CU_ASSERT( i_diterable_count( pb_list ) == 1 );
+   CU_ASSERT( i_diterable_count( pb_bstree ) == 1 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -107,22 +106,21 @@ void test_p_diterable_3( void )
 
 void test_p_diterable_4( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
-   i_bstree_start( list );
+   i_bstree_put( bstree, 24 );
+   i_bstree_start( bstree );
 
-   CU_ASSERT( i_diterable_item_f( pb_list ) == i_bstree_item_at );
-   CU_ASSERT( i_diterable_item( pb_list) == 24 );
+   CU_ASSERT( i_diterable_item( pb_bstree) == 24 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -133,21 +131,20 @@ void test_p_diterable_4( void )
 
 void test_p_diterable_5( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
+   i_bstree_put( bstree, 24 );
 
-   CU_ASSERT( i_diterable_off_f( pb_list ) == i_bstree_off );
-   CU_ASSERT( i_diterable_off( pb_list ) == 1 );
+   CU_ASSERT( i_diterable_off( pb_bstree ) == 1 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -158,19 +155,18 @@ void test_p_diterable_5( void )
 
 void test_p_diterable_6( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   CU_ASSERT( i_diterable_is_empty_f( pb_list ) == i_bstree_is_empty );
-   CU_ASSERT( i_diterable_is_empty( pb_list ) == 1 );
+   CU_ASSERT( i_diterable_is_empty( pb_bstree ) == 1 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -181,22 +177,21 @@ void test_p_diterable_6( void )
 
 void test_p_diterable_7( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
-   i_diterable_start( pb_list );
+   i_bstree_put( bstree, 24 );
+   i_diterable_start( pb_bstree );
 
-   CU_ASSERT( i_diterable_item_f( pb_list ) == i_bstree_item_at );
-   CU_ASSERT( i_diterable_item( pb_list) == 24 );
+   CU_ASSERT( i_diterable_item( pb_bstree) == 24 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -207,25 +202,24 @@ void test_p_diterable_7( void )
 
 void test_p_diterable_8( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
-   i_bstree_put( list, 13 );
+   i_bstree_put( bstree, 24 );
+   i_bstree_put( bstree, 13 );
 
-   i_bstree_start( list );
-   i_diterable_forth( pb_list );
+   i_bstree_start( bstree );
+   i_diterable_forth( pb_bstree );
 
-   CU_ASSERT( i_diterable_forth_f( pb_list ) == i_bstree_forth );
-   CU_ASSERT( i_diterable_item( pb_list) == 24 );
+   CU_ASSERT( i_diterable_item( pb_bstree) == 24 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -236,23 +230,22 @@ void test_p_diterable_8( void )
 
 void test_p_diterable_9( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
-   i_bstree_put( list, 13 );
-   i_diterable_finish( pb_list );
+   i_bstree_put( bstree, 24 );
+   i_bstree_put( bstree, 13 );
+   i_diterable_finish( pb_bstree );
 
-   CU_ASSERT( i_diterable_finish_f( pb_list ) == i_bstree_finish );
-   CU_ASSERT( i_diterable_item( pb_list) == 24 );
+   CU_ASSERT( i_diterable_item( pb_bstree) == 24 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
 
    return;
 }
@@ -263,25 +256,55 @@ void test_p_diterable_9( void )
 
 void test_p_diterable_10( void )
 {
-   i_bstree_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
 
-   list = i_bstree_make();
-   pb_list = ( protocol_base_t * ) list;
+   bstree = i_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
 
-   i_bstree_put( list, 24 );
-   i_bstree_put( list, 13 );
+   i_bstree_put( bstree, 24 );
+   i_bstree_put( bstree, 13 );
 
-   i_bstree_finish( list );
-   i_diterable_back( pb_list );
+   i_bstree_finish( bstree );
+   i_diterable_back( pb_bstree );
 
-   CU_ASSERT( i_diterable_back_f( pb_list ) == i_bstree_back );
-   CU_ASSERT( i_diterable_item( pb_list) == 13 );
+   CU_ASSERT( i_diterable_item( pb_bstree) == 13 );
 
-   i_diterable_dispose( pb_list );
+   p_basic_dispose( &pb_bstree );
+
+   return;
+}
+
+/**
+   test_p_diterable_11
+*/
+
+void test_p_diterable_11( void )
+{
+   s_bstree_t *bstree = NULL;
+   protocol_base_t *pb_bstree = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   bstree = s_bstree_make();
+   pb_bstree = ( protocol_base_t * ) bstree;
+
+   CU_ASSERT( bstree != NULL );
+   CU_ASSERT( pb_bstree != NULL );
+
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s1 );
+
+   s_bstree_finish( bstree );
+   s_diterable_back( pb_bstree );
+
+   CU_ASSERT( s_diterable_item( pb_bstree) == s1 );
+
+   p_basic_deep_dispose( &pb_bstree );
 
    return;
 }
@@ -330,6 +353,9 @@ add_test_p_diterable( void )
 
    // test_p_diterable_10
    add_test_to_suite( p_suite, test_p_diterable_10, "test_p_diterable_10" );
+
+   // test_p_diterable_11
+   add_test_to_suite( p_suite, test_p_diterable_11, "test_p_diterable_11" );
 
    return CUE_SUCCESS;
    

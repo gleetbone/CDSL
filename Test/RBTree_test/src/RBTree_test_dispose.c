@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_make.
+ Unit tests for RBTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_RBTree.h"
+#include "s_RBTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -45,7 +46,7 @@ void test_dispose_1( void )
    CU_ASSERT( i_rbtree_count( rbtree ) == 1 );
    CU_ASSERT( i_rbtree_is_empty( rbtree ) == 0 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -64,7 +65,29 @@ void test_dispose_2( void )
    CU_ASSERT( rbtree != NULL );
    CU_ASSERT( i_rbtree_count( rbtree ) == 1 );
  
-   i_rbtree_dispose_with_contents( rbtree );
+   i_rbtree_deep_dispose( &rbtree );
+   
+   return;
+}
+
+/**
+   test_dispose_3
+*/
+
+void test_dispose_3( void )
+{
+   s_rbtree_t *rbtree = NULL;
+   
+   string_t *s1 = string_make_from_cstring( "1" );
+   
+   rbtree = s_rbtree_make();
+   s_rbtree_put( rbtree, s1 );
+   
+   CU_ASSERT( rbtree != NULL );
+   CU_ASSERT( s_rbtree_count( rbtree ) == 1 );
+
+   s_rbtree_dispose( &rbtree );
+   string_deep_dispose( &s1 );
    
    return;
 }
@@ -89,6 +112,9 @@ add_test_dispose( void )
 
    // test_dispose_2
    add_test_to_suite( p_suite, test_dispose_2, "test_dispose_2" );
+
+   // test_dispose_3
+   add_test_to_suite( p_suite, test_dispose_3, "test_dispose_3" );
 
    return CUE_SUCCESS;
    

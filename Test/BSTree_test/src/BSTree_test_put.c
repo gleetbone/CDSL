@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_put.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -45,7 +46,7 @@ void test_put_1( void )
    CU_ASSERT( i_bstree_count( bstree ) == 1 );
    CU_ASSERT( i_bstree_is_empty( bstree ) == 0 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -66,7 +67,7 @@ void test_put_2( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -87,7 +88,7 @@ void test_put_3( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -108,7 +109,7 @@ void test_put_4( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -134,7 +135,7 @@ void test_put_5( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 4 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -160,7 +161,7 @@ void test_put_6( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 4 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -186,7 +187,7 @@ void test_put_7( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 4 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -212,7 +213,38 @@ void test_put_8( void )
    
    CU_ASSERT( i_bstree_count( bstree ) == 4 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_put_9
+   
+            4
+         2      6
+                  7   
+*/
+
+void test_put_9( void )
+{
+   s_bstree_t *bstree = NULL;
+   
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   string_t *s7 = string_make_from_cstring( "7" );
+   
+   bstree = s_bstree_make();
+   
+   s_bstree_put( bstree, s4 );
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s6 );
+   s_bstree_put( bstree, s7 );
+   
+   CU_ASSERT( s_bstree_count( bstree ) == 4 );
+ 
+   s_bstree_deep_dispose( &bstree );
 
    return;
 }
@@ -255,6 +287,9 @@ add_test_put( void )
 
    // test_put_8
    add_test_to_suite( p_suite, test_put_8, "test_put_8" );
+
+   // test_put_9
+   add_test_to_suite( p_suite, test_put_9, "test_put_9" );
 
    return CUE_SUCCESS;
    

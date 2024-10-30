@@ -12,7 +12,7 @@
  
  @section Description
 
- Defines to make a dgraph into a i_dgraph.
+ Defines to make a dgraph into a ii_dgraph.
 
 */
 
@@ -22,8 +22,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+ 
+#define PROTOCOLS_ENABLED
 
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix ii
 #define Value int32_t
@@ -31,9 +34,9 @@ extern "C" {
 
 #include "UGraph.h"
 
-#undef Prefix
-#undef Value
-#undef Edge
+#undef Prefix 
+#undef Value 
+#undef Edge 
 
 #ifdef __cplusplus
 }

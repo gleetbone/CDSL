@@ -1,7 +1,7 @@
 /**
  @file AVLTree_test_forth.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_t
 
 */
 
@@ -48,7 +48,7 @@ void test_forth_1( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -79,7 +79,7 @@ void test_forth_2( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -110,7 +110,7 @@ void test_forth_3( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -141,7 +141,7 @@ void test_forth_4( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -180,7 +180,7 @@ void test_forth_5( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
   
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -219,7 +219,7 @@ void test_forth_6( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -258,7 +258,7 @@ void test_forth_7( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -297,7 +297,7 @@ void test_forth_8( void )
    i_avltree_forth( avltree );
    CU_ASSERT( i_avltree_off( avltree ) == 1 );
  
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }

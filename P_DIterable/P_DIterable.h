@@ -1,7 +1,7 @@
 /**
  @file P_DIterable.h
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "P_Clonable protocol"
  
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
@@ -60,66 +60,6 @@
 */
 
 /**
-   p_diterable_dispose
-
-   dispose of p_diterable
-
-   @param p_diterable the pointer to the p_diterable
-*/
-#define P_DIterable_dispose( arg ) PRIMITIVE_CAT( arg, _diterable_dispose )
-void 
-P_DIterable_dispose( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_dispose_f
-
-   returns function to dispose of p_diterable
-
-   @param p_diterable the pointer to the p_diterable
-   @return the function
-*/
-typedef void (*diterable_dispose_f)( protocol_base_t *p_diterable );
-#define P_DIterable_dispose_f( arg ) PRIMITIVE_CAT( arg, _diterable_dispose_f )
-diterable_dispose_f
-P_DIterable_dispose_f( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_dispose_with_contents
-
-   dispose of p_diterable and its contained elements
-
-   @param p_diterable the pointer to the p_diterable
-*/
-#define P_DIterable_dispose_with_contents( arg ) PRIMITIVE_CAT( arg, _diterable_dispose_with_contents )
-void
-P_DIterable_dispose_with_contents( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_dispose_with_contents_f
-
-   returns function to dispose of p_diterable and its contained elements
-
-   @param p_diterable the pointer to the p_diterable
-   @return the function
-*/
-typedef void (*diterable_dispose_with_contents_f)( protocol_base_t *p_diterable );
-#define P_DIterable_dispose_with_contents_f( arg ) PRIMITIVE_CAT( arg, _diterable_dispose_with_contents_f )
-diterable_dispose_with_contents_f
-P_DIterable_dispose_with_contents_f( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
    p_diterable_count
 
    returns number of elements in the p_diterable
@@ -130,22 +70,6 @@ P_DIterable_dispose_with_contents_f( Prefix )
 #define P_DIterable_count( arg ) PRIMITIVE_CAT( arg, _diterable_count )
 int32_t
 P_DIterable_count( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_count_f
-
-   returns function to return number of elements in the p_diterable
-
-   @param p_diterable the pointer to the diterable struct
-   @return the function
-*/
-typedef int32_t (*diterable_count_f)( protocol_base_t *p_diterable );
-#define P_DIterable_count_f( arg ) PRIMITIVE_CAT( arg, _diterable_count_f )
-diterable_count_f
-P_DIterable_count_f( Prefix )
 (
    protocol_base_t *p_diterable
 );
@@ -166,22 +90,6 @@ P_DIterable_item( Prefix )
 );
 
 /**
-   p_diterable_item_f
-
-   returns function to return current value in the p_diterable
-
-   @param p_diterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef Type (*diterable_item_f)( protocol_base_t *p_diterable );
-#define P_DIterable_item_f( arg ) PRIMITIVE_CAT( arg, _diterable_item_f )
-diterable_item_f
-P_DIterable_item_f( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
    p_diterable_off
 
    returns 1 if cursor in the p_diterable is off, 0 otherwise
@@ -192,22 +100,6 @@ P_DIterable_item_f( Prefix )
 #define P_DIterable_off( arg ) PRIMITIVE_CAT( arg, _diterable_off )
 int32_t
 P_DIterable_off( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_off_f
-
-   returns function to return whether cursor in the p_diterable is off
-
-   @param p_diterable the pointer to the diterable struct
-   @return the function
-*/
-typedef int32_t (*diterable_off_f)( protocol_base_t *p_diterable );
-#define P_DIterable_off_f( arg ) PRIMITIVE_CAT( arg, _diterable_off_f )
-diterable_off_f
-P_DIterable_off_f( Prefix )
 (
    protocol_base_t *p_diterable
 );
@@ -228,22 +120,6 @@ P_DIterable_is_empty( Prefix )
 );
 
 /**
-   p_diterable_is_empty_f
-
-   returns function to return whether the p_diterable is empty
-
-   @param p_diterable the pointer to the diterable struct
-   @return the function
-*/
-typedef int32_t (*diterable_is_empty_f)( protocol_base_t *p_diterable );
-#define P_DIterable_is_empty_f( arg ) PRIMITIVE_CAT( arg, _diterable_is_empty_f )
-diterable_is_empty_f
-P_DIterable_is_empty_f( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
    p_diterable_start
 
    puts cursor in p_diterable at first item
@@ -253,22 +129,6 @@ P_DIterable_is_empty_f( Prefix )
 #define P_DIterable_start( arg ) PRIMITIVE_CAT( arg, _diterable_start )
 void
 P_DIterable_start( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_start_f
-
-   returns function to put cursor in p_diterable at first item
-
-   @param p_diterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef void (*diterable_start_f)( protocol_base_t *p_diterable );
-#define P_DIterable_start_f( arg ) PRIMITIVE_CAT( arg, _diterable_start_f )
-diterable_start_f
-P_DIterable_start_f( Prefix )
 (
    protocol_base_t *p_diterable
 );
@@ -288,22 +148,6 @@ P_DIterable_forth( Prefix )
 );
 
 /**
-   p_diterable_forth_f
-
-   returns function to put cursor in p_diterable at next item
-
-   @param p_diterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef void (*diterable_forth_f)( protocol_base_t *p_diterable );
-#define P_DIterable_forth_f( arg ) PRIMITIVE_CAT( arg, _diterable_forth_f )
-diterable_forth_f
-P_DIterable_forth_f( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
    p_diterable_finish
 
    puts cursor in p_diterable at first item
@@ -318,22 +162,6 @@ P_DIterable_finish( Prefix )
 );
 
 /**
-   p_diterable_finish_f
-
-   returns function to put cursor in p_diterable at first item
-
-   @param p_diterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef void (*diterable_finish_f)( protocol_base_t *p_diterable );
-#define P_DIterable_finish_f( arg ) PRIMITIVE_CAT( arg, _diterable_finish_f )
-diterable_finish_f
-P_DIterable_finish_f( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
    p_diterable_back
 
    puts cursor in p_diterable at next item, if any
@@ -343,22 +171,6 @@ P_DIterable_finish_f( Prefix )
 #define P_DIterable_back( arg ) PRIMITIVE_CAT( arg, _diterable_back )
 void
 P_DIterable_back( Prefix )
-(
-   protocol_base_t *p_diterable
-);
-
-/**
-   p_diterable_back_f
-
-   returns function to put cursor in p_diterable at next item
-
-   @param p_diterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef void (*diterable_back_f)( protocol_base_t *p_diterable );
-#define P_DIterable_back_f( arg ) PRIMITIVE_CAT( arg, _diterable_back_f )
-diterable_back_f
-P_DIterable_back_f( Prefix )
 (
    protocol_base_t *p_diterable
 );

@@ -1,7 +1,7 @@
 /**
  @file HTable_test_is_empty.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HTable_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HTable_put.
+ Unit tests for HTable_t
 
 */
 
@@ -42,7 +42,7 @@ void test_is_empty_1( void )
 
    CU_ASSERT( ii_htable_is_empty( htable ) == 1 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }
@@ -59,7 +59,7 @@ void test_is_empty_2( void )
 
    CU_ASSERT( ii_htable_is_empty( htable ) == 0 );
 
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
 
    return;
 }

@@ -1,17 +1,17 @@
 /**
  @file Configuration.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Configuration composed of key-value pairs"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,13 +28,17 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Thread safe configuration object. Holds string-string configuration values.
- Function definitions for the opaque soa_configuration_t type.
+ Function definitions for the opaque configuration_t type.
 
 */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +47,7 @@
 
 #include "Configuration.h"
 #include "Input_File_Reader.h"
-   
+
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -55,21 +59,19 @@
    defines
 */
 
-#define CONFIGURATION_TYPE 0xA5000700
-
 /**
    Structure
 */
 
-struct soa_configuration_struct
+struct configuration_struct
 {
-   int32_t type;
-   
+   int32_t _type;
+
    ss_htable_t *table;
    MULTITHREAD_MUTEX_DEFINITION( mutex );
 };
 
-typedef struct soa_configuration_struct soa_configuration_t;
+typedef struct configuration_struct configuration_t;
 
 /**
    Invariant
@@ -79,7 +81,7 @@ typedef struct soa_configuration_struct soa_configuration_t;
 
 static
 int32_t
-table_ok( soa_configuration_t *p )
+table_ok( configuration_t *p )
 {
    int32_t result = 1;
 
@@ -89,29 +91,30 @@ table_ok( soa_configuration_t *p )
 }
 
 static
-void invariant( soa_configuration_t *p )
+void invariant( configuration_t *p )
 {
-   assert(((void) "table ok", table_ok( p ) ));
+   assert( ( ( void ) "table ok", table_ok( p ) ) );
    return;
 }
 
 #endif
 
 /**
-   soa_configuration_make
+   configuration_make
 */
-soa_configuration_t *
-soa_configuration_make( void )
+configuration_t *
+configuration_make( void )
 {
-   soa_configuration_t *result
-      = ( soa_configuration_t * ) calloc( 1, sizeof( soa_configuration_t ) );
+   configuration_t *result
+      = ( configuration_t * ) calloc( 1, sizeof( configuration_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*result).type = CONFIGURATION_TYPE;
+   (*result)._type = CONFIGURATION_TYPE;
 
    // set table
    (*result).table = ss_htable_make();
-   
+
    MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
    INVARIANT( result );
@@ -120,428 +123,729 @@ soa_configuration_make( void )
 }
 
 /**
-   soa_configuration_dispose
+   configuration_clone
 */
-void
-soa_configuration_dispose( soa_configuration_t *configuration )
+
+configuration_t *
+configuration_clone( configuration_t *current )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
-   INVARIANT( configuration );
+   PRECONDITION( "configuration not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
 
-   ss_htable_dispose_with_contents( (*configuration).table );
-   MULTITHREAD_MUTEX_DESTROY( (*configuration).mutex );
+   // allocate configuration struct
+   configuration_t * result = ( configuration_t * ) calloc( 1, sizeof( configuration_t ) );
+   CHECK( "result allocated correctly", result != NULL );
 
-   free( configuration );
+   // lock mutex
+   LOCK( (*current).mutex );
+
+   // set type
+   (*result)._type = CONFIGURATION_TYPE;
+
+   (*result).table = ss_htable_clone( (*current).table );
+
+   // unlock mutex
+   UNLOCK( (*current).mutex );
+
+   INVARIANT( current );
+
+   return result;
+}
+
+/**
+   configuration_deep_clone
+*/
+
+configuration_t *
+configuration_deep_clone( configuration_t *current )
+{
+   PRECONDITION( "configuration not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
+
+   // allocate configuration struct
+   configuration_t * result = ( configuration_t * ) calloc( 1, sizeof( configuration_t ) );
+   CHECK( "result allocated correctly", result != NULL );
+
+   // lock mutex
+   LOCK( (*current).mutex );
+
+   // set type
+   (*result)._type = CONFIGURATION_TYPE;
+
+   (*result).table = ss_htable_clone( (*current).table );
+
+   // unlock mutex
+   UNLOCK( (*current).mutex );
+
+   INVARIANT( current );
+
+   return result;
+}
+
+/**
+  is_equal
+*/
+
+static
+int32_t
+is_equal(  configuration_t *current, configuration_t *other )
+{
+   int32_t result = 0;
+
+   result =
+      ( ss_htable_is_equal( (*current).table, (*other).table ) == 1 );
+
+   return result;
+};
+
+/**
+   configuration_is_equal
+*/
+
+int32_t
+configuration_is_equal( configuration_t *current, configuration_t *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type OK", (*other)._type == CONFIGURATION_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t result = 0;
+
+   if ( current == other )
+   {
+      result = 1;
+   }
+   else
+   {
+      // lock other
+      LOCK( (*other).mutex );
+
+      result = is_equal( current, other );
+
+      // unlock other
+      UNLOCK( (*other).mutex );
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+  is_deep_equal
+*/
+
+static
+int32_t
+is_deep_equal(  configuration_t *current, configuration_t *other )
+{
+   int32_t result = 0;
+
+   result =
+      ( ss_htable_is_deep_equal( (*current).table, (*other).table ) == 1 );
+
+   return result;
+};
+
+/**
+   configuration_is_deep_equal
+*/
+
+int32_t
+configuration_is_deep_equal( configuration_t *current, configuration_t *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type OK", (*other)._type == CONFIGURATION_TYPE );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t result = 0;
+
+   if ( current == other )
+   {
+      result = 1;
+   }
+   else
+   {
+      // lock other
+      LOCK( (*other).mutex );
+
+      result = is_deep_equal( current, other );
+
+      // unlock other
+      UNLOCK( (*other).mutex );
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   configuration_copy
+*/
+
+void
+configuration_copy( configuration_t *current, configuration_t *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type OK", (*other)._type == CONFIGURATION_TYPE );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   // lock mutex
+   LOCK( (*current).mutex );
+   LOCK( (*other).mutex );
+
+   ss_htable_copy( (*current).table, (*other).table );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   // unlock mutex
+   UNLOCK( (*other).mutex );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   soa_configuration_put
+   configuration_deep_copy
+*/
+
+void
+configuration_deep_copy( configuration_t *current, configuration_t *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type OK", (*other)._type == CONFIGURATION_TYPE );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   // lock mutex
+   LOCK( (*current).mutex );
+   LOCK( (*other).mutex );
+
+   ss_htable_deep_copy( (*current).table, (*other).table );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   // unlock mutex
+   UNLOCK( (*other).mutex );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   configuration_dispose
+*/
+
+void
+configuration_dispose( configuration_t **current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "current type OK", (**current)._type == CONFIGURATION_TYPE );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
+
+   // delete structure items
+   ss_htable_dispose( &(**current).table );
+
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
+
+   // deallocate the structure
+   free(*current);
+
+   // set the pointer to null
+   *current = NULL;
+
+   return;
+}
+
+/**
+   configuration_deep_dispose
+*/
+
+void
+configuration_deep_dispose( configuration_t **current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "*current not null", *current != NULL );
+   PRECONDITION( "current type OK", (**current)._type == CONFIGURATION_TYPE );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
+
+   // delete structure items
+   ss_htable_deep_dispose( &(**current).table );
+
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
+
+   // deallocate the structure
+   free(*current);
+
+   // set the pointer to null
+   *current = NULL;
+
+   return;
+}
+
+/**
+   configuration_put
 */
 void
-soa_configuration_put
+configuration_put
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *key,
    string_t *value
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
    PRECONDITION( "value not null", value != NULL );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   
-   ss_htable_replace_and_dispose( (*configuration).table, value, key );
-   
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   ss_htable_replace_and_dispose( (*current).table, value, key );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   soa_configuration_put_cstring
+   configuration_put_cstring
 */
 void
-soa_configuration_put_cstring
+configuration_put_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *key,
    char_t *value
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
    PRECONDITION( "value not null", value != NULL );
 
-   string_t *skey = string_make_from_cstring( key );
-   string_t *svalue = string_make_from_cstring( value );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   ss_htable_replace_and_dispose( (*configuration).table, svalue, skey );
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   string_t *skey = NULL;
+   string_t *svalue = NULL;
+
+   skey = string_make_from_cstring( key );
+   svalue = string_make_from_cstring( value );
+
+   ss_htable_replace_and_dispose( (*current).table, svalue, skey );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   soa_configuration_has
+   configuration_has
 */
 int32_t
-soa_configuration_has
+configuration_has
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
+
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   result = ss_htable_has( (*configuration).table, key );
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   result = ss_htable_has( (*current).table, key );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_has_cstring
+   configuration_has_cstring
 */
 int32_t
-soa_configuration_has_cstring
+configuration_has_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
+
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 0;
    string_t *skey = string_make_from_cstring( key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   result = ss_htable_has( (*configuration).table, skey );
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   result = ss_htable_has( (*current).table, skey );
 
-   string_dispose_with_contents( skey );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   string_deep_dispose( &skey );
 
    return result;
 }
 
 /**
-   soa_configuration_item
+   configuration_item
 */
 string_t *
-soa_configuration_item
+configuration_item
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
+
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    string_t *result = NULL;
    int32_t flag = 0;
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   flag = ss_htable_has( (*configuration).table, key );
+   flag = ss_htable_has( (*current).table, key );
    if ( flag == 1 )
    {
-      result = ss_htable_item( (*configuration).table, key );
+      result = ss_htable_item( (*current).table, key );
    }
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_item_cstring
+   configuration_item_cstring
 */
 string_t *
-soa_configuration_item_cstring
+configuration_item_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
+
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    string_t *result = NULL;
    int32_t flag = 0;
-   string_t *skey = string_make_from_cstring( key );
+   string_t *skey = NULL;
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   flag = ss_htable_has( (*configuration).table, skey );
+   skey = string_make_from_cstring( key );
+
+   flag = ss_htable_has( (*current).table, skey );
    if ( flag == 1 )
    {
-      result = ss_htable_item( (*configuration).table, skey );
+      result = ss_htable_item( (*current).table, skey );
    }
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
 
-   string_dispose_with_contents( skey );
+   string_deep_dispose( &skey );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_superkey_has
+   configuration_superkey_has
 */
 int32_t
-soa_configuration_superkey_has
+configuration_superkey_has
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *superkey,
    string_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "superkey not null", superkey != NULL );
    PRECONDITION( "key not null", key != NULL );
 
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
    int32_t result = 0;
-   string_t *s = string_make_from( superkey );
+   string_t *s = NULL;
+
+   s = string_clone( superkey );
    string_append_cstring( s, ":" );
    string_append( s, key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   result = ss_htable_has( (*configuration).table, s );
+   result = ss_htable_has( (*current).table, s );
    if ( result == 0 )
    {
-      result = ss_htable_has( (*configuration).table, key );
+      result = ss_htable_has( (*current).table, key );
    }
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
 
-   string_dispose_with_contents( s );
+   string_deep_dispose( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_has_cstring
+   configuration_has_cstring
 */
 int32_t
-soa_configuration_superkey_has_cstring
+configuration_superkey_has_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *superkey,
    char_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "superkey not null", superkey != NULL );
    PRECONDITION( "key not null", key != NULL );
 
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
    int32_t result = 0;
-   string_t *skey = string_make_from_cstring( key );
-   string_t *s = string_make_from_cstring( superkey );
+   string_t *skey = NULL;
+   string_t *s = NULL;
+
+   skey = string_make_from_cstring( key );
+   s = string_make_from_cstring( superkey );
    string_append_cstring( s, ":" );
    string_append_cstring( s, key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   result = ss_htable_has( (*configuration).table, s );
+   result = ss_htable_has( (*current).table, s );
    if ( result == 0 )
    {
-      result = ss_htable_has( (*configuration).table, skey );
+      result = ss_htable_has( (*current).table, skey );
    }
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
 
-   string_dispose_with_contents( skey );
-   string_dispose_with_contents( s );
+   string_deep_dispose( &skey );
+   string_deep_dispose( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_superkey_item
+   configuration_superkey_item
 */
 string_t *
-soa_configuration_superkey_item
+configuration_superkey_item
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *superkey,
    string_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "superkey not null", superkey != NULL );
    PRECONDITION( "key not null", key != NULL );
 
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
    string_t *result = NULL;
    int32_t flag = 0;
-   string_t *s = string_make_from( superkey );
+   string_t *s = NULL;
+
+   s = string_clone( superkey );
    string_append_cstring( s, ":" );
    string_append( s, key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   flag = ss_htable_has( (*configuration).table, s );
+   flag = ss_htable_has( (*current).table, s );
    if ( flag == 1 )
    {
-      result = ss_htable_item( (*configuration).table, s );
+      result = ss_htable_item( (*current).table, s );
    }
    else
    {
-      flag = ss_htable_has( (*configuration).table, key );
+      flag = ss_htable_has( (*current).table, key );
       if ( flag == 1 )
       {
-         result = ss_htable_item( (*configuration).table, key );
+         result = ss_htable_item( (*current).table, key );
       }
    }
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
 
-   string_dispose_with_contents( s );
+   string_deep_dispose( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_superkey_item_cstring
+   configuration_superkey_item_cstring
 */
 string_t *
-soa_configuration_superkey_item_cstring
+configuration_superkey_item_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *superkey,
    char_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "superkey not null", superkey != NULL );
    PRECONDITION( "key not null", key != NULL );
 
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
    string_t *result = NULL;
    int32_t flag = 0;
-   string_t *skey = string_make_from_cstring( key );
-   string_t *s = string_make_from_cstring( superkey );
+   string_t *skey = NULL;
+   string_t *s = NULL;
+
+   skey = string_make_from_cstring( key );
+   s = string_make_from_cstring( superkey );
    string_append_cstring( s, ":" );
    string_append_cstring( s, key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-   flag = ss_htable_has( (*configuration).table, s );
+   flag = ss_htable_has( (*current).table, s );
    if ( flag == 1 )
    {
-      result = ss_htable_item( (*configuration).table, s );
+      result = ss_htable_item( (*current).table, s );
    }
    else
    {
-      flag = ss_htable_has( (*configuration).table, skey );
+      flag = ss_htable_has( (*current).table, skey );
       if ( flag == 1 )
       {
-         result = ss_htable_item( (*configuration).table, skey );
+         result = ss_htable_item( (*current).table, skey );
       }
    }
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
 
-   string_dispose_with_contents( skey );
-   string_dispose_with_contents( s );
+   string_deep_dispose( &skey );
+   string_deep_dispose( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_list_items
+   configuration_list_items
 */
 s_dlist_t *
-soa_configuration_list_items
+configuration_list_items
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
 
-   s_dlist_t *result = s_dlist_make();
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   s_dlist_t *result = NULL;
    int32_t flag = 0;
    string_t *s = NULL;
    string_t *s1 = NULL;
 
+   result = s_dlist_make();
    int32_t i = 1;
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-
    flag = 1;
+
    while( flag == 1 )
    {
-      s = string_make_from( key );
+      s = string_clone( key );
       string_append_cstring( s, "_" );
       string_insert_int32( s, i, string_count( s ) );
 
-      flag = ss_htable_has( (*configuration).table, s );
+      flag = ss_htable_has( (*current).table, s );
       if ( flag == 1 )
       {
-         s1 = ss_htable_item( (*configuration).table, s );
+         s1 = ss_htable_item( (*current).table, s );
          s_dlist_put_last( result, s1 );
       }
-      string_dispose_with_contents( s );
+      string_deep_dispose( &s );
       i = i + 1;
    }
 
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_list_items_cstring
+   configuration_list_items_cstring
 */
 s_dlist_t *
-soa_configuration_list_items_cstring
+configuration_list_items_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "key not null", key != NULL );
 
-   s_dlist_t *result = s_dlist_make();
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   s_dlist_t *result = NULL;
    int32_t flag = 0;
    string_t *s = NULL;
    string_t *s1 = NULL;
 
+   result = s_dlist_make();
    int32_t i = 1;
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
 
    flag = 1;
    while( flag == 1 )
@@ -550,59 +854,61 @@ soa_configuration_list_items_cstring
       string_append_cstring( s, "_" );
       string_insert_int32( s, i, string_count( s ) );
 
-      flag = ss_htable_has( (*configuration).table, s );
+      flag = ss_htable_has( (*current).table, s );
       if ( flag == 1 )
       {
-         s1 = ss_htable_item( (*configuration).table, s );
+         s1 = ss_htable_item( (*current).table, s );
          s_dlist_put_last( result, s1 );
       }
-      string_dispose_with_contents( s );
+      string_deep_dispose( &s );
       i = i + 1;
    }
 
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 
 /**
-   soa_configuration_superkey_list_items
+   configuration_superkey_list_items
 */
 s_dlist_t *
-soa_configuration_superkey_list_items
+configuration_superkey_list_items
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *superkey,
    string_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "superkey not null", superkey != NULL );
    PRECONDITION( "key not null", key != NULL );
 
-   s_dlist_t *result = s_dlist_make();
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   s_dlist_t *result = NULL;
    int32_t flag = 0;
    string_t *s = NULL;
    string_t *s1 = NULL;
    string_t *super = NULL;
    int32_t i = 1;
-   
-   super = string_make_from( superkey );
+
+   result = s_dlist_make();
+
+   super = string_clone( superkey );
    string_append_cstring( super, ":" );
    string_append( super, key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-
-   s = string_make_from( super );
+   s = string_clone( super );
    string_append_cstring( s, "_" );
    string_insert_int32( s, i, string_count( s ) );
 
-   flag = ss_htable_has( (*configuration).table, s );
-   string_dispose_with_contents( s );
+   flag = ss_htable_has( (*current).table, s );
+   string_deep_dispose( &s );
 
    // if superkey:key is present, only return superkey:key_X items
    if ( flag == 1 )
@@ -610,17 +916,17 @@ soa_configuration_superkey_list_items
       flag = 1;
       while( flag == 1 )
       {
-         s = string_make_from( super );
+         s = string_clone( super );
          string_append_cstring( s, "_" );
          string_insert_int32( s, i, string_count( s ) );
 
-         flag = ss_htable_has( (*configuration).table, s );
+         flag = ss_htable_has( (*current).table, s );
          if ( flag == 1 )
          {
-            s1 = ss_htable_item( (*configuration).table, s );
+            s1 = ss_htable_item( (*current).table, s );
             s_dlist_put_last( result, s1 );
          }
-         string_dispose_with_contents( s );
+         string_deep_dispose( &s );
          i = i + 1;
       }
    }
@@ -630,65 +936,67 @@ soa_configuration_superkey_list_items
       flag = 1;
       while( flag == 1 )
       {
-         s = string_make_from( key );
+         s = string_clone( key );
          string_append_cstring( s, "_" );
          string_insert_int32( s, i, string_count( s ) );
 
-         flag = ss_htable_has( (*configuration).table, s );
+         flag = ss_htable_has( (*current).table, s );
          if ( flag == 1 )
          {
-            s1 = ss_htable_item( (*configuration).table, s );
+            s1 = ss_htable_item( (*current).table, s );
             s_dlist_put_last( result, s1 );
          }
-         string_dispose_with_contents( s );
+         string_deep_dispose( &s );
          i = i + 1;
       }
    }
 
-   string_dispose_with_contents( super );
-   
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   string_deep_dispose( &super );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
-   soa_configuration_superkey_list_items_cstring
+   configuration_superkey_list_items_cstring
 */
 s_dlist_t *
-soa_configuration_superkey_list_items_cstring
+configuration_superkey_list_items_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *superkey,
    char_t *key
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "superkey not null", superkey != NULL );
    PRECONDITION( "key not null", key != NULL );
 
-   s_dlist_t *result = s_dlist_make();
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   s_dlist_t *result = NULL;
    int32_t flag = 0;
    string_t *s = NULL;
    string_t *s1 = NULL;
    string_t *super = NULL;
    int32_t i = 1;
-   
+
+   result = s_dlist_make();
+
    super = string_make_from_cstring( superkey );
    string_append_cstring( super, ":" );
    string_append_cstring( super, key );
 
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
-
-   s = string_make_from( super );
+   s = string_clone( super );
    string_append_cstring( s, "_" );
    string_insert_int32( s, i, string_count( s ) );
 
-   flag = ss_htable_has( (*configuration).table, s );
-   string_dispose_with_contents( s );
+   flag = ss_htable_has( (*current).table, s );
+   string_deep_dispose( &s );
 
    // if superkey:key is present, only return superkey:key_X items
    if ( flag == 1 )
@@ -696,17 +1004,17 @@ soa_configuration_superkey_list_items_cstring
       flag = 1;
       while( flag == 1 )
       {
-         s = string_make_from( super );
+         s = string_clone( super );
          string_append_cstring( s, "_" );
          string_insert_int32( s, i, string_count( s ) );
 
-         flag = ss_htable_has( (*configuration).table, s );
+         flag = ss_htable_has( (*current).table, s );
          if ( flag == 1 )
          {
-            s1 = ss_htable_item( (*configuration).table, s );
+            s1 = ss_htable_item( (*current).table, s );
             s_dlist_put_last( result, s1 );
          }
-         string_dispose_with_contents( s );
+         string_deep_dispose( &s );
          i = i + 1;
       }
    }
@@ -720,47 +1028,47 @@ soa_configuration_superkey_list_items_cstring
          string_append_cstring( s, "_" );
          string_insert_int32( s, i, string_count( s ) );
 
-         flag = ss_htable_has( (*configuration).table, s );
+         flag = ss_htable_has( (*current).table, s );
          if ( flag == 1 )
          {
-            s1 = ss_htable_item( (*configuration).table, s );
+            s1 = ss_htable_item( (*current).table, s );
             s_dlist_put_last( result, s1 );
          }
-         string_dispose_with_contents( s );
+         string_deep_dispose( &s );
          i = i + 1;
       }
    }
 
-   string_dispose_with_contents( super );
-   
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   string_deep_dispose( &super );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 
 /**
-   soa_configuration_set_from_file
+   configuration_set_from_file
 */
 void
-soa_configuration_set_from_file
+configuration_set_from_file
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    string_t *filename
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "filename not null", filename != NULL );
+
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    ifr_t *ifr = NULL;
    s_dlist_t *tokens = NULL;
    string_t *key = NULL;
    string_t *value = NULL;
-
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
 
    ifr = ifr_make( filename );
    ifr_forth( ifr );
@@ -771,42 +1079,42 @@ soa_configuration_set_from_file
 
       if ( s_dlist_count( tokens ) >= 2 )
       {
-         key = string_make_from( s_dlist_item( tokens, 0 ) );
-         value = string_make_from( s_dlist_item( tokens, 1 ) );
-         ss_htable_put( (*configuration).table, value, key );
+         key = string_clone( s_dlist_item( tokens, 0 ) );
+         value = string_clone( s_dlist_item( tokens, 1 ) );
+         ss_htable_put( (*current).table, value, key );
          ifr_forth( ifr );
       }
    }
 
-   ifr_dispose( ifr );
+   ifr_dispose( &ifr );
 
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   soa_configuration_set_from_file_cstring
+   configuration_set_from_file_cstring
 */
 void
-soa_configuration_set_from_file_cstring
+configuration_set_from_file_cstring
 (
-   soa_configuration_t *configuration,
+   configuration_t *current,
    char_t *filename
 )
 {
-   PRECONDITION( "configuration not null", configuration != NULL );
-   PRECONDITION( "configuration type OK", (*configuration).type == CONFIGURATION_TYPE );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", (*current)._type == CONFIGURATION_TYPE );
    PRECONDITION( "filename not null", filename != NULL );
+
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    ifr_t *ifr = NULL;
    s_dlist_t *tokens = NULL;
    string_t *key = NULL;
    string_t *value = NULL;
-
-   LOCK( (*configuration).mutex );
-   INVARIANT( configuration );
 
    ifr = ifr_make_cstring( filename );
 
@@ -818,19 +1126,23 @@ soa_configuration_set_from_file_cstring
 
       if ( s_dlist_count( tokens ) >= 2 )
       {
-         key = string_make_from( s_dlist_item( tokens, 0 ) );
-         value = string_make_from( s_dlist_item( tokens, 1 ) );
-         ss_htable_put( (*configuration).table, value, key );
+         key = string_clone( s_dlist_item( tokens, 0 ) );
+         value = string_clone( s_dlist_item( tokens, 1 ) );
+         ss_htable_put( (*current).table, value, key );
          ifr_forth( ifr );
       }
    }
 
-   ifr_dispose( ifr );
+   ifr_dispose( &ifr );
 
-   INVARIANT( configuration );
-   UNLOCK( (*configuration).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /* End of file */

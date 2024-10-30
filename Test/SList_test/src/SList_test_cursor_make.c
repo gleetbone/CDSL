@@ -1,7 +1,7 @@
 /**
  @file SList_test_cursor_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_cursor_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_cursor_make.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -45,7 +46,7 @@ void test_cursor_make_1( void )
    CU_ASSERT( cursor != NULL );
    CU_ASSERT( int_slist_cursor_off( cursor ) == 1 );
   
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -62,7 +63,7 @@ void test_cursor_make_2( void )
    int_slist_cursor_start( cursor );
    CU_ASSERT( int_slist_cursor_item_at( cursor ) == 24 );
  
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -87,7 +88,35 @@ void test_cursor_make_3( void )
    int_slist_cursor_start( cursor1 );
    CU_ASSERT( int_slist_cursor_item_at( cursor ) == 24 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_cursor_make_4
+*/
+
+void test_cursor_make_4( void )
+{
+   s_slist_t *list = NULL;
+   s_slist_cursor_t *cursor = NULL;
+   s_slist_cursor_t *cursor1 = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   
+   list = s_slist_make();
+   
+   s_slist_put_last( list, s1 );
+
+   cursor = s_slist_cursor_make( list );
+   cursor1 = s_slist_cursor_make( list );
+
+   s_slist_cursor_start( cursor );
+   s_slist_cursor_start( cursor1 );
+   CU_ASSERT( s_slist_cursor_item_at( cursor ) == s1 );
+
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -115,6 +144,9 @@ add_test_cursor_make( void )
 
    // test_cursor_make_3
    add_test_to_suite( p_suite, test_cursor_make_3, "test_cursor_make_3" );
+
+   // test_cursor_make_4
+   add_test_to_suite( p_suite, test_cursor_make_4, "test_cursor_make_4" );
 
    return CUE_SUCCESS;
    

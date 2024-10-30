@@ -1,0 +1,18 @@
+==== Building DGraph_test (debug) ====
+Linking DGraph_test
+/usr/bin/ld: obj/Debug/ss_DGraph.o: in function `vertex_deep_dispose':
+/home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:824: undefined reference to `string_deep_dispose'
+/usr/bin/ld: obj/Debug/ss_DGraph.o: in function `edge_deep_dispose':
+/home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:966: undefined reference to `string_deep_dispose'
+/usr/bin/ld: obj/Debug/ss_DGraph.o: in function `ss_dgraph_is_deep_equal':
+/home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:1567: undefined reference to `string_is_equal'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:1604: undefined reference to `string_is_equal'
+/usr/bin/ld: obj/Debug/ss_DGraph.o: in function `ss_dgraph_deep_copy':
+/home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:1834: undefined reference to `string_deep_clone'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:1883: undefined reference to `string_deep_clone'
+/usr/bin/ld: obj/Debug/ss_DGraph.o: in function `ss_dgraph_deep_clone':
+/home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:2178: undefined reference to `string_deep_clone'
+/usr/bin/ld: /home/leegr3/Projects/C_data_structures/Test/DGraph_test/build/../../../DGraph/DGraph.c:2227: undefined reference to `string_deep_clone'
+collect2: error: ld returned 1 exit status
+make[1]: *** [DGraph_test.make:139: ../DGraph_test] Error 1
+make: *** [Makefile:17: DGraph_test] Error 2

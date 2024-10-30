@@ -1,7 +1,7 @@
 /**
  @file HSet_test_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_make.
+ Unit tests for HSet_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -44,7 +45,26 @@ void test_make_1( void )
    CU_ASSERT( i_hset_count( hset ) == 0 );
    CU_ASSERT( i_hset_is_empty( hset ) == 1 );
  
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_make_2
+*/
+
+void test_make_2( void )
+{
+   s_hset_t *hset = NULL;
+   
+   hset = s_hset_make();
+   
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( s_hset_count( hset ) == 0 );
+   CU_ASSERT( s_hset_is_empty( hset ) == 1 );
+ 
+   s_hset_dispose( &hset );
 
    return;
 }
@@ -66,6 +86,9 @@ add_test_make( void )
 
    // test_make_1
    add_test_to_suite( p_suite, test_make_1, "test_make_1" );
+
+   // test_make_2
+   add_test_to_suite( p_suite, test_make_2, "test_make_2" );
 
    return CUE_SUCCESS;
    

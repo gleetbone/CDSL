@@ -1,7 +1,7 @@
 /**
  @file binary_file_test_info.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for ifr_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for binary_file_t
 
 */
 
@@ -47,8 +47,8 @@ void test_info_1( void )
 
    CU_ASSERT( binary_file_exists( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -70,8 +70,8 @@ void test_info_2( void )
 
    CU_ASSERT( binary_file_exists( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -93,8 +93,8 @@ void test_info_3( void )
 
    CU_ASSERT( binary_file_is_closed( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -116,8 +116,8 @@ void test_info_4( void )
 
    CU_ASSERT( binary_file_is_closed( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -141,8 +141,8 @@ void test_info_5( void )
    CU_ASSERT( binary_file_is_open_write( file ) == 0 );
    CU_ASSERT( binary_file_is_open_append( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -166,8 +166,8 @@ void test_info_6( void )
    CU_ASSERT( binary_file_is_open_write( file ) == 1 );
    CU_ASSERT( binary_file_is_open_append( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -191,8 +191,8 @@ void test_info_7( void )
    CU_ASSERT( binary_file_is_open_write( file ) == 1 );
    CU_ASSERT( binary_file_is_open_append( file ) == 0 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -216,8 +216,8 @@ void test_info_8( void )
    CU_ASSERT( binary_file_is_open_write( file ) == 0 );
    CU_ASSERT( binary_file_is_open_append( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }
@@ -241,8 +241,8 @@ void test_info_9( void )
    CU_ASSERT( binary_file_is_open_write( file ) == 0 );
    CU_ASSERT( binary_file_is_open_append( file ) == 1 );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
    
    return;
 }

@@ -12,7 +12,7 @@
  
  @section Description
 
- Defines to make a dgraph into a i_dgraph.
+ Defines to make a dgraph into a ii_dgraph.
 
 */
 
@@ -23,7 +23,10 @@
 extern "C" {
 #endif
  
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix ii
 #define Value int32_t

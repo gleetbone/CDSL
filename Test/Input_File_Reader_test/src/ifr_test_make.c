@@ -1,8 +1,8 @@
 /**
  @file ifr_test_make.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_make_from_cstring"
+ @version 2.0.0
+ @brief: "tests for ifr_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for ifr_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "Input_File_Reader.h"
+#include "String_utilities.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -37,45 +38,30 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 void test_make_1( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
+   string_t *file_name = NULL;
    
-   filename = string_make_from_cstring( "src/input_files/XXX.txt" );
+   file_name = string_make_from_cstring( "src/input_files/XXX.txt" );
 
-   ifr = ifr_make( filename );
+   if ( file_exists( file_name ) == 1 )
+   {
+      ifr = ifr_make( file_name );
+   }
 
    CU_ASSERT( ifr == NULL );
 
-   string_dispose_with_contents( filename );
+   string_deep_dispose( &file_name );
 
-   filename = string_make_from_cstring( "src/input_files/f_empty.txt" );
+   file_name = string_make_from_cstring( "src/input_files/f_empty.txt" );
    
-   ifr = ifr_make( filename );
+   ifr = ifr_make( file_name );
 
    CU_ASSERT( ifr != NULL );
 
-   ifr_dispose( ifr );
-   string_dispose_with_contents( filename );
+   ifr_dispose( &ifr );
+   string_deep_dispose( &file_name );
    
    return;
 }
-
-void test_make_2( void )
-{
-   ifr_t *ifr = NULL;
-   
-   ifr = ifr_make_cstring( "src/input_files/XXX.txt" );
-
-   CU_ASSERT( ifr == NULL );
-
-   ifr = ifr_make_cstring( "src/input_files/f_empty.txt" );
-
-   CU_ASSERT( ifr != NULL );
-
-   ifr_dispose( ifr );
-   
-   return;
-}
-
 
 int
 add_test_make( void )
@@ -94,9 +80,6 @@ add_test_make( void )
 
    // test_make_1
    add_test_to_suite( p_suite, test_make_1, "test_make_1" );
-
-   // test_make_2
-   add_test_to_suite( p_suite, test_make_2, "test_make_2" );
 
    return CUE_SUCCESS;
    

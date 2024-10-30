@@ -1,17 +1,17 @@
 /**
  @file DGraph.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Directed graph with edges and nodes"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
- Copyright 2018 Greg Lee
+
+ Copyright 2024 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque DGraph_t type.
@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include <stdlib.h>   
+#include <stdlib.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -52,58 +52,57 @@ extern "C" {
    defines
 */
 
-#define DGRAPH_TYPE 0xA5000600
-#define DGRAPH_EDGE_TYPE 0xA5000601
-#define DGRAPH_VERTEX_TYPE 0xA5000602
-
-#define DGraph_has_internal( arg ) PRIMITIVE_CAT( arg, _dgraph_has_internal )
-int32_t
-DGraph_has_internal( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *vertex 
-);
-
-#define DGraph_edge_from_to_internal( arg ) PRIMITIVE_CAT( arg, _dgraph_edge_from_to_internal )
-DGraph_edge_type( Prefix ) *DGraph_edge_from_to_internal( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph,
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-);
+#define START_CAPACITY 4
 
 /**
-   Node structure definition. Holds a value and references to its neighbor vertices
+   Vertex structure definition. Holds a value and references to its neighbor vertices
    and the edges that connect them.
 */
-
+#define DGraph_vertex_struct( arg ) PRIMITIVE_CAT( arg, _dgraph_vertex_struct )
+#define DGraph_vertex_type( arg ) PRIMITIVE_CAT( arg, _dgraph_vertex_t )
+typedef struct DGraph_vertex_struct( Prefix ) DGraph_vertex_type( Prefix );
 struct DGraph_vertex_struct( Prefix )
 {
-   int32_t type;
-   int32_t value_type;
-   
-   int32_t hash_code;
-   DGraph_type( Prefix ) *dgraph;
+   int32_t _type;
+   int32_t _value_type;
+
+   DGraph_type( Prefix ) *dgraph; // the dgraph vertex is associated with
+
+   int32_t id;
    Value value;
-   HSet_type( Vertex_prefix ) *neighbors_from;
-   HSet_type( Vertex_prefix ) *neighbors_to;
+
+   int32_t *neighbors_from;
+   int32_t nfcount;
+   int32_t nfcapacity;
+
+   int32_t *neighbors_to;
+   int32_t ntcount;
+   int32_t ntcapacity;
 };
 
+
 /**
-   Edge structure definition. Holds a value and references to its start and 
+   Edge structure definition. Holds a value and references to its start and
    ending vertices. Represents a one way or directed edge.
 */
 
+#define DGraph_edge_struct( arg ) PRIMITIVE_CAT( arg, _dgraph_edge_struct )
+#define DGraph_edge_type( arg ) PRIMITIVE_CAT( arg, _dgraph_edge_t )
+typedef struct DGraph_edge_struct( Prefix ) DGraph_edge_type( Prefix );
 struct DGraph_edge_struct( Prefix )
 {
-   int32_t type;
-   int32_t edge_type;
-   
-   int32_t hash_code;
+   int32_t _type;
+   int32_t _value_type;
+
+   DGraph_type( Prefix ) *dgraph; // the dgraph edge is associated with
+
+   int32_t id;
    Edge value;
-   DGraph_vertex_type( Prefix ) *v_from;
-   DGraph_vertex_type( Prefix ) *v_to;
+
+   int32_t v_from;
+   int32_t v_to;
 };
+
 
 /**
    Directed graph structure definition.
@@ -111,12 +110,20 @@ struct DGraph_edge_struct( Prefix )
 
 struct DGraph_struct( Prefix )
 {
-   int32_t type;
-   int32_t edge_type;
-   int32_t value_type;
-   
-   HSet_type( Vertex_prefix ) *vertices;
-   HSet_type( Edge_prefix ) *edges;
+   int32_t _type;
+   int32_t _edge_type;
+   int32_t _value_type;
+
+   DGraph_vertex_type( Prefix ) **vp;
+   int32_t vcount;
+   int32_t vcapacity;
+   int32_t vnot_filled;
+
+   DGraph_edge_type( Prefix ) **ep;
+   int32_t ecount;
+   int32_t ecapacity;
+   int32_t enot_filled;
+
    DGraph_cursor_type( Prefix ) *first_cursor;
 
    MULTITHREAD_MUTEX_DEFINITION( mutex );
@@ -130,272 +137,646 @@ struct DGraph_struct( Prefix )
 struct DGraph_cursor_struct( Prefix )
 {
    DGraph_type( Prefix ) *dgraph; // the dgraph we're working with
-   
-   HSet_cursor_type( Vertex_prefix ) *cursor; // vertex cursor
-   HSet_cursor_type( Edge_prefix ) *edge_cursor; // edge cursor
-   
-   int32_t is_depth_first; // search type flag
-   HSet_type( Vertex_prefix ) *is_visited; // set of visited vertices for search
-   
+
+   int32_t vcursor; // vertex cursor - current index
+   int32_t ecursor; // edge cursor - current index
+
    DGraph_cursor_type( Prefix ) *next_cursor; // pointer to next cursor
 
    MULTITHREAD_MUTEX_DEFINITION( mutex );
 };
 
-/**
-   structure address to hash code
-*/
-
-#define HASH_PRIME_NUMBER 8388593U // largest prime number less than 2^24
-
-#define DGraph_address_to_hash( arg ) PRIMITIVE_CAT( arg, _dgraph_address_to_hash )
-
-int32_t
-DGraph_address_to_hash( Prefix )( DGraph_vertex_type( Prefix ) *vertex )
-{
-   int32_t result = 0;
-   
-   void *p = vertex;
-   
-   // get pointer as 64 bit unsigned integer
-   uint64_t u64 =  ( uint64_t ) p;
-      
-   // if pointer has last hex digit as all zeros, shift down 4 bits to eliminate zeros
-   if ( ( u64 & 0xF ) == 0 )
-   {
-      u64 = u64 >> 4;
-   }
-   
-   // make sure 64 bit unsigned integer fits into 32 bit signed integer
-   u64 = ( u64 % HASH_PRIME_NUMBER );
-   
-   // return the 32 bit signed integer as the hash code of the pointer
-   result = ( int32_t ) u64;   
-   
-   return result;
-}
-
-#define PRIME_1 23
-#define PRIME_2 31
-
-#define DGraph_edge_address_to_hash( arg ) PRIMITIVE_CAT( arg, _dgraph_edge_address_to_hash )
-
-int32_t
-DGraph_edge_address_to_hash( Prefix )( DGraph_edge_type( Prefix ) *edge )
-{
-   int32_t result = 0;
-   
-   void *p1 = (*edge).v_from;
-   void *p2 = (*edge).v_to;
-   
-   uint64_t hash = PRIME_1;
-   
-   // get pointer as 64 bit unsigned integer
-   uint64_t u64 = ( uint64_t ) p1;
-   
-   // if pointer has last hex digit as all zeros, shift down 4 bits to eliminate zeros
-   if ( ( u64 & 0xF ) == 0 )
-   {
-      u64 = u64 >> 4;
-   }
-   
-   // get remainder of pointer with large prime 
-   u64 = u64 % HASH_PRIME_NUMBER;   
-   
-   // update computed hash code 
-   hash = hash*PRIME_2 + u64;
-   hash = hash % HASH_PRIME_NUMBER;
-   
-   // get pointer as 64 bit unsigned integer
-   u64 = ( uint64_t ) p2;
-   
-   // if pointer has last hex digit as all zeros, shift down 4 bits to eliminate zeros
-   if ( ( u64 & 0xF ) == 0 )
-   {
-      u64 = u64 >> 4;
-   }
-   
-   // get remainder of pointer with large prime 
-   u64 = u64 % HASH_PRIME_NUMBER;   
-   
-   // update computed hash code 
-   hash = hash*PRIME_2 + u64;
-   
-   // make sure 64 bit unsigned integer fits into 32 bit signed integer
-   hash = hash % HASH_PRIME_NUMBER;
-   
-   // return the 32 bit signed integer as the hash code of the pointer
-   result = ( int32_t ) hash;   
-   
-   return result;
-}
-
-#define DGraph_dispose_of_vertex( arg ) PRIMITIVE_CAT( arg, _dgraph_dispose_of_vertex )
-
-void
-DGraph_dispose_of_vertex( Prefix )( DGraph_vertex_type( Prefix ) *vertex )
-{
-   DGraph_vertex_type( Prefix ) *v1 = NULL;
-   DGraph_edge_type( Prefix ) *e = NULL;
-   
-   DGraph_type( Prefix ) *dgraph = (*vertex).dgraph;
-   
-   if ( 
-         ( dgraph != NULL ) 
-         && 
-         ( (*dgraph).edges != NULL ) 
-         && 
-         ( (*vertex).neighbors_to != NULL ) 
-         && 
-         ( (*vertex).neighbors_from != NULL ) 
-      )
-   {
-      // dispose of edges to vertex
-      for
-      ( 
-         HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-         HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0;
-         HSet_forth( Vertex_prefix )( (*vertex).neighbors_to )
-      )
-      {   
-         v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-         e = DGraph_edge_from_to_internal( Prefix )( dgraph, vertex, v1 );
-         if ( e != NULL )
-         {
-            EDGE_DISPOSE_FUNCTION( (*e).value );
-            HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-            free( e );
-         }
-      }
-      
-      // dispose of edges from vertex
-      for
-      ( 
-         HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-         HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0;
-         HSet_forth( Vertex_prefix )( (*vertex).neighbors_from )
-      )
-      {   
-         v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-         e = DGraph_edge_from_to_internal( Prefix )( dgraph, v1, vertex );
-         if ( e != NULL )
-         {
-            EDGE_DISPOSE_FUNCTION( (*e).value );
-            HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-            free( e );
-         }
-      }
-      
-      // dispose of neighbor vertex hash sets but not their contents
-      HSet_dispose( Vertex_prefix )( (*vertex).neighbors_to );
-      (*vertex).neighbors_to = NULL;
-
-      HSet_dispose( Vertex_prefix )( (*vertex).neighbors_from );
-      (*vertex).neighbors_from = NULL;
-   
-   }
-   else if ( 
-         ( (*vertex).neighbors_to != NULL ) 
-         && 
-         ( (*vertex).neighbors_from != NULL ) 
-      )
-   {
-      // dispose of neighbor vertex hash sets but not their contents
-      HSet_dispose( Vertex_prefix )( (*vertex).neighbors_to );
-      (*vertex).neighbors_to = NULL;
-
-      HSet_dispose( Vertex_prefix )( (*vertex).neighbors_from );
-      (*vertex).neighbors_from = NULL;
-   }
-
-   free( vertex );
-   
-   return;
-}
-
-/**
-   DGraph_vertex_make
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_vertex_make( Prefix )( Value value )
-{
-   // allocate vertex
-   DGraph_vertex_type( Prefix ) *vertex 
-   =  ( DGraph_vertex_type( Prefix ) * ) calloc( 1, sizeof( DGraph_vertex_type( Prefix ) ) );
-   
-   // set type
-   (*vertex).type = DGRAPH_VERTEX_TYPE;
-   (*vertex).value_type = Value_Code;
-   
-   // set hash code
-   (*vertex).hash_code = DGraph_address_to_hash( Prefix )( ( void * ) vertex );
-   
-   // set value
-   (*vertex).value = value;
-   
-   // initialize vertex hash sets
-   (*vertex).neighbors_to = HSet_make( Vertex_prefix )();
-   (*vertex).neighbors_from = HSet_make( Vertex_prefix )();
-   
-   POSTCONDITION( "vertex not null", vertex != NULL );
-   
-   return vertex;
-}
-
-/**
-   edge_make
+/*
+   Local function prototypes
 */
 
 static
 DGraph_edge_type( Prefix ) *
-edge_make( DGraph_vertex_type( Prefix ) *v_from, DGraph_vertex_type( Prefix ) *v_to, Edge value )
+get_edge_from_to
+(
+   DGraph_type( Prefix ) *current,
+   int32_t v1_index,
+   int32_t v2_index
+);
+
+static
+void
+vertex_dispose
+(
+   DGraph_vertex_type( Prefix ) **vertex
+);
+
+static
+void
+vertex_deep_dispose
+(
+   DGraph_vertex_type( Prefix ) **vertex
+);
+
+static
+void
+edge_dispose
+(
+   DGraph_edge_type( Prefix ) **edge
+);
+
+static
+void
+edge_deep_dispose
+(
+   DGraph_edge_type( Prefix ) **edge
+);
+
+/*
+   pointer_insert
+*/
+
+static
+int32_t
+pointer_insert( void ***ap, int32_t *count, int32_t *capacity, int32_t *not_filled, void *p )
 {
-   PRECONDITION( "v_from vertex not null", v_from != NULL );
-   PRECONDITION( "v_to vertex not null", v_to != NULL );
-   
-   // allocate edge
-   DGraph_edge_type( Prefix ) *edge = ( DGraph_edge_type( Prefix ) * ) calloc( 1, sizeof( DGraph_edge_type( Prefix ) ) );
-   
-   // set type
-   (*edge).type = DGRAPH_EDGE_TYPE;
-   (*edge).edge_type = Edge_Code;
-   
-   // set value
-   (*edge).value = value;
-      
-   // set v_from and v_to vertex
-   (*edge).v_from = v_from;
-   (*edge).v_to = v_to;
-   
-   // set hash code
-   (*edge).hash_code = DGraph_edge_address_to_hash( Prefix )( edge );
-   
-   POSTCONDITION( "edge not null", edge != NULL );
-   
-   return edge;
+   PRECONDITION( "ap not NULL", ap != NULL );
+   PRECONDITION( "ap not NULL", *ap != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+   PRECONDITION( "not_filled not NULL", not_filled != NULL );
+
+   int32_t result = -1;
+   int32_t new_capacity = 0;
+   int32_t i = 0;
+   int32_t flag = 0;
+
+   if ( *not_filled == 0 )
+   {
+      if ( *count < *capacity )
+      {
+         result = *count;
+         *count = *count + 1;
+         (*ap)[result] = p;
+      }
+      else
+      {
+         new_capacity = 2 * (*capacity);
+         (*ap) = realloc( (*ap), new_capacity * sizeof( void * ) );
+         CHECK( "ap allocated correctly", (*ap) != NULL );
+
+         memset( &(*ap)[*capacity], 0, (*capacity)*sizeof( void * ) );
+
+         *capacity = new_capacity;
+         result = *count;
+         *count = *count + 1;
+         (*ap)[result] = p;
+      }
+   }
+   else
+   {
+      for ( i = 0; ( i < *count ) && ( flag == 0 ); i++ )
+      {
+         if ( (*ap)[i] == ( void * ) 0 )
+         {
+            result = i;
+            flag = 1;
+            *not_filled = *not_filled - 1;
+            (*ap)[result] = p;
+         }
+      }
+   }
+
+   POSTCONDITION( "return is not negative", result >= 0 );
+   return result;
+}
+
+/*
+   pointer_remove
+*/
+
+static
+void
+pointer_remove(  void **ap, int32_t *count, int32_t *capacity, int32_t *not_filled, int32_t index )
+{
+   PRECONDITION( "ap not NULL", ap != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+   PRECONDITION( "not_filled not NULL", not_filled != NULL );
+   PRECONDITION( "index not negative", index >= 0 );
+
+   ap[index] = ( void * ) 0;
+   *not_filled = *not_filled + 1;
+
+   return;
 }
 
 /**
-   DGraph_dispose_of_edge
+   get_edge_from_to
+*/
+static
+DGraph_edge_type( Prefix ) *
+get_edge_from_to
+(
+   DGraph_type( Prefix ) *current,
+   int32_t v1_index,
+   int32_t v2_index
+)
+{
+   DGraph_edge_type( Prefix ) *result = NULL;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   int32_t i = 0;
+
+   for( i = 0; ( i < (*current).ecount ) && ( result == NULL ); i++ )
+   {
+      edge = (*current).ep[i];
+      if ( edge != NULL )
+      {
+         if (
+            ( (*edge).v_from == v1_index )
+            &&
+            ( (*edge).v_to == v2_index )
+         )
+         {
+            result = edge;
+         }
+
+      }
+   }
+
+   return result;
+}
+
+/*
+   index_first
 */
 
-#define DGraph_dispose_of_edge( arg ) PRIMITIVE_CAT( arg, _dgraph_dispose_of_edge )
-
-void
-DGraph_dispose_of_edge( Prefix )( DGraph_edge_type( Prefix ) *edge )
+static
+int32_t
+index_first( int32_t *ip, int32_t *count, int32_t *capacity )
 {
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   
-   // do not dispose of value
-   
-   // do not dispose of start and end vertex
+   PRECONDITION( "ip not NULL", ip != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
 
-   // dispose of edge   
-   free( edge );
-   
+   int32_t result = 0;
+
+   result = ip[0];
+
+   POSTCONDITION( "return is not negative", result >= 0 );
+
+   return result;
+}
+
+/*
+   index_put_last
+*/
+
+static
+void
+index_put_last( int32_t **ip, int32_t *count, int32_t *capacity, int32_t index )
+{
+   PRECONDITION( "ip not NULL", ip != NULL );
+   PRECONDITION( "ip not NULL", *ip != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+   PRECONDITION( "index is not negative", index >= 0 );
+
+   int32_t new_capacity = 0;
+
+   if ( *count < *capacity )
+   {
+      (*ip)[*count] = index;
+      *count = *count + 1;
+   }
+   else
+   {
+      new_capacity = 2 * (*capacity);
+      (*ip) = realloc( (*ip), new_capacity * sizeof( int32_t ) );
+      CHECK( "ip allocated correctly", (*ip) != NULL );
+
+      memset( &(*ip)[*capacity], 0xFF, (*capacity)*sizeof( int32_t ) );
+
+      *capacity = new_capacity;
+      (*ip)[*count] = index;
+      *count = *count + 1;
+   }
+
    return;
+}
+
+/*
+   index_remove
+*/
+
+static
+void
+index_remove( int32_t *ip, int32_t *count, int32_t *capacity, int32_t index )
+{
+   PRECONDITION( "ip not NULL", ip != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "count positive", *count > 0 );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+   PRECONDITION( "index is not negative", index >= 0 );
+
+   int32_t i = 0;
+   int32_t flag = 0;
+
+   for ( i = 0; ( i < *count ) && ( flag == 0 ); i++ )
+   {
+      if ( ip[i] == index )
+      {
+         if ( i == *count - 1 )
+         {
+            ip[i] = -1;
+            *count = *count - 1;
+         }
+         else
+         {
+            memmove( &ip[i], &ip[i + 1], ( *count - 1 )*sizeof( int32_t ) );
+            ip[*count - 1] = -1;
+            *count = *count - 1;
+         }
+         flag = 1;
+      }
+   }
+
+   return;
+}
+
+/*
+   index_remove_first
+*/
+
+static
+void
+index_remove_first( int32_t *ip, int32_t *count, int32_t *capacity )
+{
+   PRECONDITION( "ip not NULL", ip != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+
+   int32_t i = 0;
+   int32_t flag = 0;
+
+   for ( i = 0; ( i < *count ) && ( flag == 0 ); i++ )
+   {
+      if ( *count == 1 )
+      {
+         ip[0] = -1;
+         *count = 0;
+      }
+      else if ( *count > 1 )
+      {
+         memmove( &ip[0], &ip[1], ( *count - 1 )*sizeof( int32_t ) );
+         ip[*count - 1] = -1;
+         *count = *count - 1;
+      }
+      flag = 1;
+   }
+
+   return;
+}
+
+/*
+   index_remove_last
+
+   not used in this class
+*/
+/*
+static
+void
+index_remove_last( int32_t *ip, int32_t *count, int32_t *capacity )
+{
+   PRECONDITION( "ip not NULL", ip != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+
+   int32_t i = 0;
+   int32_t flag = 0;
+
+   for ( i = 0; ( i < *count ) && ( flag == 0 ); i++ )
+   {
+      if ( *count >= 1 )
+      {
+         ip[*count - 1] = -1;
+         *count = *count - 1;
+      }
+      flag = 1;
+   }
+
+   return;
+}
+*/
+
+/*
+   index_has
+*/
+
+static
+int32_t
+index_has( int32_t *ip, int32_t *count, int32_t *capacity, int32_t index )
+{
+   PRECONDITION( "ip not NULL", ip != NULL );
+   PRECONDITION( "count not NULL", count != NULL );
+   PRECONDITION( "capacity not NULL", capacity != NULL );
+   PRECONDITION( "index is not negative", index >= 0 );
+
+   int32_t i = 0;
+   int32_t flag = 0;
+   int32_t result = 0;
+
+   for ( i = 0; ( i < *count ) && ( flag == 0 ); i++ )
+   {
+      if ( ip[i] == index )
+      {
+         result = 1;
+         flag = 1;
+      }
+   }
+
+   return result;
+}
+
+/**
+   find_connected_vertices_breadth_first
+
+   walk through the graph, finding vertices that are connected to vertex
+   breadth first search
+
+   @param current the dgraph
+   @param vertex_id the id of the vertex to start from - will be included in result
+   @param queue queue of vertex ids
+   @param qcount number of vertex ids in queue
+   @param qcapacity size of vertex id queue
+   @param is_visited list of vertex ids already looked at
+   @param ivcount number or vertices already looked at
+   @param ivcapacity size of already looked at list
+*/
+
+static
+void
+find_connected_vertices_breadth_first
+(
+   DGraph_type( Prefix ) *current,
+   int32_t vertex_id,
+   int32_t **queue,
+   int32_t *qcount,
+   int32_t *qcapacity,
+   int32_t **is_visited,
+   int32_t *ivcount,
+   int32_t *ivcapacity
+)
+{
+   DGraph_vertex_type( Prefix ) *v = NULL;
+   int32_t id = 0;
+   int32_t i = 0;
+
+   // put vertex into visited set
+   index_put_last( is_visited, ivcount, ivcapacity, vertex_id );
+
+   // put vertex into queue
+   index_put_last( queue, qcount, qcapacity, vertex_id );
+
+   // work on contents of the queue
+   while( *qcount > 0 )
+   {
+      // get first vertex in queue
+      id = index_first( *queue, qcount, qcapacity );
+      v = (*current).vp[id];
+      index_remove_first( *queue, qcount, qcapacity );
+
+      // put adjacent vertices into is_visited hash set
+      for( i = 0; i < (*v).ntcount; i++ )
+      {
+         id = (*v).neighbors_to[i];
+         if ( index_has( *is_visited, ivcount, ivcapacity, id ) == 0 )
+         {
+            index_put_last( is_visited, ivcount, ivcapacity, id );
+            index_put_last( queue, qcount, qcapacity, id );
+         }
+      }
+   }
+
+   return;
+}
+
+
+/**
+   find_connected_vertices_depth_first
+
+   walk through the graph, finding vertices that are connected to vertex
+   depth first search
+
+   @param current the dgraph
+   @param vertex_id the id of the vertex to start from - will be included in result
+   @param is_visited list of vertex ids already looked at
+   @param ivcount number or vertices already looked at
+   @param ivcapacity size of already looked at list
+*/
+
+static
+void
+find_connected_vertices_depth_first
+(
+   DGraph_type( Prefix ) *current,
+   int32_t vertex_id,
+   int32_t **is_visited,
+   int32_t *ivcount,
+   int32_t *ivcapacity
+)
+{
+   DGraph_vertex_type( Prefix ) *v = NULL;
+   int32_t id = 0;
+   int32_t i = 0;
+
+   if ( index_has( *is_visited, ivcount, ivcapacity, vertex_id ) == 0 )
+   {
+
+      // put vertex id into visited set
+      index_put_last( is_visited, ivcount, ivcapacity, vertex_id );
+
+      // get vertex
+      v = (*current).vp[vertex_id];
+
+      // put connected vertices into is_visited hash set
+      for( i = 0; i < (*v).ntcount; i++ )
+      {
+         id = (*v).neighbors_to[i];
+         if ( index_has( *is_visited, ivcount, ivcapacity, id ) == 0 )
+         {
+            // if not visited, recurse into it
+            find_connected_vertices_depth_first
+            (
+               current,
+               id,
+               is_visited,
+               ivcount,
+               ivcapacity
+            );
+         }
+      }
+
+   }
+
+   return;
+}
+
+
+
+
+/**
+   vertex_dispose
+*/
+
+static
+void
+vertex_dispose
+(
+   DGraph_vertex_type( Prefix ) **vertex
+)
+{
+   PRECONDITION( "vertex not null", vertex != NULL );
+   PRECONDITION( "vertex not null", *vertex != NULL );
+   PRECONDITION( "vertex type ok", ( (**vertex)._type == DGRAPH_VERTEX_TYPE ) && ( (**vertex)._value_type == Value_Code ) );
+
+   DGraph_type( Prefix ) *current = NULL;
+   DGraph_edge_type( Prefix ) *e = NULL;
+   int32_t i = 0;
+
+   // get the dgraph
+   current = (**vertex).dgraph;
+
+   // remove edges from another to vertex
+   for( i = 0; i < (*current).ecount; i++ )
+   {
+      e = (*current).ep[i];
+      if ( e != NULL )
+      {
+         if ( (*e).v_to == (**vertex).id )
+         {
+            edge_dispose( &e );
+         }
+      }
+   }
+
+   // remove edges from vertex to another
+   for( i = 0; i < (*current).ecount; i++ )
+   {
+      e = (*current).ep[i];
+      if ( e != NULL )
+      {
+         if ( (*e).v_from == (**vertex).id )
+         {
+            edge_dispose( &e );
+         }
+      }
+   }
+
+   // dispose of vertex neighbors_from index array
+   free( (**vertex).neighbors_from );
+
+   // dispose of vertex neighbors_to index array
+   free( (**vertex).neighbors_to );
+
+   // do not dispose of value
+
+   // get the vertex id
+   i = (**vertex).id;
+
+   // free the vertex
+   free(*vertex);
+
+   // set to null
+   *vertex = NULL;
+
+   // remove vertex from graph
+   pointer_remove
+   (
+      ( void ** ) (*current).vp,
+      &(*current).vcount,
+      &(*current).vcapacity,
+      &(*current).vnot_filled,
+      i
+   );
+
+   return;
+
+}
+
+/**
+   vertex_deep_dispose
+*/
+
+static
+void
+vertex_deep_dispose
+(
+   DGraph_vertex_type( Prefix ) **vertex
+)
+{
+   PRECONDITION( "vertex not null", vertex != NULL );
+   PRECONDITION( "vertex not null", *vertex != NULL );
+   PRECONDITION( "vertex type ok", ( (**vertex)._type == DGRAPH_VERTEX_TYPE ) && ( (**vertex)._value_type == Value_Code ) );
+
+   DGraph_type( Prefix ) *current = NULL;
+   DGraph_edge_type( Prefix ) *e = NULL;
+   int32_t i = 0;
+
+   // get the dgraph
+   current = (**vertex).dgraph;
+
+   // remove edges from another to vertex
+   for( i = 0; i < (*current).ecount; i++ )
+   {
+      e = (*current).ep[i];
+      if ( e != NULL )
+      {
+         if ( (*e).v_to == (**vertex).id )
+         {
+            edge_deep_dispose( &e );
+         }
+      }
+   }
+
+   // remove edges from vertex to another
+   for( i = 0; i < (*current).ecount; i++ )
+   {
+      e = (*current).ep[i];
+      if ( e != NULL )
+      {
+         if ( (*e).v_from == (**vertex).id )
+         {
+            edge_deep_dispose( &e );
+         }
+      }
+   }
+
+   // dispose of vertex neighbors_from index array
+   free( (**vertex).neighbors_from );
+
+   // dispose of vertex neighbors_to index array
+   free( (**vertex).neighbors_to );
+
+   // dispose of value
+   VERTEX_VALUE_DEEP_DISPOSE_FUNCTION( (**vertex).value );
+
+   // get the vertex id
+   i = (**vertex).id;
+
+   // free the vertex
+   free(*vertex);
+
+   // set to null
+   *vertex = NULL;
+
+   // remove vertex from graph
+   pointer_remove
+   (
+      ( void ** ) (*current).vp,
+      &(*current).vcount,
+      &(*current).vcapacity,
+      &(*current).vnot_filled,
+      i
+   );
+
+   return;
+
 }
 
 /**
@@ -404,71 +785,175 @@ DGraph_dispose_of_edge( Prefix )( DGraph_edge_type( Prefix ) *edge )
 
 static
 void
-edge_dispose( DGraph_edge_type( Prefix ) *edge )
+edge_dispose
+(
+   DGraph_edge_type( Prefix ) **edge
+)
 {
    PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   
+   PRECONDITION( "edge not null", *edge != NULL );
+   PRECONDITION( "edge type ok", ( (**edge)._type == DGRAPH_EDGE_TYPE ) && ( (**edge)._value_type == Edge_Code ) );
+
+   DGraph_type( Prefix ) *current = NULL;
+   int32_t i = 0;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+
+   // get the dgraph
+   current = (**edge).dgraph;
+
+   // remove edge vertex_to from edge vertex_from's neighbors_to list
+   vertex = (*current).vp[ (**edge).v_from ];
+
+   index_remove
+   (
+      (*vertex).neighbors_to,
+      &(*vertex).ntcount,
+      &(*vertex).ntcapacity,
+      (**edge).v_to
+   );
+
+   // remove edge vertex_from from edge vertex_to's neighbors_from list
+   vertex = (*current).vp[ (**edge).v_to ];
+
+   index_remove
+   (
+      (*vertex).neighbors_from,
+      &(*vertex).nfcount,
+      &(*vertex).nfcapacity,
+      (**edge).v_from
+   );
+
    // do not dispose of value
-   
+
    // do not dispose of start and end vertex
 
-   // dispose of edge   
-   free( edge );
-   
+   // do not dispose of value
+
+   // get the edge id
+   i = (**edge).id;
+
+   // dispose of edge
+   free(*edge);
+
+   // set to NULL
+   *edge = NULL;
+
+   // remove edge from graph
+   pointer_remove
+   (
+      ( void ** ) (*current).ep,
+      &(*current).ecount,
+      &(*current).ecapacity,
+      &(*current).enot_filled,
+      i
+   );
+
    return;
 }
 
 /**
-   edge_dispose_with_contents
+   edge_deep_dispose
 */
 
 static
 void
-edge_dispose_with_contents( DGraph_edge_type( Prefix ) *edge )
+edge_deep_dispose
+(
+   DGraph_edge_type( Prefix ) **edge
+)
 {
    PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   
-   // dispose of value
-   EDGE_DISPOSE_FUNCTION( (*edge).value );
-   
-   // do not dispose of start and end vertex
+   PRECONDITION( "edge not null", *edge != NULL );
+   PRECONDITION( "edge type ok", ( (**edge)._type == DGRAPH_EDGE_TYPE ) && ( (**edge)._value_type == Edge_Code ) );
 
-   // dispose of edge   
-   free( edge );
-   
+   DGraph_type( Prefix ) *current = NULL;
+   int32_t i = 0;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+
+   // get the dgraph
+   current = (**edge).dgraph;
+
+   // remove edge vertex_to from edge vertex_from's neighbors_to list
+   vertex = (*current).vp[ (**edge).v_from ];
+
+   index_remove
+   (
+      (*vertex).neighbors_to,
+      &(*vertex).ntcount,
+      &(*vertex).ntcapacity,
+      (**edge).v_to
+   );
+
+   // remove edge vertex_from from edge vertex_to's neighbors_from list
+   vertex = (*current).vp[ (**edge).v_to ];
+
+   index_remove
+   (
+      (*vertex).neighbors_from,
+      &(*vertex).nfcount,
+      &(*vertex).nfcapacity,
+      (**edge).v_from
+   );
+
+   // dispose of value
+   EDGE_VALUE_DEEP_DISPOSE_FUNCTION( (**edge).value );
+
+   // get the edge id
+   i = (**edge).id;
+
+   // dispose of edge
+   free(*edge);
+
+   // set to NULL
+   *edge = NULL;
+
+   // remove edge from graph
+   pointer_remove
+   (
+      ( void ** ) (*current).ep,
+      &(*current).ecount,
+      &(*current).ecapacity,
+      &(*current).enot_filled,
+      i
+   );
+
+
    return;
 }
 
-/**
-   DGraph_edge_equal
+/*
+   cursor_vertex_off
 */
 
-#define DGraph_edge_equal( arg ) PRIMITIVE_CAT( arg, _dgraph_edge_equal )
-
+static
 int32_t
-DGraph_edge_equal( Prefix )( DGraph_edge_type( Prefix ) *edge1, DGraph_edge_type( Prefix ) *edge2 )
+cursor_vertex_off( DGraph_cursor_type( Prefix ) *cursor )
 {
-   PRECONDITION( "edge1 not null", edge1 != NULL );
-   PRECONDITION( "edge1 type ok", ( (*edge1).type == DGRAPH_EDGE_TYPE ) && ( (*edge1).edge_type == Edge_Code ) );
-   PRECONDITION( "edge2 not null", edge2 != NULL );
-   PRECONDITION( "edge2 type ok", ( (*edge2).type == DGRAPH_EDGE_TYPE ) && ( (*edge2).edge_type == Edge_Code ) );
-   
-   int32_t result = 1;
-   
-   // check from
-   if ( (*edge1).v_from != (*edge2).v_from )
+   int32_t result = 0;
+
+   if ( (*cursor).vcursor >= ( *(*cursor).dgraph ).vcount )
    {
-      result = 0;
+      result = 1;
    }
-   
-   // check to
-   if ( (*edge1).v_to != (*edge2).v_to )
+
+   return result;
+}
+
+/*
+   cursor_edge_off
+*/
+
+static
+int32_t
+cursor_edge_off( DGraph_cursor_type( Prefix ) *cursor )
+{
+   int32_t result = 0;
+
+   if ( (*cursor).ecursor >= ( *(*cursor).dgraph ).ecount )
    {
-      result = 0;
+      result = 1;
    }
-   
+
    return result;
 }
 
@@ -480,46 +965,175 @@ DGraph_edge_equal( Prefix )( DGraph_edge_type( Prefix ) *edge1, DGraph_edge_type
 
 static
 int32_t
-edge_from_and_to_vertices_exist( DGraph_type( Prefix ) *dgraph )
+edge_from_and_to_vertices_exist( DGraph_type( Prefix ) *current )
 {
    int32_t result = 1;
    DGraph_edge_type( Prefix ) *edge = NULL;
-   DGraph_vertex_type( Prefix ) *v1;   
-   DGraph_vertex_type( Prefix ) *v2;   
-   HSet_cursor_type( Edge_prefix ) *cursor;
-   
-   cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
-   
-   HSet_cursor_start( Edge_prefix )( cursor );
-   while( ( HSet_cursor_off( Edge_prefix )( cursor ) == 0 ) && ( result == 1 ) )
+   int32_t i = 0;
+
+   for( i = 0; ( i < (*current).ecount ) && ( result == 1 ); i++ )
    {
-      edge = HSet_cursor_item_at( Edge_prefix )( cursor );
-      v1 = (*edge).v_from;
-      v2 = (*edge).v_to;
-      result = DGraph_has_internal( Prefix )( dgraph, v1 );
-      if ( result == 1 )
+      if ( (*current).ep[i] != NULL )
       {
-         result = DGraph_has_internal( Prefix )( dgraph, v2 );
+         edge = (*current).ep[i];
+
+         if ( result == 1 )
+         {
+            result = 0;
+            if ( (*current).vp[ (*edge).v_from ] != NULL )
+            {
+               result = 1;
+            }
+         }
+
+         if ( result == 1 )
+         {
+            result = 0;
+            if ( (*current).vp[ (*edge).v_to ] != NULL )
+            {
+               result = 1;
+            }
+         }
       }
-      HSet_cursor_forth( Edge_prefix )( cursor );
    }
 
-   HSet_cursor_dispose( Edge_prefix )( cursor );
-   
    return result;
 }
 
 static
 int32_t
-cursors_ok( DGraph_type( Prefix ) *dgraph )
+edge_implies_vertex_neighbor_from_and_to( DGraph_type( Prefix ) *current )
+{
+   int32_t result = 1;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   int32_t i = 0;
+
+   for( i = 0; ( i < (*current).ecount ) && ( result == 1 ); i++ )
+   {
+      if ( (*current).ep[i] != NULL )
+      {
+         edge = (*current).ep[i];
+
+         // edge start vertex
+         if ( result == 1 )
+         {
+            result = 0;
+            if ( (*current).vp[ (*edge).v_from ] != NULL )
+            {
+               result = 1;
+            }
+         }
+
+         if ( result == 1 )
+         {
+            result = 0;
+            vertex = (*current).vp[ (*edge).v_from ];
+            result
+               = index_has
+                 (
+                    (*vertex).neighbors_to,
+                    &(*vertex).ntcount,
+                    &(*vertex).ntcapacity,
+                    (*edge).v_to
+                 );
+         }
+
+         // edge end vertex
+         if ( result == 1 )
+         {
+            if ( (*current).vp[ (*edge).v_to ] != NULL )
+            {
+               result = 1;
+            }
+         }
+
+         if ( result == 1 )
+         {
+            result = 0;
+            vertex = (*current).vp[ (*edge).v_to ];
+            result
+               = index_has
+                 (
+                    (*vertex).neighbors_from,
+                    &(*vertex).nfcount,
+                    &(*vertex).nfcapacity,
+                    (*edge).v_from
+                 );
+         }
+
+      }
+   }
+
+   return result;
+}
+
+
+static
+int32_t
+vertex_neighbor_from_and_to_implies_edge( DGraph_type( Prefix ) *current )
+{
+   int32_t result = 1;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   int32_t i = 0;
+   int32_t j = 0;
+   int32_t vertex_from = 0;
+   int32_t vertex_to = 0;
+
+   for( i = 0; ( i < (*current).vcount ) && ( result == 1 ); i++ )
+   {
+      if ( (*current).vp[i] != NULL )
+      {
+         vertex = (*current).vp[i];
+
+         // neighbors_from
+         for( j = 0; ( j < (*vertex).nfcount ) && ( result == 1 ); j++ )
+         {
+            vertex_from = (*vertex).neighbors_from[j];
+            edge = get_edge_from_to( current, vertex_from, (*vertex).id );
+            if ( result == 1 )
+            {
+               result = 0;
+               if ( edge != NULL )
+               {
+                  result = 1;
+               }
+            }
+         }
+
+         // neighbors_to
+         for( j = 0; ( j < (*vertex).ntcount ) && ( result == 1 ); j++ )
+         {
+            vertex_to = (*vertex).neighbors_to[j];
+            edge = get_edge_from_to( current, (*vertex).id, vertex_to );
+            if ( result == 1 )
+            {
+               result = 0;
+               if ( edge != NULL )
+               {
+                  result = 1;
+               }
+            }
+         }
+      }
+   }
+
+   return result;
+}
+
+
+static
+int32_t
+cursors_ok( DGraph_type( Prefix ) *current )
 {
    int32_t result = 1;
 
-   DGraph_cursor_type( Prefix ) *cursor = (*dgraph).first_cursor;
+   DGraph_cursor_type( Prefix ) *cursor = (*current).first_cursor;
 
    while ( ( cursor != NULL ) && ( result == 1 ) )
    {
-      result = ( (*cursor).dgraph == dgraph );
+      result = ( (*cursor).dgraph == current );
       cursor = (*cursor).next_cursor;
    }
 
@@ -528,501 +1142,1189 @@ cursors_ok( DGraph_type( Prefix ) *dgraph )
 
 
 static
-void invariant( DGraph_type( Prefix ) *dgraph )
+void invariant( DGraph_type( Prefix ) *current )
 {
-   assert(((void) "edge from and to vertices exist", edge_from_and_to_vertices_exist( dgraph ) ));
-   assert(((void) "cursors OK", cursors_ok( dgraph ) ));
+   assert( ( ( void ) "edge from and to vertices exist", edge_from_and_to_vertices_exist( current ) ) );
+   assert( ( ( void ) "edge implies vertex neighbor from and to", edge_implies_vertex_neighbor_from_and_to( current ) ) );
+   assert( ( ( void ) "vertex neighbor from and to implies edge", vertex_neighbor_from_and_to_implies_edge( current ) ) );
+   assert( ( ( void ) "cursors OK", cursors_ok( current ) ) );
    return;
 }
 
 #endif
 
-/**
-   DGraph_vertex_dispose
-*/
-
-void
-DGraph_vertex_dispose( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   
-   DGraph_vertex_type( Prefix ) *v1 = NULL;
-   DGraph_edge_type( Prefix ) *e = NULL;
-   
-   if ( (*vertex).dgraph != NULL )
-   {
-    
-      if ( HSet_has( Vertex_prefix )( (*dgraph).vertices, vertex ) == 1 )
-      {
-         // dispose of edges to vertex
-         for
-         ( 
-            HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-            HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0;
-            HSet_forth( Vertex_prefix )( (*vertex).neighbors_to )
-         )
-         {   
-            v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-            e = DGraph_edge_from_to_internal( Prefix )( dgraph, vertex, v1 );
-            if ( e != NULL )
-            {
-               EDGE_DISPOSE_FUNCTION( (*e).value );
-               HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-               free( e );
-            }
-         }
-         
-         // dispose of edges from vertex
-         for
-         ( 
-            HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-            HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0;
-            HSet_forth( Vertex_prefix )( (*vertex).neighbors_from )
-         )
-         {   
-            v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-            e = DGraph_edge_from_to_internal( Prefix )( dgraph, v1, vertex );
-            if ( e != NULL )
-            {
-               EDGE_DISPOSE_FUNCTION( (*e).value );
-               HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-               free( e );
-            }
-         }
-         
-         // remove vertex from graph
-         HSet_remove( Vertex_prefix )( (*dgraph).vertices, vertex );
-         
-      }
-   }
-   
-   // do not dispose of value
-      
-   // dispose of neighbor vertex hash sets but not their contents
-   HSet_dispose( Vertex_prefix )( (*vertex).neighbors_to );
-   HSet_dispose( Vertex_prefix )( (*vertex).neighbors_from );
-
-   (*vertex).hash_code = 0;
-   (*vertex).dgraph = NULL;
-   (*vertex).neighbors_from = NULL;
-   (*vertex).neighbors_to = NULL;
-   
-   // dispose of vertex   
-   free( vertex );
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
 
 /**
-   DGraph_vertex_dispose_with_contents
-*/
-
-void
-DGraph_vertex_dispose_with_contents( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   
-   DGraph_vertex_type( Prefix ) *v1 = NULL;
-   DGraph_edge_type( Prefix ) *e = NULL;
-   
-   if ( (*vertex).dgraph != NULL )
-   {
-            
-      if ( HSet_has( Vertex_prefix )( (*dgraph).vertices, vertex ) == 1 )
-      {
-         // dispose of edges to vertex
-         for
-         ( 
-            HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-            HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0;
-            HSet_forth( Vertex_prefix )( (*vertex).neighbors_to )
-         )
-         {   
-            v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-            e = DGraph_edge_from_to_internal( Prefix )( dgraph, vertex, v1 );
-            if ( e != NULL )
-            {
-               EDGE_DISPOSE_FUNCTION( (*e).value );
-               HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-               free( e );
-            }
-         }
-         
-         // dispose of edges from vertex
-         for
-         ( 
-            HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-            HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0;
-            HSet_forth( Vertex_prefix )( (*vertex).neighbors_from )
-         )
-         {   
-            v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-            e = DGraph_edge_from_to_internal( Prefix )( dgraph, v1, vertex );
-            if ( e != NULL )
-            {
-               EDGE_DISPOSE_FUNCTION( (*e).value );
-               HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-               free( e );
-            }
-         }
-         
-         // remove vertex from graph
-         HSet_remove( Vertex_prefix )( (*dgraph).vertices, vertex );
-      }
-   }
-   
-   // dispose of neighbor vertex hash sets but not their contents
-   HSet_dispose( Vertex_prefix )( (*vertex).neighbors_to );
-   HSet_dispose( Vertex_prefix )( (*vertex).neighbors_from );
-
-   (*vertex).hash_code = 0;
-   (*vertex).dgraph = NULL;
-   (*vertex).neighbors_from = NULL;
-   (*vertex).neighbors_to = NULL;
-   
-   // dispose of value
-   DISPOSE_FUNCTION( (*vertex).value );
-   
-   // dispose of vertex   
-   free( vertex );
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-
-
-/**
-   DGraph_make_depth
+   DGraph_make
 */
 
 DGraph_type( Prefix ) *
-DGraph_make_depth( Prefix )( void )
+DGraph_make( Prefix )( void )
 {
    // allocate dgraph struct
-   DGraph_type( Prefix ) * dgraph
+   DGraph_type( Prefix ) *result
       = ( DGraph_type( Prefix ) * ) calloc( 1, sizeof( DGraph_type( Prefix ) ) );
+   CHECK( "result allocated successfully", result != NULL );
 
    // set type codes
-   (*dgraph).type = DGRAPH_TYPE;
-   (*dgraph).edge_type = Edge_Code;
-   (*dgraph).value_type = Value_Code;
-   
-   // init hash set of vertices 
-   (*dgraph).vertices = HSet_make( Vertex_prefix )();
+   (*result)._type = DGRAPH_TYPE;
+   (*result)._edge_type = Edge_Code;
+   (*result)._value_type = Value_Code;
 
-   // init hash set of edges 
-   (*dgraph).edges = HSet_make( Edge_prefix )();
+   // init vertex array
+   (*result).vp = calloc( START_CAPACITY, sizeof( void * ) );
+   CHECK( "(*result).vp allocated successfully", (*result).vp != NULL );
+   (*result).vcount = 0;
+   (*result).vcapacity = START_CAPACITY;
+   (*result).vnot_filled = 0;
+
+   // init edge array
+   (*result).ep = calloc( START_CAPACITY, sizeof( void * ) );
+   CHECK( "(*result).ep allocated successfully", (*result).ep != NULL );
+   (*result).ecount = 0;
+   (*result).ecapacity = START_CAPACITY;
+   (*result).enot_filled = 0;
 
    // allocate cursor struct
    DGraph_cursor_type( Prefix ) *cursor
       =  ( DGraph_cursor_type( Prefix ) * )
          calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated successfully", cursor != NULL );
 
    // set dgraph in cursor
-   (*cursor).dgraph = dgraph;
+   (*cursor).dgraph = result;
 
-   // set internal hset cursors
-   (*cursor).cursor = HSet_cursor_make( Vertex_prefix )( (*dgraph).vertices );
-   (*cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
+   // set internal cursors
+   (*cursor).vcursor = 0;
+   (*cursor).ecursor = 0;
 
-   // set cursor to depth first
-   (*cursor).is_depth_first = 1;
-   
-   // initialize is_visited hset
-   (*cursor).is_visited = HSet_make( Vertex_prefix )();
-   
    // set next cursor to null
    (*cursor).next_cursor = NULL;
-   
+
    // set dgraph first cursor
-   (*dgraph).first_cursor = cursor;
+   (*result).first_cursor = cursor;
 
-   MULTITHREAD_MUTEX_INIT( (*dgraph).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( dgraph );
+   INVARIANT( result );
 
-   return dgraph;
+   return result;
 }
 
 /**
-   DGraph_make_breadth
-*/
-
-DGraph_type( Prefix ) *
-DGraph_make_breadth( Prefix )( void )
-{
-   // allocate dgraph struct
-   DGraph_type( Prefix ) * dgraph
-      = ( DGraph_type( Prefix ) * ) calloc( 1, sizeof( DGraph_type( Prefix ) ) );
-
-   // set type codes
-   (*dgraph).type = DGRAPH_TYPE;
-   (*dgraph).edge_type = Edge_Code;
-   (*dgraph).value_type = Value_Code;
-   
-   // init hash set of vertices 
-   (*dgraph).vertices = HSet_make( Vertex_prefix )();
-
-   // init hash set of edges 
-   (*dgraph).edges = HSet_make( Edge_prefix )();
-
-   // allocate cursor struct
-   DGraph_cursor_type( Prefix ) *cursor
-      =  ( DGraph_cursor_type( Prefix ) * )
-         calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
-
-   // set dgraph in cursor
-   (*cursor).dgraph = dgraph;
-
-   // set internal hset cursors
-   (*cursor).cursor = HSet_cursor_make( Vertex_prefix )( (*dgraph).vertices );
-   (*cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
-
-   // set cursor to breadth first
-   (*cursor).is_depth_first = 0;
-   
-   // initialize is_visited hset
-   (*cursor).is_visited = HSet_make( Vertex_prefix )();
-   
-   // set next cursor to null
-   (*cursor).next_cursor = NULL;
-   
-   // set dgraph first cursor
-   (*dgraph).first_cursor = cursor;
-
-   MULTITHREAD_MUTEX_INIT( (*dgraph).mutex );
-
-   INVARIANT( dgraph );
-
-   return dgraph;
-}
-
-/**
-   DGraph_cursor_make_depth
+   Dgraph_make_cursor
 */
 
 DGraph_cursor_type( Prefix ) *
-DGraph_cursor_make_depth( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_make_cursor( Prefix )( DGraph_type( Prefix ) *current )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
+   DGraph_cursor_type( Prefix ) *result = NULL;
    DGraph_cursor_type( Prefix ) *c = NULL;
-   
+
    // allocate cursor struct
-   DGraph_cursor_type( Prefix ) *cursor
+   result
       =  ( DGraph_cursor_type( Prefix ) * )
          calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
+   CHECK( "result allocated successfully", result != NULL );
 
    // set dgraph in cursor
-   (*cursor).dgraph = dgraph;
+   (*result).dgraph = current;
 
-   // set internal hset cursors
-   (*cursor).cursor = HSet_cursor_make( Vertex_prefix )( (*dgraph).vertices );
-   (*cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
+   // init internal hset cursors
+   (*result).vcursor = 0;
+   (*result).ecursor = 0;
 
-   // set cursor to depth first
-   (*cursor).is_depth_first = 1;
-   
-   // initialize is_visited hset
-   (*cursor).is_visited = HSet_make( Vertex_prefix )();
-   
    // set next cursor to null
-   (*cursor).next_cursor = NULL;
-   
-   // get last cursor reference in dgraph structure
-   c = (*dgraph).first_cursor;
+   (*result).next_cursor = NULL;
+
+   // place into current at end of cursor list
+   c = (*current).first_cursor;
+
    while ( (*c).next_cursor != NULL )
    {
       c = (*c).next_cursor;
    }
 
-   // add new cursor to end of cursor "list"
-   (*c).next_cursor = cursor;
-   
-   MULTITHREAD_MUTEX_INIT( (*dgraph).mutex );
+   (*c).next_cursor = result;
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
-   return cursor;
+   return result;
 }
 
 /**
-   DGraph_cursor_make_breadth
+   DGraph_is_equal
 */
 
-DGraph_cursor_type( Prefix ) *
-DGraph_cursor_make_breadth( Prefix )( DGraph_type( Prefix ) *dgraph )
+int32_t
+DGraph_is_equal( Prefix )( DGraph_type( Prefix ) *current, DGraph_type( Prefix ) *other )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "other type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == DGRAPH_TYPE ) && ( (*other)._edge_type == Edge_Code ) && ( (*other)._value_type == Value_Code ) );
 
-   DGraph_cursor_type( Prefix ) *c = NULL;
-   
+   LOCK( (*current).mutex );
+   LOCK( (*other).mutex );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   int32_t result = 1;
+   int32_t i = 0;
+   int32_t j = 0;
+
+   // check vertices
+   if ( (*current).vcount != (*other).vcount )
+   {
+      result = 0;
+   }
+   else
+   {
+
+      // vertex null in current implies vertex null in other
+      for ( i = 0; i < (*current).vcount; i++ )
+      {
+         if ( ( (*current).vp[i] == NULL ) && ( (*other).vp[i] != NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).vp[i] != NULL ) && ( (*other).vp[i] == NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).vp[i] != NULL ) && ( (*other).vp[i] != NULL ) )
+         {
+            // neighbors_from count same
+            if ( ( *(*current).vp[i] ).nfcount != ( *(*other).vp[i] ).nfcount )
+            {
+               result = 0;
+            }
+
+            // neighbors_from same
+            for ( j = 0; j < ( *(*current).vp[i] ).nfcount; j++ )
+            {
+               vertex = (*other).vp[i];
+               if (
+                  index_has
+                  (
+                     (*vertex).neighbors_from,
+                     &(*vertex).nfcount,
+                     &(*vertex).nfcapacity,
+                     ( *(*current).vp[i] ).neighbors_from[j]
+                  )
+                  == 0
+               )
+               {
+                  result = 0;
+               }
+            }
+
+            // neighbors_to count same
+            if ( ( *(*current).vp[i] ).ntcount != ( *(*other).vp[i] ).ntcount )
+            {
+               result = 0;
+            }
+
+            // neighbors_to same
+            for ( j = 0; j < ( *(*current).vp[i] ).ntcount; j++ )
+            {
+               vertex = (*other).vp[i];
+               if (
+                  index_has
+                  (
+                     (*vertex).neighbors_to,
+                     &(*vertex).ntcount,
+                     &(*vertex).ntcapacity,
+                     ( *(*current).vp[i] ).neighbors_to[j]
+                  )
+                  == 0
+               )
+               {
+                  result = 0;
+               }
+            }
+
+            // value
+            if ( ( *(*current).vp[i] ).value != ( *(*other).vp[i] ).value )
+            {
+               result = 0;
+            }
+
+         }
+      }
+   }
+
+   // check edges
+   if ( (*current).ecount != (*other).ecount )
+   {
+      result = 0;
+   }
+   else
+   {
+      // edge null in current implies edge null in other
+      for ( i = 0; i < (*current).ecount; i++ )
+      {
+         if ( ( (*current).ep[i] == NULL ) && ( (*other).ep[i] != NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).ep[i] != NULL ) && ( (*other).ep[i] == NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).ep[i] != NULL ) && ( (*other).ep[i] != NULL ) )
+         {
+            // value
+            if ( ( *(*current).ep[i] ).value != ( *(*other).ep[i] ).value )
+            {
+               result = 0;
+            }
+         }
+      }
+   }
+
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   UNLOCK( (*current).mutex );
+   UNLOCK( (*other).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_is_deep_equal
+*/
+
+int32_t
+DGraph_is_deep_equal( Prefix )( DGraph_type( Prefix ) *current, DGraph_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "other type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == DGRAPH_TYPE ) && ( (*other)._edge_type == Edge_Code ) && ( (*other)._value_type == Value_Code ) );
+
+   LOCK( (*current).mutex );
+   LOCK( (*other).mutex );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   int32_t result = 1;
+   int32_t i = 0;
+   int32_t j = 0;
+
+   // check vertices
+   if ( (*current).vcount != (*other).vcount )
+   {
+      result = 0;
+   }
+   else
+   {
+
+      // vertex null in current implies vertex null in other
+      for ( i = 0; i < (*current).vcount; i++ )
+      {
+         if ( ( (*current).vp[i] == NULL ) && ( (*other).vp[i] != NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).vp[i] != NULL ) && ( (*other).vp[i] == NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).vp[i] != NULL ) && ( (*other).vp[i] != NULL ) )
+         {
+            // neighbors_from count same
+            if ( ( *(*current).vp[i] ).nfcount != ( *(*other).vp[i] ).nfcount )
+            {
+               result = 0;
+            }
+
+            // neighbors_from same
+            for ( j = 0; j < ( *(*current).vp[i] ).nfcount; j++ )
+            {
+               vertex = (*other).vp[i];
+               if (
+                  index_has
+                  (
+                     (*vertex).neighbors_from,
+                     &(*vertex).nfcount,
+                     &(*vertex).nfcapacity,
+                     ( *(*current).vp[i] ).neighbors_from[j]
+                  )
+                  == 0
+               )
+               {
+                  result = 0;
+               }
+            }
+
+            // neighbors_to count same
+            if ( ( *(*current).vp[i] ).ntcount != ( *(*other).vp[i] ).ntcount )
+            {
+               result = 0;
+            }
+
+            // neighbors_to same
+            for ( j = 0; j < ( *(*current).vp[i] ).ntcount; j++ )
+            {
+               vertex = (*other).vp[i];
+               if (
+                  index_has
+                  (
+                     (*vertex).neighbors_to,
+                     &(*vertex).ntcount,
+                     &(*vertex).ntcapacity,
+                     ( *(*current).vp[i] ).neighbors_to[j]
+                  )
+                  == 0
+               )
+               {
+                  result = 0;
+               }
+            }
+
+            // value
+            if (
+               VERTEX_VALUE_DEEP_EQUAL_FUNCTION
+               (
+                  ( *(*current).vp[i] ).value,
+                  ( *(*other).vp[i] ).value
+               )
+               != 1
+            )
+            {
+               result = 0;
+            }
+
+         }
+      }
+   }
+
+   // check edges
+   if ( (*current).ecount != (*other).ecount )
+   {
+      result = 0;
+   }
+   else
+   {
+      // edge null in current implies edge null in other
+      for ( i = 0; i < (*current).ecount; i++ )
+      {
+         if ( ( (*current).ep[i] == NULL ) && ( (*other).ep[i] != NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).ep[i] != NULL ) && ( (*other).ep[i] == NULL ) )
+         {
+            result = 0;
+         }
+         else if ( ( (*current).ep[i] != NULL ) && ( (*other).ep[i] != NULL ) )
+         {
+            // value
+            if (
+               EDGE_VALUE_DEEP_EQUAL_FUNCTION
+               (
+                  ( *(*current).ep[i] ).value,
+                  ( *(*other).ep[i] ).value
+               )
+               != 1
+            )
+            {
+               result = 0;
+            }
+         }
+      }
+   }
+
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   UNLOCK( (*current).mutex );
+   UNLOCK( (*other).mutex );
+
+   return result;
+}
+
+
+/**
+   DGraph_copy
+*/
+
+void
+DGraph_copy( Prefix )( DGraph_type( Prefix ) *current, DGraph_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "other type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == DGRAPH_TYPE ) && ( (*other)._edge_type == Edge_Code ) && ( (*other)._value_type == Value_Code ) );
+
+   LOCK( (*current).mutex );
+   LOCK( (*other).mutex );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   DGraph_vertex_type( Prefix ) *vertex1 = NULL;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_edge_type( Prefix ) *edge1 = NULL;
+   int32_t i = 0;
+
+   // first, empty current
+   for ( i = 0; i < (*current).vcount; i++ )
+   {
+
+      if ( (*current).vp[i] != NULL )
+      {
+         // get vertex
+         vertex = (*current).vp[i];
+
+         // dispose vertex
+         vertex_deep_dispose( &vertex );
+      }
+   }
+
+   // now copy vertices using the same values
+   for ( i = 0; i < (*other).vcount; i++ )
+   {
+
+      if ( (*other).vp[i] != NULL )
+      {
+         // get vertex
+         vertex1 = (*other).vp[i];
+
+         // allocate vertex
+         vertex = ( DGraph_vertex_type( Prefix ) * ) calloc( 1, sizeof( DGraph_vertex_type( Prefix ) ) );
+         CHECK( "vertex allocated correctly", vertex != NULL );
+
+         // set type
+         (*vertex)._type = DGRAPH_VERTEX_TYPE;
+         (*vertex)._value_type = Value_Code;
+
+         // set dgraph
+         (*vertex).dgraph = current;
+
+         // set value
+         (*vertex).value = (*vertex1).value;
+
+         // initialize neighbors_from
+         (*vertex).neighbors_from = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_from allocated correctly", (*vertex).neighbors_from != NULL );
+         (*vertex).nfcount = 0;
+         (*vertex).nfcapacity = START_CAPACITY;
+
+         // initialize neighbors_to
+         (*vertex).neighbors_to = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_to allocated correctly", (*vertex).neighbors_to != NULL );
+         (*vertex).ntcount = 0;
+         (*vertex).ntcapacity = START_CAPACITY;
+
+         // put vertex into current, and set its index
+         (*vertex).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*current).vp ),
+                 &(*current).vcount,
+                 &(*current).vcapacity,
+                 &(*current).vnot_filled,
+                 vertex
+              );
+
+      }
+   }
+
+   // now copy edges using the same values
+   for ( i = 0; i < (*other).ecount; i++ )
+   {
+
+      if ( (*other).ep[i] != NULL )
+      {
+         // get edge
+         edge1 = (*other).ep[i];
+
+         // allocate edge
+         edge = ( DGraph_edge_type( Prefix ) * ) calloc( 1, sizeof( DGraph_edge_type( Prefix ) ) );
+         CHECK( "edge allocated correctly", edge != NULL );
+
+         // set type
+         (*edge)._type = DGRAPH_EDGE_TYPE;
+         (*edge)._value_type = Edge_Code;
+
+         // set dgraph
+         (*edge).dgraph = current;
+
+         // set value
+         (*edge).value = (*edge1).value;
+
+         // set from and to
+         (*edge).v_from = (*edge1).v_from;
+         (*edge).v_to = (*edge1).v_to;
+
+         // put edge into DGraph, and set its index
+         (*edge).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*current).ep ),
+                 &(*current).ecount,
+                 &(*current).ecapacity,
+                 &(*current).enot_filled,
+                 edge
+              );
+
+         // add v_to to v_from's neighbors_to
+         vertex = (*current).vp[(*edge).v_from];
+         index_put_last( &( (*vertex).neighbors_to ), &(*vertex).ntcount, &(*vertex).ntcapacity, (*edge).v_to );
+
+         // add v_from to v_to's neighbors_from
+         vertex = (*current).vp[(*edge).v_to];
+         index_put_last( &( (*vertex).neighbors_from ), &(*vertex).nfcount, &(*vertex).nfcapacity, (*edge).v_from );
+      }
+   }
+
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   UNLOCK( (*current).mutex );
+   UNLOCK( (*other).mutex );
+
+   return;
+}
+
+
+/**
+   DGraph_deep_copy
+*/
+
+void
+DGraph_deep_copy( Prefix )( DGraph_type( Prefix ) *current, DGraph_type( Prefix ) *other )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "other type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "other not null", other != NULL );
+   PRECONDITION( "other type ok", ( (*other)._type == DGRAPH_TYPE ) && ( (*other)._edge_type == Edge_Code ) && ( (*other)._value_type == Value_Code ) );
+
+   LOCK( (*current).mutex );
+   LOCK( (*other).mutex );
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   DGraph_vertex_type( Prefix ) *vertex1 = NULL;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_edge_type( Prefix ) *edge1 = NULL;
+   int32_t i = 0;
+
+   // first, empty current
+   for ( i = 0; i < (*current).vcount; i++ )
+   {
+
+      if ( (*current).vp[i] != NULL )
+      {
+         // get vertex
+         vertex = (*current).vp[i];
+
+         // dispose vertex
+         vertex_deep_dispose( &vertex );
+      }
+   }
+
+   // now copy vertices using the same values
+   for ( i = 0; i < (*other).vcount; i++ )
+   {
+
+      if ( (*other).vp[i] != NULL )
+      {
+         // get vertex
+         vertex1 = (*other).vp[i];
+
+         // allocate vertex
+         vertex = ( DGraph_vertex_type( Prefix ) * ) calloc( 1, sizeof( DGraph_vertex_type( Prefix ) ) );
+         CHECK( "vertex allocated correctly", vertex != NULL );
+
+         // set type
+         (*vertex)._type = DGRAPH_VERTEX_TYPE;
+         (*vertex)._value_type = Value_Code;
+
+         // set dgraph
+         (*vertex).dgraph = current;
+
+         // set value
+         (*vertex).value = VERTEX_VALUE_DEEP_CLONE_FUNCTION( (*vertex1).value );
+
+         // initialize neighbors_from
+         (*vertex).neighbors_from = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_from allocated correctly", (*vertex).neighbors_from != NULL );
+         (*vertex).nfcount = 0;
+         (*vertex).nfcapacity = START_CAPACITY;
+
+         // initialize neighbors_to
+         (*vertex).neighbors_to = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_to allocated correctly", (*vertex).neighbors_to != NULL );
+         (*vertex).ntcount = 0;
+         (*vertex).ntcapacity = START_CAPACITY;
+
+         // put vertex into current, and set its index
+         (*vertex).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*current).vp ),
+                 &(*current).vcount,
+                 &(*current).vcapacity,
+                 &(*current).vnot_filled,
+                 vertex
+              );
+
+      }
+   }
+
+   // now copy edges using the same values
+   for ( i = 0; i < (*other).ecount; i++ )
+   {
+
+      if ( (*other).ep[i] != NULL )
+      {
+         // get edge
+         edge1 = (*other).ep[i];
+
+         // allocate edge
+         edge = ( DGraph_edge_type( Prefix ) * ) calloc( 1, sizeof( DGraph_edge_type( Prefix ) ) );
+         CHECK( "edge allocated correctly", edge != NULL );
+
+         // set type
+         (*edge)._type = DGRAPH_EDGE_TYPE;
+         (*edge)._value_type = Edge_Code;
+
+         // set dgraph
+         (*edge).dgraph = current;
+
+         // set value
+         (*edge).value = EDGE_VALUE_DEEP_CLONE_FUNCTION( (*edge1).value );
+
+         // set from and to
+         (*edge).v_from = (*edge1).v_from;
+         (*edge).v_to = (*edge1).v_to;
+
+         // put edge into DGraph, and set its index
+         (*edge).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*current).ep ),
+                 &(*current).ecount,
+                 &(*current).ecapacity,
+                 &(*current).enot_filled,
+                 edge
+              );
+
+         // add v_to to v_from's neighbors_to
+         vertex = (*current).vp[(*edge).v_from];
+         index_put_last( &( (*vertex).neighbors_to ), &(*vertex).ntcount, &(*vertex).ntcapacity, (*edge).v_to );
+
+         // add v_from to v_to's neighbors_from
+         vertex = (*current).vp[(*edge).v_to];
+         index_put_last( &( (*vertex).neighbors_from ), &(*vertex).nfcount, &(*vertex).nfcapacity, (*edge).v_from );
+      }
+   }
+
+
+   INVARIANT( current );
+   INVARIANT( other );
+
+   UNLOCK( (*current).mutex );
+   UNLOCK( (*other).mutex );
+
+   return;
+}
+
+/**
+   DGraph_clone
+*/
+
+DGraph_type( Prefix ) *
+DGraph_clone( Prefix )( DGraph_type( Prefix ) *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "other type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+
+   LOCK( (*current).mutex );
+
+   INVARIANT( current );
+
+   DGraph_type( Prefix ) *result = NULL;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   DGraph_vertex_type( Prefix ) *vertex1 = NULL;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_edge_type( Prefix ) *edge1 = NULL;
+   int32_t i = 0;
+
+   // allocate dgraph struct
+   result = ( DGraph_type( Prefix ) * ) calloc( 1, sizeof( DGraph_type( Prefix ) ) );
+   CHECK( "result allocated successfully", result != NULL );
+
+   // set type codes
+   (*result)._type = DGRAPH_TYPE;
+   (*result)._edge_type = Edge_Code;
+   (*result)._value_type = Value_Code;
+
+   // init vertex array
+   (*result).vp = calloc( START_CAPACITY, sizeof( void * ) );
+   CHECK( "(*result).vp allocated successfully", (*result).vp != NULL );
+   (*result).vcount = 0;
+   (*result).vcapacity = START_CAPACITY;
+   (*result).vnot_filled = 0;
+
+   // init edge array
+   (*result).ep = calloc( START_CAPACITY, sizeof( void * ) );
+   CHECK( "(*result).ep allocated successfully", (*result).ep != NULL );
+   (*result).ecount = 0;
+   (*result).ecapacity = START_CAPACITY;
+   (*result).enot_filled = 0;
+
    // allocate cursor struct
    DGraph_cursor_type( Prefix ) *cursor
       =  ( DGraph_cursor_type( Prefix ) * )
          calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated successfully", cursor != NULL );
 
    // set dgraph in cursor
-   (*cursor).dgraph = dgraph;
+   (*cursor).dgraph = result;
 
-   // set internal hset cursors
-   (*cursor).cursor = HSet_cursor_make( Vertex_prefix )( (*dgraph).vertices );
-   (*cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
+   // set internal cursors
+   (*cursor).vcursor = 0;
+   (*cursor).ecursor = 0;
 
-   // set cursor to breadth first
-   (*cursor).is_depth_first = 0;
-   
-   // initialize is_visited hset
-   (*cursor).is_visited = HSet_make( Vertex_prefix )();
-   
    // set next cursor to null
    (*cursor).next_cursor = NULL;
-   
-   // get last cursor reference in dgraph structure
-   c = (*dgraph).first_cursor;
-   while ( (*c).next_cursor != NULL )
+
+   // set dgraph first cursor
+   (*result).first_cursor = cursor;
+
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
+
+   // now copy vertices using the same values
+   for ( i = 0; i < (*current).vcount; i++ )
    {
-      c = (*c).next_cursor;
+
+      if ( (*current).vp[i] != NULL )
+      {
+         // get vertex
+         vertex1 = (*current).vp[i];
+
+         // allocate vertex
+         vertex = ( DGraph_vertex_type( Prefix ) * ) calloc( 1, sizeof( DGraph_vertex_type( Prefix ) ) );
+         CHECK( "vertex allocated correctly", vertex != NULL );
+
+         // set type
+         (*vertex)._type = DGRAPH_VERTEX_TYPE;
+         (*vertex)._value_type = Value_Code;
+
+         // set dgraph
+         (*vertex).dgraph = result;
+
+         // set value
+         (*vertex).value = (*vertex1).value;
+
+         // initialize neighbors_from
+         (*vertex).neighbors_from = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_from allocated correctly", (*vertex).neighbors_from != NULL );
+         (*vertex).nfcount = 0;
+         (*vertex).nfcapacity = START_CAPACITY;
+
+         // initialize neighbors_to
+         (*vertex).neighbors_to = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_to allocated correctly", (*vertex).neighbors_to != NULL );
+         (*vertex).ntcount = 0;
+         (*vertex).ntcapacity = START_CAPACITY;
+
+         // put vertex into result, and set its index
+         (*vertex).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*result).vp ),
+                 &(*result).vcount,
+                 &(*result).vcapacity,
+                 &(*result).vnot_filled,
+                 vertex
+              );
+
+      }
    }
 
-   // add new cursor to end of cursor "list"
-   (*c).next_cursor = cursor;
-   
-   MULTITHREAD_MUTEX_INIT( (*cursor).mutex );
+   // now copy edges using the same values
+   for ( i = 0; i < (*current).ecount; i++ )
+   {
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+      if ( (*current).ep[i] != NULL )
+      {
+         // get edge
+         edge1 = (*current).ep[i];
 
-   return cursor;
+         // allocate edge
+         edge = ( DGraph_edge_type( Prefix ) * ) calloc( 1, sizeof( DGraph_edge_type( Prefix ) ) );
+         CHECK( "edge allocated correctly", edge != NULL );
+
+         // set type
+         (*edge)._type = DGRAPH_EDGE_TYPE;
+         (*edge)._value_type = Edge_Code;
+
+         // set dgraph
+         (*edge).dgraph = result;
+
+         // set value
+         (*edge).value = (*edge1).value;
+
+         // set from and to
+         (*edge).v_from = (*edge1).v_from;
+         (*edge).v_to = (*edge1).v_to;
+
+         // put edge into DGraph, and set its index
+         (*edge).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*result).ep ),
+                 &(*result).ecount,
+                 &(*result).ecapacity,
+                 &(*result).enot_filled,
+                 edge
+              );
+
+         // add v_to to v_from's neighbors_to
+         vertex = (*result).vp[(*edge).v_from];
+         index_put_last( &( (*vertex).neighbors_to ), &(*vertex).ntcount, &(*vertex).ntcapacity, (*edge).v_to );
+
+         // add v_from to v_to's neighbors_from
+         vertex = (*result).vp[(*edge).v_to];
+         index_put_last( &( (*vertex).neighbors_from ), &(*vertex).nfcount, &(*vertex).nfcapacity, (*edge).v_from );
+      }
+   }
+
+
+   INVARIANT( current );
+   INVARIANT( result );
+
+   UNLOCK( (*current).mutex );
+
+   return result;
 }
+
+
+/**
+   DGraph_deep_clone
+*/
+
+DGraph_type( Prefix ) *
+DGraph_deep_clone( Prefix )( DGraph_type( Prefix ) *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "other type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+
+   LOCK( (*current).mutex );
+
+   INVARIANT( current );
+
+   DGraph_type( Prefix ) *result = NULL;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+   DGraph_vertex_type( Prefix ) *vertex1 = NULL;
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_edge_type( Prefix ) *edge1 = NULL;
+   int32_t i = 0;
+
+   // allocate dgraph struct
+   result = ( DGraph_type( Prefix ) * ) calloc( 1, sizeof( DGraph_type( Prefix ) ) );
+   CHECK( "result allocated successfully", result != NULL );
+
+   // set type codes
+   (*result)._type = DGRAPH_TYPE;
+   (*result)._edge_type = Edge_Code;
+   (*result)._value_type = Value_Code;
+
+   // init vertex array
+   (*result).vp = calloc( START_CAPACITY, sizeof( void * ) );
+   CHECK( "(*result).vp allocated successfully", (*result).vp != NULL );
+   (*result).vcount = 0;
+   (*result).vcapacity = START_CAPACITY;
+   (*result).vnot_filled = 0;
+
+   // init edge array
+   (*result).ep = calloc( START_CAPACITY, sizeof( void * ) );
+   CHECK( "(*result).ep allocated successfully", (*result).ep != NULL );
+   (*result).ecount = 0;
+   (*result).ecapacity = START_CAPACITY;
+   (*result).enot_filled = 0;
+
+   // allocate cursor struct
+   DGraph_cursor_type( Prefix ) *cursor
+      =  ( DGraph_cursor_type( Prefix ) * )
+         calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
+   CHECK( "cursor allocated successfully", cursor != NULL );
+
+   // set dgraph in cursor
+   (*cursor).dgraph = result;
+
+   // set internal cursors
+   (*cursor).vcursor = 0;
+   (*cursor).ecursor = 0;
+
+   // set next cursor to null
+   (*cursor).next_cursor = NULL;
+
+   // set dgraph first cursor
+   (*result).first_cursor = cursor;
+
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
+
+   // now copy vertices using the same values
+   for ( i = 0; i < (*current).vcount; i++ )
+   {
+
+      if ( (*current).vp[i] != NULL )
+      {
+         // get vertex
+         vertex1 = (*current).vp[i];
+
+         // allocate vertex
+         vertex = ( DGraph_vertex_type( Prefix ) * ) calloc( 1, sizeof( DGraph_vertex_type( Prefix ) ) );
+         CHECK( "vertex allocated correctly", vertex != NULL );
+
+         // set type
+         (*vertex)._type = DGRAPH_VERTEX_TYPE;
+         (*vertex)._value_type = Value_Code;
+
+         // set dgraph
+         (*vertex).dgraph = result;
+
+         // set value
+         (*vertex).value = VERTEX_VALUE_DEEP_CLONE_FUNCTION( (*vertex1).value );
+
+         // initialize neighbors_from
+         (*vertex).neighbors_from = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_from allocated correctly", (*vertex).neighbors_from != NULL );
+         (*vertex).nfcount = 0;
+         (*vertex).nfcapacity = START_CAPACITY;
+
+         // initialize neighbors_to
+         (*vertex).neighbors_to = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+         CHECK( "(*vertex).neighbors_to allocated correctly", (*vertex).neighbors_to != NULL );
+         (*vertex).ntcount = 0;
+         (*vertex).ntcapacity = START_CAPACITY;
+
+         // put vertex into result, and set its index
+         (*vertex).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*result).vp ),
+                 &(*result).vcount,
+                 &(*result).vcapacity,
+                 &(*result).vnot_filled,
+                 vertex
+              );
+
+      }
+   }
+
+   // now copy edges using the same values
+   for ( i = 0; i < (*current).ecount; i++ )
+   {
+
+      if ( (*current).ep[i] != NULL )
+      {
+         // get edge
+         edge1 = (*current).ep[i];
+
+         // allocate edge
+         edge = ( DGraph_edge_type( Prefix ) * ) calloc( 1, sizeof( DGraph_edge_type( Prefix ) ) );
+         CHECK( "edge allocated correctly", edge != NULL );
+
+         // set type
+         (*edge)._type = DGRAPH_EDGE_TYPE;
+         (*edge)._value_type = Edge_Code;
+
+         // set dgraph
+         (*edge).dgraph = result;
+
+         // set value
+         (*edge).value = EDGE_VALUE_DEEP_CLONE_FUNCTION( (*edge1).value );
+
+         // set from and to
+         (*edge).v_from = (*edge1).v_from;
+         (*edge).v_to = (*edge1).v_to;
+
+         // put edge into DGraph, and set its index
+         (*edge).id
+            = pointer_insert
+              (
+                 ( void *** ) & ( (*result).ep ),
+                 &(*result).ecount,
+                 &(*result).ecapacity,
+                 &(*result).enot_filled,
+                 edge
+              );
+
+         // add v_to to v_from's neighbors_to
+         vertex = (*result).vp[(*edge).v_from];
+         index_put_last( &( (*vertex).neighbors_to ), &(*vertex).ntcount, &(*vertex).ntcapacity, (*edge).v_to );
+
+         // add v_from to v_to's neighbors_from
+         vertex = (*result).vp[(*edge).v_to];
+         index_put_last( &( (*vertex).neighbors_from ), &(*vertex).nfcount, &(*vertex).nfcapacity, (*edge).v_from );
+      }
+   }
+
+
+   INVARIANT( current );
+   INVARIANT( result );
+
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+
 
 /**
    DGraph_dispose
 */
 
 void
-DGraph_dispose( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_dispose( Prefix )( DGraph_type( Prefix ) **current )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current not null", *current != NULL );
+   PRECONDITION( "current type ok", ( (**current)._type == DGRAPH_TYPE ) && ( (**current)._edge_type == Edge_Code ) && ( (**current)._value_type == Value_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
    DGraph_cursor_type( Prefix ) *cursor = NULL;
    DGraph_cursor_type( Prefix ) *c = NULL;
-   
+   int32_t i = 0;
+
+   // dipose of edges
+   for ( i = 0; i < (**current).ecount; i++ )
+   {
+      if ( (**current).ep[i] != NULL )
+      {
+         edge_dispose( &( (**current).ep[i] ) );
+      }
+   }
+
+   // dispose of vertices
+   for ( i = 0; i < (**current).vcount; i++ )
+   {
+      if ( (**current).vp[i] != NULL )
+      {
+         vertex_dispose( &( (**current).vp[i] ) );
+      }
+   }
+
+   // dispose of edge pointer array
+   free( (**current).ep );
+   (**current).ep = NULL;
+
+   // dispose of vertex pointer array
+   free( (**current).vp );
+   (**current).vp = NULL;
+
    // dispose of cursors
-   cursor = (*dgraph).first_cursor;
-   
+   cursor = (**current).first_cursor;
+
    // walk through cursors
    while( cursor != NULL )
    {
-      // free allocated memory
-      HSet_cursor_dispose( Vertex_prefix )( (*cursor).cursor );
-      HSet_cursor_dispose( Edge_prefix )( (*cursor).edge_cursor );
-      HSet_dispose( Vertex_prefix )( (*cursor).is_visited );
       c = cursor;
       cursor = (*cursor).next_cursor;
-      // and free the cursor struct
+
+      // free the cursor struct
       free( c );
    }
 
-   // dipose of edges
-   HSet_dispose_with_contents( Edge_prefix )( (*dgraph).edges );
-   (*dgraph).edges = NULL;
-   
-   // dispose of vertices
-   HSet_dispose_with_contents( Vertex_prefix )( (*dgraph).vertices );
-   
-   MULTITHREAD_MUTEX_DESTROY( (*dgraph).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
    // delete dgraph struct
-   free( dgraph );
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
 
 /**
-   DGraph_dispose_with_contents
+   DGraph_deep_dispose
 */
 
 void
-DGraph_dispose_with_contents( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_deep_dispose( Prefix )( DGraph_type( Prefix ) **current )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current not null", *current != NULL );
+   PRECONDITION( "current type ok", ( (**current)._type == DGRAPH_TYPE ) && ( (**current)._edge_type == Edge_Code ) && ( (**current)._value_type == Value_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
    DGraph_cursor_type( Prefix ) *cursor = NULL;
    DGraph_cursor_type( Prefix ) *c = NULL;
-   
-   // dispose of cursors
-   cursor = (*dgraph).first_cursor;
-   
-   // walk through cursors
-   while( cursor != NULL )
-   {
-      // free allocated memory
-      HSet_cursor_dispose( Vertex_prefix )( (*cursor).cursor );
-      HSet_cursor_dispose( Edge_prefix )( (*cursor).edge_cursor );
-      HSet_dispose( Vertex_prefix )( (*cursor).is_visited );
-      c = cursor;
-      cursor = (*cursor).next_cursor;
-      // and free the cursor struct
-      free( c );
-   }
+   int32_t i = 0;
 
-   // dispose of edge values
-   HSet_start( Edge_prefix )( (*dgraph).edges );
-   while( HSet_off( Edge_prefix )( (*dgraph).edges ) == 0 )
+   // dipose of edges
+   for ( i = 0; i < (**current).ecount; i++ )
    {
-      EDGE_DISPOSE_FUNCTION( (* HSet_item_at( Edge_prefix )( (*dgraph).edges ) ).value );
-      HSet_forth( Edge_prefix )( (*dgraph).edges );
-   }
-
-   // dispose of edges
-   HSet_dispose_with_contents( Edge_prefix )( (*dgraph).edges );
-   (*dgraph).edges = NULL;
-   
-   // dispose of vertex values
-   HSet_start( Vertex_prefix )( (*dgraph).vertices );
-   while( HSet_off( Vertex_prefix )( (*dgraph).vertices ) == 0 )
-   {
-      DISPOSE_FUNCTION( (* HSet_item_at( Vertex_prefix )( (*dgraph).vertices ) ).value );
-      HSet_forth( Vertex_prefix )( (*dgraph).vertices );
+      if ( (**current).ep[i] != NULL )
+      {
+         edge_deep_dispose( &( (**current).ep[i] ) );
+      }
    }
 
    // dispose of vertices
-   HSet_dispose_with_contents( Vertex_prefix )( (*dgraph).vertices );
-   
-   MULTITHREAD_MUTEX_DESTROY( (*dgraph).mutex );
+   for ( i = 0; i < (**current).vcount; i++ )
+   {
+      if ( (**current).vp[i] != NULL )
+      {
+         vertex_deep_dispose( &( (**current).vp[i] ) );
+      }
+   }
+
+   // dispose of edge pointer array
+   free( (**current).ep );
+   (**current).ep = NULL;
+
+   // dispose of vertex pointer array
+   free( (**current).vp );
+   (**current).vp = NULL;
+
+   // dispose of cursors
+   cursor = (**current).first_cursor;
+
+   // walk through cursors
+   while( cursor != NULL )
+   {
+      c = cursor;
+      cursor = (*cursor).next_cursor;
+
+      // free the cursor struct
+      free( c );
+   }
+
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
    // delete dgraph struct
-   free( dgraph );
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
@@ -1032,2120 +2334,192 @@ DGraph_dispose_with_contents( Prefix )( DGraph_type( Prefix ) *dgraph )
 */
 
 void
-DGraph_cursor_dispose( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
+DGraph_cursor_dispose( Prefix )( DGraph_cursor_type( Prefix ) **cursor )
 {
    PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
+   PRECONDITION( "cursor not null", *cursor != NULL );
+   LOCK( ( *(**cursor).dgraph ).mutex );
+   INVARIANT( (**cursor).dgraph );
 
-   DGraph_type( Prefix ) *dgraph = (*cursor).dgraph;
-
-   DGraph_cursor_type( Prefix ) *c1 = NULL;
-   DGraph_cursor_type( Prefix ) *c2 = NULL;
+   DGraph_cursor_type( Prefix ) *c = NULL;
+   DGraph_type( Prefix ) *current = NULL;
    int32_t flag = 0;
 
-   // find and remove this cursor from dgraph structure
-   c1 = (*(*cursor).dgraph).first_cursor;
-   c2 = (*c1).next_cursor;
+   // get dgraph
+   current = (**cursor).dgraph;
 
-   // otherwise search through rest of the cursors
-   while ( ( c2 != NULL) && ( flag == 0 ) )
+   // dispose of cursor
+   c = (*current).first_cursor;
+
+   // walk through cursors, find cursor
+   while( c != NULL || flag == 0 )
    {
-      if ( c2 == cursor )
+      if ( (*c).next_cursor == *cursor )
       {
-         // if we have a match, remove "c2" from the cursor dgraph, set flag
-         (*c1).next_cursor = (*c2).next_cursor;
+         (*c).next_cursor = (**cursor).next_cursor;
          flag = 1;
-
-         // now advance c1 and c2
-         c1 = (*c1).next_cursor;
-         if ( c1 != NULL )
-         {
-            c2 = (*c1).next_cursor;
-         }
-         else
-         {
-            c2 = NULL;
-         }
       }
       else
       {
-         // advance c1 and c2
-         c1 = c2;
-         if ( c1 != NULL )
-         {
-            c2 = (*c1).next_cursor;
-         }
+         c = (*c).next_cursor;
       }
    }
-   
-   // free allocated memory in cursor
-   HSet_cursor_dispose( Vertex_prefix )( (*cursor).cursor );
-   HSet_cursor_dispose( Edge_prefix )( (*cursor).edge_cursor );
-   HSet_dispose( Vertex_prefix )( (*cursor).is_visited );
-      
-   // delete cursor struct
-   free( cursor );
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   // free the cursor struct
+   free(*cursor);
+
+   // set to NULL
+   *cursor = NULL;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   DGraph_value
-
-*/
-
-Value
-DGraph_value( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   Value result = (*vertex).value;
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_from_to
-
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_edge_from_to_internal( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   DGraph_edge_type( Prefix ) *result = NULL;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   DGraph_edge_type( Prefix ) *edge1 = NULL;
-   
-   // get the edge, if it exists
-   edge1 = edge_make( v_from, v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-   
-   if ( edge != NULL )
-   {
-      result = edge;
-   }   
-   
-   return result;
-}
-
-/**
-   DGraph_edge_from_to
-
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_edge_from_to( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_edge_type( Prefix ) *result 
-      = DGraph_edge_from_to_internal( Prefix )( dgraph, v_from, v_to );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-   
-   return result;
-}
-
-/**
-   DGraph_edge_value_from_to
-
-*/
-
-Edge
-DGraph_edge_value_from_to( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   Edge result = (* DGraph_edge_from_to_internal( Prefix )( dgraph, v_from, v_to ) ).value;
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-   
-   return result;
-}
-
-/**
-   DGraph_edge_value
-
-*/
-
-Edge
-DGraph_edge_value( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_edge_type( Prefix ) *edge 
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   Edge result = (*edge).value;
-   
-   // get the edge, if it exists
-   DGraph_edge_type( Prefix ) *edge1 = edge_make( (*edge).v_from, (*edge).v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-   
-   if ( edge != NULL )
-   {
-      result = (*edge).value;
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_vertex_from
-
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_edge_vertex_from( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_edge_type( Prefix ) *edge 
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = NULL;
-   
-   // get the edge, if it exists
-   DGraph_edge_type( Prefix ) *edge1 = edge_make( (*edge).v_from, (*edge).v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-   
-   if ( edge != NULL )
-   {
-      result = (*edge).v_from;
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_vertex_to
-
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_edge_vertex_to( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_edge_type( Prefix ) *edge 
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = NULL;
-   
-   // get the edge, if it exists
-   DGraph_edge_type( Prefix ) *edge1 = edge_make( (*edge).v_from, (*edge).v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-   
-   if ( edge != NULL )
-   {
-      result = (*edge).v_to;
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_at
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_at( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = HSet_item_at( Vertex_prefix )( (*dgraph).vertices );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_at
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_cursor_at( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-   PRECONDITION( "cursor not off", HSet_cursor_off( Vertex_prefix )( (*cursor).cursor ) == 0 );
-
-   DGraph_vertex_type( Prefix ) *result = HSet_cursor_item_at( Vertex_prefix )( (*cursor).cursor );
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-   UNLOCK( (*cursor).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_value_at
-*/
-
-Value
-DGraph_cursor_value_at( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-   PRECONDITION( "cursor not off", HSet_cursor_off( Vertex_prefix )( (*cursor).cursor ) == 0 );
-
-   Value result = (* HSet_cursor_item_at( Vertex_prefix )( (*cursor).cursor ) ).value;
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-   UNLOCK( (*cursor).mutex );
-
-   return result;
-}
-
-
-/**
-   DGraph_value_at
-*/
-
-Value
-DGraph_value_at( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   PRECONDITION( "not off", HSet_off( Vertex_prefix )( (*dgraph).vertices  ) == 0 );
-
-   Value result = (* HSet_item_at( Vertex_prefix )( (*dgraph).vertices ) ).value;
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_edge_at
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_cursor_edge_at( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-   PRECONDITION( "edge_cursor not off", HSet_cursor_off( Edge_prefix )( (*cursor).edge_cursor ) == 0 );
-
-   DGraph_edge_type( Prefix ) *result = HSet_cursor_item_at( Edge_prefix )( (*cursor).edge_cursor );
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-   UNLOCK( (*cursor).mutex );
-
-   return result;
-}
-
-
-/**
-   DGraph_edge_at
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_edge_at( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   PRECONDITION( "not off", HSet_off( Edge_prefix )( (*dgraph).edges ) == 0 );
-
-   DGraph_edge_type( Prefix ) *result = HSet_item_at( Edge_prefix )( (*dgraph).edges );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_edge_value_at
-*/
-
-Edge
-DGraph_cursor_edge_value_at( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-   PRECONDITION( "cursor not off", HSet_cursor_off( Edge_prefix )( (*cursor).edge_cursor ) == 0 );
-
-   Edge result = (* HSet_cursor_item_at( Edge_prefix )( (*cursor).edge_cursor ) ).value;
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-   UNLOCK( (*cursor).mutex );
-
-   return result;
-}
-
-
-/**
-   DGraph_edge_value_at
-*/
-
-Edge
-DGraph_edge_value_at( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   PRECONDITION( "not off", HSet_off( Edge_prefix )( (*dgraph).edges ) == 0 );
-
-   Edge result = (* HSet_item_at( Edge_prefix )( (*dgraph).edges ) ).value;
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_as_array
-*/
-
-DGraph_vertex_type( Prefix ) **
-DGraph_as_array( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) **result = NULL;
-   DGraph_vertex_type( Prefix ) *vertex = NULL;
-   int32_t i = 0;
-   int32_t n = HSet_count( Vertex_prefix )( (*dgraph).vertices );
-
-   // allocate space for array of vertex pointers, one extra at end to be NULL
-   result = ( DGraph_vertex_type( Prefix ) ** ) calloc( n + 1, sizeof( DGraph_vertex_type( Prefix ) ) );
-
-   // put vertex pointers into result array
-   HSet_start( Vertex_prefix )( (*dgraph).vertices );
-   i = 0;
-   while ( HSet_off( Vertex_prefix )( (*dgraph).vertices ) == 0 )
-   {
-      vertex = HSet_item_at( Vertex_prefix )( (*dgraph).vertices );
-      result[i] = vertex;
-      i++;
-      HSet_forth( Vertex_prefix )( (*dgraph).vertices );
-   }
-   // last entry in array is NULL
-   result[n] = NULL;
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edges_as_array
-*/
-
-DGraph_edge_type( Prefix ) **
-DGraph_edges_as_array( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_edge_type( Prefix ) **result = NULL;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   int32_t i = 0;
-   int32_t n = HSet_count( Edge_prefix )( (*dgraph).edges );
-
-   // allocate space for array of vertex pointers, one extra at end to be NULL
-   result = ( DGraph_edge_type( Prefix ) ** ) calloc( n + 1, sizeof( DGraph_edge_type( Prefix ) ) );
-
-   // put vertex pointers into result array
-   HSet_cursor_start( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   i = 0;
-   while ( HSet_cursor_off( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor ) == 0 )
-   {
-      edge = HSet_cursor_item_at( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-      result[i] = edge;
-      i++;
-      HSet_cursor_forth( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   }
-   // last entry in array is NULL
-   result[n] = NULL;
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_count
+   DGraph_vertex_add
 */
 
 int32_t
-DGraph_count( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_vertex_add( Prefix )( DGraph_type( Prefix ) *current, Value value )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t count = HSet_count( Vertex_prefix )( (*dgraph).vertices );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return count;
-}
-
-/**
-   DGraph_edge_count
-*/
-
-int32_t
-DGraph_edge_count( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t count = HSet_count( Edge_prefix )( (*dgraph).edges );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return count;
-}
-
-/**
-   DGraph_are_adjacent
-*/
-
-int32_t
-DGraph_are_adjacent( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph,
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = 0;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   
-   // get the edge, if it exists
-   DGraph_edge_type( Prefix ) *edge1 = edge_make( v_from, v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-   
-   if ( edge != NULL )
-   {
-      result = 1;
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_off
-*/
-
-int32_t
-DGraph_off( Prefix)( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = HSet_off( Vertex_prefix )( (*dgraph).vertices );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_off
-*/
-
-int32_t
-DGraph_cursor_off( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-
-   int32_t result = HSet_cursor_off( Vertex_prefix )( (*cursor).cursor );
-
-   UNLOCK( (*cursor).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_is_empty
-*/
-
-int32_t
-DGraph_is_empty( Prefix)( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = HSet_is_empty( Vertex_prefix )( (*dgraph).vertices );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_off
-*/
-
-int32_t
-DGraph_edge_off( Prefix)( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = HSet_off( Edge_prefix )( (*dgraph).edges );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_edge_off
-*/
-
-int32_t
-DGraph_cursor_edge_off( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-
-   int32_t result = HSet_cursor_off( Edge_prefix )( (*cursor).edge_cursor );
-
-   UNLOCK( (*cursor).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_is_empty
-*/
-
-int32_t
-DGraph_edge_is_empty( Prefix)( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = HSet_is_empty( Edge_prefix )( (*dgraph).edges );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   dgraph_depth_is_connected
-   
-   use hash set to accumulate visited vertices
-*/
-
-static
-void
-dgraph_depth_is_connected( DGraph_cursor_type( Prefix ) *cursor, DGraph_vertex_type( Prefix ) *vertex )
-{
-   DGraph_vertex_type( Prefix ) *v = NULL;
-   
-   if ( HSet_has( Vertex_prefix )( (*cursor).is_visited, vertex ) == 0 )
-   {
-      
-      // put vertex into visited set
-      HSet_put( Vertex_prefix )( (*cursor).is_visited, vertex );
-            
-      // put connected vertices into is_visited hash set
-      HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-      while( HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0 )
-      {
-         v = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-         if ( HSet_has( Vertex_prefix )( (*cursor).is_visited, v ) == 0 )
-         {
-            dgraph_depth_is_connected( cursor, v );
-         }
-         HSet_forth( Vertex_prefix )( (*vertex).neighbors_to );
-      }
-      
-      HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-      while( HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0 )
-      {
-         v = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-         if ( HSet_has( Vertex_prefix )( (*cursor).is_visited, v ) == 0 )
-         {
-            dgraph_depth_is_connected( cursor, v );
-         }
-         HSet_forth( Vertex_prefix )( (*vertex).neighbors_from );
-      }
-      
-   }
-
-   return;
-}
-
-/**
-   dgraph_breadth_is_connected
-   
-   use hash set to accumulate visited vertices
-*/
-
-static
-void
-dgraph_breadth_is_connected
-( 
-   DGraph_cursor_type( Prefix ) *cursor, 
-   DGraph_vertex_type( Prefix ) *vertex,
-   HSet_type( Vertex_prefix ) *queue
-)
-{
-   DGraph_vertex_type( Prefix ) *v = NULL;
-   DGraph_vertex_type( Prefix ) *v1 = NULL;
-   
-   // put vertex into visited set
-   HSet_put( Vertex_prefix )( (*cursor).is_visited, vertex );
-         
-   // put vertex into queue
-   HSet_put( Vertex_prefix )( queue, vertex );
-   
-   // work on contents of the queue
-   while( HSet_is_empty( Vertex_prefix )( queue ) == 0 )
-   {
-      // get first vertex in queue
-      HSet_start( Vertex_prefix )(  queue );
-      v = HSet_item_at( Vertex_prefix )( queue );
-      HSet_remove( Vertex_prefix )( queue, v );
-      
-      // put adjacent vertices into is_visited hash set
-      HSet_start( Vertex_prefix )( (*v).neighbors_to );
-      while( HSet_off( Vertex_prefix )( (*v).neighbors_to ) == 0 )
-      {
-         v1 = HSet_item_at( Vertex_prefix )( (*v).neighbors_to );
-         if ( HSet_has( Vertex_prefix )( (*cursor).is_visited, v1 ) == 0 )
-         {
-            HSet_put( Vertex_prefix )( (*cursor).is_visited, v1 );
-            HSet_put( Vertex_prefix )( queue, v1 );
-         }
-         HSet_forth( Vertex_prefix )( (*v).neighbors_to );
-      }
-      
-      HSet_start( Vertex_prefix )( (*v).neighbors_from );
-      while( HSet_off( Vertex_prefix )( (*v).neighbors_from ) == 0 )
-      {
-         v1 = HSet_item_at( Vertex_prefix )( (*v).neighbors_from );
-         if ( HSet_has( Vertex_prefix )( (*cursor).is_visited, v1 ) == 0 )
-         {
-            HSet_put( Vertex_prefix )( (*cursor).is_visited, v1 );
-            HSet_put( Vertex_prefix )( queue, v1 );
-         }
-         HSet_forth( Vertex_prefix )( (*v).neighbors_from );
-      }
-   
-   }
-   
-   return;
-}
-
-/**
-   DGraph_is_connected
-*/
-
-int32_t
-DGraph_is_connected( Prefix)( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = 0;
-   DGraph_vertex_type( Prefix ) *vertex = NULL;
-   DGraph_cursor_type( Prefix ) *cursor = (*dgraph).first_cursor;
-   
-   if ( HSet_count( Vertex_prefix )( (*dgraph).vertices ) <= 1 )
-   {
-      // zero or one vertex graphs are connected
-      result = 1;
-   }
-   else if ( (*cursor).is_depth_first == 1 ) 
-   {
-      // get first vertex
-      HSet_wipe_out( Vertex_prefix )( (*cursor).is_visited );
-      HSet_start( Vertex_prefix )( (*dgraph).vertices );
-      vertex = HSet_item_at( Vertex_prefix )( (*dgraph).vertices );
-      
-      // fill is_visited hash set with connected vertices
-      dgraph_depth_is_connected( cursor, vertex );
-      
-      // graph is connected if all vertices have been visited, which means
-      // that the count of is_visited is the same as the count of vertices
-      if ( 
-            HSet_count( Vertex_prefix )( (*cursor).is_visited ) 
-               == HSet_count( Vertex_prefix )( (*dgraph).vertices )
-         )
-      {
-         result = 1;
-      }
-   }
-   else // breadth first 
-   {
-      // get first vertex
-      HSet_wipe_out( Vertex_prefix )( (*cursor).is_visited );
-      HSet_start( Vertex_prefix )( (*dgraph).vertices );
-      vertex = HSet_item_at( Vertex_prefix )( (*dgraph).vertices );
-      
-      HSet_type( Vertex_prefix ) *queue 
-         = HSet_make( Vertex_prefix )(); // queue of visited vertices for search
-      
-      // fill is_visited hash set with connected vertices
-      dgraph_breadth_is_connected( cursor, vertex, queue );
-      
-      // graph is connected if all vertices have been visited, which means
-      // that the count of is_visited is the same as the count of vertices
-      if ( 
-            HSet_count( Vertex_prefix )( (*cursor).is_visited ) 
-               == HSet_count( Vertex_prefix )( (*dgraph).vertices )
-         )
-      {
-         result = 1;
-      }
-      
-      HSet_dispose( Vertex_prefix )( queue );
-      
-   }
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_has_internal
-*/
-
-int32_t
-DGraph_has_internal( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   
-   int32_t result = HSet_has( Vertex_prefix )( (*dgraph).vertices, vertex );
-   return result;
-}
-
-
-int32_t
-DGraph_has( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = DGraph_has_internal( Prefix )( dgraph, vertex );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_has
-*/
-
-int32_t
-DGraph_edge_has( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_edge_type( Prefix ) *edge )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = HSet_has( Edge_prefix )( (*dgraph).edges, edge );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_has_value
-*/
-
-int32_t
-DGraph_has_value( Prefix )( DGraph_type( Prefix ) *dgraph, Value value )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = 0;
-   Value v;
-   
-   HSet_start( Vertex_prefix )( (*dgraph).vertices );
-   while( HSet_off( Vertex_prefix )( (*dgraph).vertices ) == 0 )
-   {
-      v = (* HSet_item_at( Vertex_prefix )( (*dgraph).vertices ) ).value;
-      if ( EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = 1;
-         break;
-      }
-      HSet_forth( Vertex_prefix )( (*dgraph).vertices );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_has_value
-*/
-
-int32_t
-DGraph_edge_has_value( Prefix )( DGraph_type( Prefix ) *dgraph, Edge value )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   int32_t result = 0;
-   Edge v;
-   
-   HSet_cursor_start( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   while( HSet_cursor_off( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor ) == 0 )
-   {
-      v = (* HSet_cursor_item_at( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor ) ).value;
-      if ( EDGE_EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = 1;
-         break;
-      }
-      HSet_cursor_forth( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_neighbors_from
-*/
-DGraph_vertex_type( Prefix ) **
-DGraph_neighbors_from( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) **result = NULL;
-   DGraph_vertex_type( Prefix ) *v = NULL;
-   int32_t i = 0;
-   int32_t n = HSet_count( Vertex_prefix )( (*vertex).neighbors_from );
-
-   // allocate space for array of vertex pointers, one extra at end to be NULL
-   result = ( DGraph_vertex_type( Prefix ) ** ) calloc( n + 1, sizeof( DGraph_vertex_type( Prefix ) ) );
-
-   // put vertex pointers into result array
-   HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-   i = 0;
-   while ( HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0 )
-   {
-      v = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-      result[i] = v;
-      i++;
-      HSet_forth( Vertex_prefix )( (*vertex).neighbors_from );
-   }
-   // last entry in array is NULL
-   result[n] = NULL;
-   
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_neighbors_to
-*/
-DGraph_vertex_type( Prefix ) **
-DGraph_neighbors_to( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) **result = NULL;
-   DGraph_vertex_type( Prefix ) *v = NULL;
-   int32_t i = 0;
-   int32_t n = HSet_count( Vertex_prefix )( (*vertex).neighbors_to );
-
-   // allocate space for array of vertex pointers, one extra at end to be NULL
-   result = ( DGraph_vertex_type( Prefix ) ** ) calloc( n + 1, sizeof( DGraph_vertex_type( Prefix ) ) );
-
-   // put vertex pointers into result array
-   HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-   i = 0;
-   while ( HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0 )
-   {
-      v = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-      result[i] = v;
-      i++;
-      HSet_forth( Vertex_prefix )( (*vertex).neighbors_to );
-   }
-   // last entry in array is NULL
-   result[n] = NULL;
-   
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_forth
-*/
-void
-DGraph_cursor_forth( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-
-   HSet_cursor_forth( Vertex_prefix )( (*cursor).cursor );
-   
-   UNLOCK( (*cursor).mutex );
-
-   return;
-}
-
-/**
-   DGraph_cursor_start
-*/
-
-void
-DGraph_cursor_start( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-
-   HSet_cursor_start( Vertex_prefix )( (*cursor).cursor );
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-   UNLOCK( (*cursor).mutex );
-
-   return;
-}
-
-/**
-   DGraph_forth
-*/
-void
-DGraph_forth( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   PRECONDITION( "not off", HSet_off( Vertex_prefix )( (*dgraph).vertices ) == 0 );
-
-   HSet_forth( Vertex_prefix )( (*dgraph).vertices );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_start
-*/
-
-void
-DGraph_start( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   HSet_start( Vertex_prefix )( (*dgraph).vertices );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_find_value
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_find_value( Prefix )( DGraph_type( Prefix ) *dgraph, Value value )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = NULL;
-   DGraph_vertex_type( Prefix ) *vertex = NULL;
-   Value v;
-   
-   HSet_cursor_start( Vertex_prefix )( (*(*dgraph).first_cursor).cursor );
-   while( HSet_cursor_off( Vertex_prefix )( (*(*dgraph).first_cursor).cursor ) == 0 )
-   {
-      vertex = HSet_cursor_item_at( Vertex_prefix )( (*(*dgraph).first_cursor).cursor );
-      v = (*vertex).value;
-      if ( EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = vertex;
-         break;
-      }
-      HSet_cursor_forth( Vertex_prefix )( (*(*dgraph).first_cursor).cursor );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_find_next_value
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_find_next_value( Prefix )( DGraph_type( Prefix ) *dgraph, Value value )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = NULL;
-   DGraph_vertex_type( Prefix ) *vertex = NULL;
-   Value v;
-   
-   HSet_cursor_forth( Vertex_prefix )( (*(*dgraph).first_cursor).cursor );
-   while( HSet_cursor_off( Vertex_prefix )( (*(*dgraph).first_cursor).cursor ) == 0 )
-   {
-      vertex = HSet_cursor_item_at( Vertex_prefix )( (*(*dgraph).first_cursor).cursor );
-      v = (*vertex).value;
-      if ( EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = vertex;
-         break;
-      }
-      HSet_cursor_forth( Vertex_prefix )( (*(*dgraph).first_cursor).cursor );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_find_value
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_cursor_find_value( Prefix )( DGraph_cursor_type( Prefix ) *cursor, Value value )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = NULL;
-   DGraph_vertex_type( Prefix ) *vertex = NULL;
-   Value v;
-   
-   HSet_cursor_start( Vertex_prefix )( (*cursor).cursor );
-   while( HSet_cursor_off( Vertex_prefix )( (*cursor).cursor ) == 0 )
-   {
-      vertex = HSet_cursor_item_at( Vertex_prefix )( (*cursor).cursor );
-      v = (*vertex).value;
-      if ( EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = vertex;
-         break;
-      }
-      HSet_cursor_forth( Vertex_prefix )( (*cursor).cursor );
-   }
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_find_next_value
-*/
-
-DGraph_vertex_type( Prefix ) *
-DGraph_cursor_find_next_value( Prefix )( DGraph_cursor_type( Prefix ) *cursor, Value value )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-
-   DGraph_vertex_type( Prefix ) *result = NULL;
-   DGraph_vertex_type( Prefix ) *vertex = NULL;
-   Value v;
-   
-   HSet_cursor_forth( Vertex_prefix )( (*cursor).cursor );
-   while( HSet_cursor_off( Vertex_prefix )( (*cursor).cursor ) == 0 )
-   {
-      vertex = HSet_cursor_item_at( Vertex_prefix )( (*cursor).cursor );
-      v = (*vertex).value;
-      if ( EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = vertex;
-         break;
-      }
-      HSet_cursor_forth( Vertex_prefix )( (*cursor).cursor );
-   }
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_edge_forth
-*/
-void
-DGraph_cursor_edge_forth( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-
-   HSet_cursor_forth( Edge_prefix )( (*cursor).edge_cursor );
-   
-   UNLOCK( (*cursor).mutex );
-
-   return;
-}
-
-/**
-   DGraph_cursor_edge_start
-*/
-
-void
-DGraph_cursor_edge_start( Prefix )( DGraph_cursor_type( Prefix ) *cursor )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*cursor).mutex );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-
-   HSet_cursor_start( Edge_prefix )( (*cursor).edge_cursor );
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-   UNLOCK( (*cursor).mutex );
-
-   return;
-}
-
-/**
-   DGraph_edge_forth
-*/
-void
-DGraph_edge_forth( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-   PRECONDITION( "not off", HSet_off( Edge_prefix )( (*dgraph).edges ) == 0 );
-
-   HSet_forth( Edge_prefix )( (*dgraph).edges );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_edge_start
-*/
-
-void
-DGraph_edge_start( Prefix )( DGraph_type( Prefix ) *dgraph )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   HSet_start( Edge_prefix )( (*dgraph).edges );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_edge_find_value
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_edge_find_value( Prefix )( DGraph_type( Prefix ) *dgraph, Edge value )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_edge_type( Prefix ) *result = NULL;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   Edge v;
-   
-   HSet_cursor_start( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   while( HSet_cursor_off( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor ) == 0 )
-   {
-      edge = HSet_cursor_item_at( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-      v = (*edge).value;
-      if ( EDGE_EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = edge;
-         break;
-      }
-      HSet_cursor_forth( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_edge_find_next_value
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_edge_find_next_value( Prefix )( DGraph_type( Prefix ) *dgraph, Edge value )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_edge_type( Prefix ) *result = NULL;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   Edge v;
-   
-   HSet_cursor_forth( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   while( HSet_cursor_off( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor ) == 0 )
-   {
-      edge = HSet_cursor_item_at( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-      v = (*edge).value;
-      if ( EDGE_EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = edge;
-         break;
-      }
-      HSet_cursor_forth( Edge_prefix )( (*(*dgraph).first_cursor).edge_cursor );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_edge_find_value
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_cursor_edge_find_value( Prefix )( DGraph_cursor_type( Prefix ) *cursor, Edge value )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-
-   DGraph_edge_type( Prefix ) *result = NULL;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   Edge v;
-   
-   HSet_cursor_start( Edge_prefix )( (*cursor).edge_cursor );
-   while( HSet_cursor_off( Edge_prefix )( (*cursor).edge_cursor ) == 0 )
-   {
-      edge = HSet_cursor_item_at( Edge_prefix )( (*cursor).edge_cursor );
-      v = (*edge).value;
-      if ( EDGE_EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = edge;
-         break;
-      }
-      HSet_cursor_forth( Edge_prefix )( (*cursor).edge_cursor );
-   }
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_cursor_edge_find_next_value
-*/
-
-DGraph_edge_type( Prefix ) *
-DGraph_cursor_edge_find_next_value( Prefix )( DGraph_cursor_type( Prefix ) *cursor, Value value )
-{
-   PRECONDITION( "cursor not null", cursor != NULL );
-   PRECONDITION( "cursor type ok", ( (*(*cursor).dgraph).type == DGRAPH_TYPE ) && ( (*(*cursor).dgraph).edge_type == Edge_Code ) && ( (*(*cursor).dgraph).value_type == Value_Code ) );
-   LOCK( (*(*cursor).dgraph).mutex );
-   INVARIANT( (*cursor).dgraph );
-
-   DGraph_edge_type( Prefix ) *result = NULL;
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   Edge v;
-   
-   HSet_cursor_forth( Edge_prefix )( (*cursor).edge_cursor );
-   while( HSet_cursor_off( Edge_prefix )( (*cursor).edge_cursor ) == 0 )
-   {
-      edge = HSet_cursor_item_at( Edge_prefix )( (*cursor).edge_cursor );
-      v = (*edge).value;
-      if ( EDGE_EQUALITY_FUNCTION( value, v ) == 1 )
-      {
-         result = edge;
-         break;
-      }
-      HSet_cursor_forth( Edge_prefix )( (*cursor).edge_cursor );
-   }
-
-   INVARIANT( (*cursor).dgraph );
-   UNLOCK( (*(*cursor).dgraph).mutex );
-
-   return result;
-}
-
-/**
-   DGraph_vertex_set_bucket_count
-*/
-
-void
-DGraph_vertex_set_bucket_count( Prefix )( DGraph_type( Prefix ) *dgraph, int32_t bucket_count )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "bucket_count positive", bucket_count > 0 );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    DGraph_vertex_type( Prefix ) *vertex = NULL;
-   DGraph_cursor_type( Prefix ) *cursor = NULL;
-   
-   // set bucket count in each vertex HSet
-   HSet_start( Vertex_prefix )( (*dgraph).vertices );
-   while( HSet_off( Vertex_prefix )( (*dgraph).vertices ) == 0 )
-   {
-      vertex = HSet_item_at( Vertex_prefix )( (*dgraph).vertices );
-      HSet_set_bucket_count( Vertex_prefix )( (*vertex).neighbors_from, bucket_count );
-      HSet_set_bucket_count( Vertex_prefix )( (*vertex).neighbors_to, bucket_count );
-      HSet_forth( Vertex_prefix )( (*dgraph).vertices );
-   }
-   
-   HSet_set_bucket_count( Vertex_prefix )( (*dgraph).vertices, bucket_count );
-   
-   // set bucket counts in cursors
-   cursor = (*dgraph).first_cursor;
-   
-   while( cursor != NULL )
-   {
-      HSet_set_bucket_count( Vertex_prefix )( (*cursor).is_visited, bucket_count );
-      cursor = (*cursor).next_cursor;
-   }
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
 
-   return;
-}
+   // allocate vertex
+   vertex = ( DGraph_vertex_type( Prefix ) * ) calloc( 1, sizeof( DGraph_vertex_type( Prefix ) ) );
+   CHECK( "vertex allocated correctly", vertex != NULL );
 
-/**
-   DGraph_edge_set_bucket_count
-*/
-
-void
-DGraph_edge_set_bucket_count( Prefix )( DGraph_type( Prefix ) *dgraph, int32_t bucket_count )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "bucket_count positive", bucket_count > 0 );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   // set bucket count in each edge HSet
-   HSet_set_bucket_count( Edge_prefix )( (*dgraph).edges, bucket_count );
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_put
-*/
-
-void
-DGraph_put( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   // set type
+   (*vertex)._type = DGRAPH_VERTEX_TYPE;
+   (*vertex)._value_type = Value_Code;
 
    // set dgraph
-   (*vertex).dgraph = dgraph; 
-   
-   HSet_put( Vertex_prefix )( (*dgraph).vertices, vertex );
+   (*vertex).dgraph = current;
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_edge_put
-*/
-
-void
-DGraph_edge_put( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   Edge value,
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   // add edge
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   edge = edge_make( v_from, v_to, value );
-   HSet_put( Edge_prefix )( (*dgraph).edges, edge );
-
-   // add to neighbors_to of v_from
-   HSet_put( Vertex_prefix )( (*v_from).neighbors_to, v_to );
-   
-   // add to neighbors_to of v_to
-   HSet_put( Vertex_prefix )( (*v_to).neighbors_from, v_from );
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_set_value
-*/
-
-void
-DGraph_set_value( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *vertex,
-   Value value
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
+   // set value
    (*vertex).value = value;
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   // initialize neighbors_from
+   (*vertex).neighbors_from = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+   CHECK( "(*vertex).neighbors_from allocated correctly", (*vertex).neighbors_from != NULL );
+   (*vertex).nfcount = 0;
+   (*vertex).nfcapacity = START_CAPACITY;
+
+   // initialize neighbors_to
+   (*vertex).neighbors_to = ( int32_t * ) calloc( START_CAPACITY, sizeof( int32_t ) );
+   CHECK( "(*vertex).neighbors_to allocated correctly", (*vertex).neighbors_to != NULL );
+   (*vertex).ntcount = 0;
+   (*vertex).ntcapacity = START_CAPACITY;
+
+   // put vertex into DGraph, and set its index
+   (*vertex).id
+      = pointer_insert
+        (
+           ( void *** ) & ( (*current).vp ),
+           &(*current).vcount,
+           &(*current).vcapacity,
+           &(*current).vnot_filled,
+           vertex
+        );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return (*vertex).id;
+}
+
+/**
+   DGraph_vertex_remove
+*/
+
+void
+DGraph_vertex_remove( Prefix )( DGraph_type( Prefix ) *current, int32_t id )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "vertex present", (*current).vp[id] != NULL );
+   INVARIANT( current );
+
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+
+   // get vertex
+   vertex = (*current).vp[id];
+
+   // dispose vertex
+   vertex_dispose( &vertex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   DGraph_edge_set
+   DGraph_vertex_remove_and_dispose
 */
 
 void
-DGraph_edge_set( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to,
-   Edge value
-)
+DGraph_vertex_remove_and_dispose( Prefix )( DGraph_type( Prefix ) *current, int32_t id )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "vertex present", (*current).vp[id] != NULL );
+   INVARIANT( current );
 
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   DGraph_edge_type( Prefix ) *e1 = NULL;
-   
-   edge = edge_make( v_from, v_to, value );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge ) == 1 )
-   {
-      e1 = HSet_item( Edge_prefix )( (*dgraph).edges, edge );
-   }
-   edge_dispose( edge );
-   
-   if ( e1 != NULL )
-   {
-      (*e1).value = value;
-   }
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+
+   // get vertex
+   vertex = (*current).vp[id];
+
+   // dispose vertex
+   vertex_deep_dispose( &vertex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
-
-/**
-   DGraph_edge_set_value
-*/
-
-void
-DGraph_edge_set_value( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_edge_type( Prefix ) *edge,
-   Edge value
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   (*edge).value = value;
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_remove
-*/
-
-void
-DGraph_remove( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex  != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *v1 = NULL;
-   DGraph_edge_type( Prefix ) *e = NULL;
-   
-   // dispose of edges to vertex
-   for
-   ( 
-      HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-      HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0;
-      HSet_forth( Vertex_prefix )( (*vertex).neighbors_to )
-   )
-   {   
-      v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-      e = DGraph_edge_from_to_internal( Prefix )( dgraph, vertex, v1 );
-      if ( e != NULL )
-      {
-         EDGE_DISPOSE_FUNCTION( (*e).value );
-         HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-         free( e );
-      }
-   }
-   
-   // dispose of edges from vertex
-   for
-   ( 
-      HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-      HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0;
-      HSet_forth( Vertex_prefix )( (*vertex).neighbors_from )
-   )
-   {   
-      v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-      e = DGraph_edge_from_to_internal( Prefix )( dgraph, v1, vertex );
-      if ( e != NULL )
-      {
-         EDGE_DISPOSE_FUNCTION( (*e).value );
-         HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-         free( e );
-      }
-   }
-   
-   // wipe out neighbor vertex hash sets but not their contents
-   HSet_wipe_out( Vertex_prefix )( (*vertex).neighbors_to );
-   HSet_wipe_out( Vertex_prefix )( (*vertex).neighbors_from );
-   
-   HSet_remove( Vertex_prefix )( (*dgraph).vertices, vertex );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_remove_and_dispose
-*/
-
-void
-DGraph_remove_and_dispose( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_vertex_type( Prefix ) *vertex )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "vertex not null", vertex  != NULL );
-   PRECONDITION( "vertex type ok", ( (*vertex).type == DGRAPH_VERTEX_TYPE ) && ( (*vertex).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_vertex_type( Prefix ) *v1 = NULL;
-   DGraph_edge_type( Prefix ) *e = NULL;
-   
-   // dispose of edges to vertex
-   for
-   ( 
-      HSet_start( Vertex_prefix )( (*vertex).neighbors_to );
-      HSet_off( Vertex_prefix )( (*vertex).neighbors_to ) == 0;
-      HSet_forth( Vertex_prefix )( (*vertex).neighbors_to )
-   )
-   {   
-      v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_to );
-      e = DGraph_edge_from_to_internal( Prefix )( dgraph, vertex, v1 );
-      if ( e != NULL )
-      {
-         EDGE_DISPOSE_FUNCTION( (*e).value );
-         HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-         free( e );
-      }
-   }
-   
-   // dispose of edges from vertex
-   for
-   ( 
-      HSet_start( Vertex_prefix )( (*vertex).neighbors_from );
-      HSet_off( Vertex_prefix )( (*vertex).neighbors_from ) == 0;
-      HSet_forth( Vertex_prefix )( (*vertex).neighbors_from )
-   )
-   {   
-      v1 = HSet_item_at( Vertex_prefix )( (*vertex).neighbors_from );
-      e = DGraph_edge_from_to_internal( Prefix )( dgraph, v1, vertex );
-      if ( e != NULL )
-      {
-         EDGE_DISPOSE_FUNCTION( (*e).value );
-         HSet_remove( Edge_prefix )( (*dgraph).edges, e );
-         free( e );
-      }
-   }
-   
-   // dispose of neighbor vertex hash sets but not their contents
-   HSet_dispose( Vertex_prefix )( (*vertex).neighbors_to );
-   (*vertex).neighbors_to = NULL;
-   
-   HSet_dispose( Vertex_prefix )( (*vertex).neighbors_from );
-   (*vertex).neighbors_from = NULL;
-
-   HSet_remove_and_dispose( Vertex_prefix )( (*dgraph).vertices, vertex );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-
-/**
-   DGraph_edge_remove
-*/
-
-void
-DGraph_edge_remove( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_edge_type( Prefix ) *edge )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   HSet_remove_and_dispose( Edge_prefix )( (*dgraph).edges, edge );
-   
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_edge_remove_and_dispose
-*/
-
-void
-DGraph_edge_remove_and_dispose( Prefix )( DGraph_type( Prefix ) *dgraph, DGraph_edge_type( Prefix ) *edge )
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "edge not null", edge  != NULL );
-   PRECONDITION( "edge type ok", ( (*edge).type == DGRAPH_EDGE_TYPE ) && ( (*edge).edge_type == Edge_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   EDGE_DISPOSE_FUNCTION( (*edge).value );
-   HSet_remove_and_dispose( Edge_prefix )( (*dgraph).edges, edge );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-
-/**
-   DGraph_edge_remove_from_to
-*/
-
-void
-DGraph_edge_remove_from_to( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   
-   // get the edge, if it exists
-   DGraph_edge_type( Prefix ) *edge1 = edge_make( v_from, v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-
-   if ( edge != NULL )
-   {
-      HSet_remove_and_dispose( Edge_prefix )( (*dgraph).edges, edge );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
-/**
-   DGraph_edge_remove_and_dispose_from_to
-*/
-
-void
-DGraph_edge_remove_and_dispose_from_to( Prefix )
-( 
-   DGraph_type( Prefix ) *dgraph, 
-   DGraph_vertex_type( Prefix ) *v_from, 
-   DGraph_vertex_type( Prefix ) *v_to
-)
-{
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   PRECONDITION( "v_from not null", v_from != NULL );
-   PRECONDITION( "v_from type ok", ( (*v_from).type == DGRAPH_VERTEX_TYPE ) && ( (*v_from).value_type == Value_Code ) );
-   PRECONDITION( "v_to not null", v_to != NULL );
-   PRECONDITION( "v_to type ok", ( (*v_to).type == DGRAPH_VERTEX_TYPE ) && ( (*v_to).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
-
-   DGraph_edge_type( Prefix ) *edge = NULL;
-   
-   // get the edge, if it exists
-   DGraph_edge_type( Prefix ) *edge1 = edge_make( v_from, v_to, EDGE_DEFAULT_VALUE );
-   if ( HSet_has( Edge_prefix )( (*dgraph).edges, edge1 ) == 1 )
-   {
-      edge = HSet_item( Edge_prefix )( (*dgraph).edges, edge1 );
-   }
-   edge_dispose_with_contents( edge1 );
-
-   if ( edge != NULL )
-   {
-      EDGE_DISPOSE_FUNCTION( (*edge).value );
-      HSet_remove_and_dispose( Edge_prefix )( (*dgraph).edges, edge );
-   }
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
-
-   return;
-}
-
 
 /**
    DGraph_wipe_out
 */
 
 void
-DGraph_wipe_out( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_wipe_out( Prefix )( DGraph_type( Prefix ) *current )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   DGraph_cursor_type( Prefix ) *cursor = NULL;
-   DGraph_cursor_type( Prefix ) *c = NULL;
-   int32_t is_depth_first = 0;
-   
-   cursor = (*dgraph).first_cursor;
-   is_depth_first = (*cursor).is_depth_first;
-   
-   while( cursor != NULL  )
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+
+   int32_t i = 0;
+
+
+   for ( i = 0; i < (*current).vcount; i++ )
    {
-      HSet_cursor_dispose( Vertex_prefix )( (*cursor).cursor );
-      HSet_cursor_dispose( Edge_prefix )( (*cursor).edge_cursor );
-      HSet_dispose( Vertex_prefix )( (*cursor).is_visited );
-      c = cursor;
-      cursor = (*cursor).next_cursor;
-      free( c );
+
+      if ( (*current).vp[i] != NULL )
+      {
+         // get vertex
+         vertex = (*current).vp[i];
+
+         // dispose vertex
+         vertex_dispose( &vertex );
+      }
    }
-   
-   // wipe out the hsets for vertices and edges, including all their cursors
-   HSet_wipe_out_and_dispose( Vertex_prefix )( (*dgraph).vertices );
-   HSet_wipe_out_and_dispose( Edge_prefix )( (*dgraph).edges );
 
-   // (re)set internal hset cursors
-   (*dgraph).first_cursor
-      =  ( DGraph_cursor_type( Prefix ) * )
-         calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
-   
-   (*(*dgraph).first_cursor).cursor = HSet_cursor_make( Vertex_prefix )( (*dgraph).vertices );
-   (*(*dgraph).first_cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
-   (*(*dgraph).first_cursor).is_visited = HSet_make( Vertex_prefix )();
-   (*(*dgraph).first_cursor).next_cursor = NULL;
-   (*(*dgraph).first_cursor).dgraph = dgraph;
-   (*(*dgraph).first_cursor).is_depth_first = is_depth_first;
-   MULTITHREAD_MUTEX_INIT( (*(*dgraph).first_cursor).mutex );
-
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -3155,139 +2529,1235 @@ DGraph_wipe_out( Prefix )( DGraph_type( Prefix ) *dgraph )
 */
 
 void
-DGraph_wipe_out_and_dispose( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_wipe_out_and_dispose( Prefix )( DGraph_type( Prefix ) *current )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   DGraph_cursor_type( Prefix ) *cursor = NULL;
-   DGraph_cursor_type( Prefix ) *c = NULL;
-   int32_t is_depth_first = 0;
-   
-   cursor = (*dgraph).first_cursor;
-   is_depth_first = (*cursor).is_depth_first;
-   
-   while( cursor != NULL  )
-   {
-      HSet_cursor_dispose( Vertex_prefix )( (*cursor).cursor );
-      HSet_cursor_dispose( Edge_prefix )( (*cursor).edge_cursor );
-      HSet_dispose( Vertex_prefix )( (*cursor).is_visited );
-      c = cursor;
-      cursor = (*cursor).next_cursor;
-      free( c );
-   }
-   
-   // wipe out the hsets for vertices and edges, including all their cursors
-   HSet_start( Edge_prefix )( (*dgraph).edges );
-   while( HSet_off( Edge_prefix )( (*dgraph).edges ) == 0 )
-   {
-      EDGE_DISPOSE_FUNCTION( (* HSet_item_at( Edge_prefix )( (*dgraph).edges ) ).value );
-      HSet_forth( Edge_prefix )( (*dgraph).edges );
-   }
-   HSet_wipe_out_and_dispose( Edge_prefix )( (*dgraph).edges );
-   
-   HSet_start( Vertex_prefix )( (*dgraph).vertices );
-   while( HSet_off( Vertex_prefix )( (*dgraph).vertices ) == 0 )
-   {
-      DISPOSE_FUNCTION( (* HSet_item_at( Vertex_prefix )( (*dgraph).vertices ) ).value );
-      HSet_forth( Vertex_prefix )( (*dgraph).vertices );
-   }
-   HSet_wipe_out_and_dispose( Vertex_prefix )( (*dgraph).vertices );
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
 
-   // (re)set internal hset cursors
-   (*dgraph).first_cursor
-      =  ( DGraph_cursor_type( Prefix ) * )
-         calloc( 1, sizeof( DGraph_cursor_type( Prefix ) ) );
-   
-   (*(*dgraph).first_cursor).cursor = HSet_cursor_make( Vertex_prefix )( (*dgraph).vertices );
-   (*(*dgraph).first_cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
-   (*(*dgraph).first_cursor).is_visited = HSet_make( Vertex_prefix )();
-   (*(*dgraph).first_cursor).next_cursor = NULL;
-   (*(*dgraph).first_cursor).dgraph = dgraph;
-   (*(*dgraph).first_cursor).is_depth_first = is_depth_first;
-   MULTITHREAD_MUTEX_INIT( (*(*dgraph).first_cursor).mutex );
+   int32_t i = 0;
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+
+   for ( i = 0; i < (*current).vcount; i++ )
+   {
+
+      if ( (*current).vp[i] != NULL )
+      {
+         // get vertex
+         vertex = (*current).vp[i];
+
+         // dispose vertex
+         vertex_deep_dispose( &vertex );
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   DGraph_edge_wipe_out
+   DGraph_vertex_count
+*/
+
+int32_t
+DGraph_vertex_count( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t result = 0;
+
+   result = (*current).vcount - (*current).vnot_filled;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_vertex_value
+*/
+
+Value
+DGraph_vertex_value( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "vertex present", (*current).vp[id] != NULL );
+   INVARIANT( current );
+
+   Value result;
+
+   result = ( *(*current).vp[id] ).value;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_vertex_value_put
 */
 
 void
-DGraph_edge_wipe_out( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_vertex_value_put( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id,
+   Value value
+)
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "vertex present", (*current).vp[id] != NULL );
+   INVARIANT( current );
 
-   DGraph_cursor_type( Prefix ) *cursor = NULL;
-   
-   cursor = (*dgraph).first_cursor;
-   while( cursor != NULL  )
-   {
-      HSet_wipe_out( Vertex_prefix )( (*cursor).is_visited );
-      cursor = (*cursor).next_cursor;
-   }
-   
-   // dispose of edges
-   HSet_wipe_out_and_dispose( Edge_prefix )( (*dgraph).edges );
-   
-   // get new cursor to replace cursor eliminated by previous call
-   (*(*dgraph).first_cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
+   ( *(*current).vp[id] ).value = value;
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
-   DGraph_edge_wipe_out_and_dispose
+   DGraph_vertex_neighbors_from
+*/
+
+int32_t *
+DGraph_vertex_neighbors_from( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id,
+   int32_t *count
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "count not null", count != NULL );
+   LOCK( (*current).mutex );
+   PRECONDITION( "vertex present", (*current).vp[id] != NULL );
+   INVARIANT( current );
+
+   int32_t *result = NULL;
+   int32_t min_count = 1;
+   int32_t i = 0;
+
+   if ( ( *(*current).vp[id] ).nfcount > 0 )
+   {
+      min_count = ( *(*current).vp[id] ).nfcount + 1;
+   }
+
+   result = calloc( min_count, sizeof( int32_t ) );
+   CHECK( "result allocated_correctly", result != NULL );
+
+   *count = ( *(*current).vp[id] ).nfcount;
+
+   for( i = 0; i < (*count); i++ )
+   {
+      result[i] = ( *(*current).vp[id] ).neighbors_from[i];
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_vertex_neighbors_to
+*/
+
+int32_t *
+DGraph_vertex_neighbors_to( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id,
+   int32_t *count
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "count not null", count != NULL );
+   LOCK( (*current).mutex );
+   PRECONDITION( "vertex present", (*current).vp[id] != NULL );
+   INVARIANT( current );
+
+   int32_t *result = NULL;
+   int32_t min_count = 1;
+   int32_t i = 0;
+
+   if ( ( *(*current).vp[id] ).ntcount > 0 )
+   {
+      min_count = ( *(*current).vp[id] ).ntcount + 1;
+   }
+
+   result = calloc( min_count, sizeof( int32_t ) );
+   CHECK( "result allocated_correctly", result != NULL );
+
+   *count = ( *(*current).vp[id] ).ntcount;
+
+   for( i = 0; i < (*count); i++ )
+   {
+      result[i] = ( *(*current).vp[id] ).neighbors_to[i];
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_for_from_to
+*/
+
+int32_t
+DGraph_edge_for_from_to( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t v_from,
+   int32_t v_to
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   PRECONDITION( "v_from non negative", v_from >= 0 );
+   PRECONDITION( "v_to non negative", v_to >= 0 );
+   LOCK( (*current).mutex );
+   PRECONDITION( "v_from present", (*current).vp[v_from] != NULL );
+   PRECONDITION( "v_to present", (*current).vp[v_to] != NULL );
+   INVARIANT( current );
+
+   int32_t result = -1;
+   int32_t i = 0;
+
+   for( i = 0; ( i < (*current).ecount ) && ( result == -1 ); i++ )
+   {
+      if ( (*current).ep[i] != NULL )
+      {
+         if (
+            ( ( *(*current).ep[i] ).v_from == v_from )
+            &&
+            ( ( *(*current).ep[i] ).v_to == v_to )
+         )
+         {
+            result = i;
+         }
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_add
+*/
+
+int32_t
+DGraph_edge_add( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t vertex_from,
+   int32_t vertex_to,
+   Edge value
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "graph has vertex_from", (*current).vp[vertex_from] != NULL );
+   PRECONDITION( "graph has vertex_to", (*current).vp[vertex_to] != NULL );
+   INVARIANT( current );
+
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   DGraph_vertex_type( Prefix ) *vertex = NULL;
+
+   // allocate edge
+   edge = ( DGraph_edge_type( Prefix ) * ) calloc( 1, sizeof( DGraph_edge_type( Prefix ) ) );
+   CHECK( "edge allocated correctly", edge != NULL );
+
+   // set type
+   (*edge)._type = DGRAPH_EDGE_TYPE;
+   (*edge)._value_type = Edge_Code;
+
+   // set dgraph
+   (*edge).dgraph = current;
+
+   // set value
+   (*edge).value = value;
+
+   // set from and to
+   (*edge).v_from = vertex_from;
+   (*edge).v_to = vertex_to;
+
+   // put edge into DGraph, and set its index
+   (*edge).id
+      = pointer_insert
+        (
+           ( void *** ) & ( (*current).ep ),
+           &(*current).ecount,
+           &(*current).ecapacity,
+           &(*current).enot_filled,
+           edge
+        );
+
+   // add v_to to v_from's neighbors_to
+   vertex = (*current).vp[vertex_from];
+   index_put_last( &( (*vertex).neighbors_to ), &(*vertex).ntcount, &(*vertex).ntcapacity, vertex_to );
+
+   // add v_from to v_to's neighbors_from
+   vertex = (*current).vp[vertex_to];
+   index_put_last( &( (*vertex).neighbors_from ), &(*vertex).nfcount, &(*vertex).nfcapacity, vertex_from );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return (*edge).id;
+}
+
+/**
+   DGraph_edge_remove
 */
 
 void
-DGraph_edge_wipe_out_and_dispose( Prefix )( DGraph_type( Prefix ) *dgraph )
+DGraph_edge_remove( Prefix )( DGraph_type( Prefix ) *current, int32_t id )
 {
-   PRECONDITION( "dgraph not null", dgraph != NULL );
-   PRECONDITION( "dgraph type ok", ( (*dgraph).type == DGRAPH_TYPE ) && ( (*dgraph).edge_type == Edge_Code ) && ( (*dgraph).value_type == Value_Code ) );
-   LOCK( (*dgraph).mutex );
-   INVARIANT( dgraph );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "edge present", (*current).ep[id] != NULL );
+   INVARIANT( current );
 
-   DGraph_cursor_type( Prefix ) *cursor = NULL;
-   
-   cursor = (*dgraph).first_cursor;
-   while( cursor != NULL  )
-   {
-      HSet_wipe_out( Vertex_prefix )( (*cursor).is_visited );
-      cursor = (*cursor).next_cursor;
-   }
-   
-   // dispose of edge values
-   HSet_start( Edge_prefix )( (*dgraph).edges );
-   while( HSet_off( Edge_prefix )( (*dgraph).edges ) == 0 )
-   {
-      EDGE_DISPOSE_FUNCTION( (* HSet_item_at( Edge_prefix )( (*dgraph).edges ) ).value );
-      HSet_forth( Edge_prefix )( (*dgraph).edges );
-   }
-   
-   // dispose of edges
-   HSet_wipe_out_and_dispose( Edge_prefix )( (*dgraph).edges );
-   
-   // get new cursor to replace cursor eliminated by previous call
-   (*(*dgraph).first_cursor).edge_cursor = HSet_cursor_make( Edge_prefix )( (*dgraph).edges );
+   DGraph_edge_type( Prefix ) *edge = NULL;
 
-   INVARIANT( dgraph );
-   UNLOCK( (*dgraph).mutex );
+   // get edge
+   edge = (*current).ep[id];
+
+   // dispose edge
+   edge_dispose( &edge );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
+
+/**
+   DGraph_edge_remove_and_dispose
+*/
+
+void
+DGraph_edge_remove_and_dispose( Prefix )( DGraph_type( Prefix ) *current, int32_t id )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "edge present", (*current).ep[id] != NULL );
+   INVARIANT( current );
+
+   DGraph_edge_type( Prefix ) *edge = NULL;
+
+   // get edge
+   edge = (*current).ep[id];
+
+   // dispose edge
+   edge_deep_dispose( &edge );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_wipe_out_edges
+*/
+
+void
+DGraph_wipe_out_edges( Prefix )( DGraph_type( Prefix ) *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   int32_t i = 0;
+
+   for ( i = 0; i < (*current).ecount; i++ )
+   {
+      if ( (*current).ep[i] != NULL )
+      {
+         // get edge
+         edge = (*current).ep[i];
+
+         // dispose edge
+         edge_dispose( &edge );
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_wipe_out_edges_and_dispose
+*/
+
+void
+DGraph_wipe_out_edges_and_dispose( Prefix )( DGraph_type( Prefix ) *current )
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   DGraph_edge_type( Prefix ) *edge = NULL;
+   int32_t i = 0;
+
+   for ( i = 0; i < (*current).ecount; i++ )
+   {
+      if ( (*current).ep[i] != NULL )
+      {
+         // get edge
+         edge = (*current).ep[i];
+
+         // dispose edge
+         edge_deep_dispose( &edge );
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_edge_count
+*/
+
+int32_t
+DGraph_edge_count( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t result = 0;
+
+   result = (*current).ecount - (*current).enot_filled;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_value
+*/
+
+Edge
+DGraph_edge_value( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "edge present", (*current).ep[id] != NULL );
+   INVARIANT( current );
+
+   Edge result;
+
+   result = ( *(*current).ep[id] ).value;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_value_put
+*/
+
+void
+DGraph_edge_value_put( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id,
+   Edge value
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "edge present", (*current).ep[id] != NULL );
+   INVARIANT( current );
+
+   ( *(*current).ep[id] ).value = value;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_edge_vertex_from
+*/
+
+int32_t
+DGraph_edge_vertex_from( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "edge present", (*current).ep[id] != NULL );
+   INVARIANT( current );
+
+   int32_t result = -1;
+
+   result = ( *(*current).ep[id] ).v_from;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_vertex_to
+*/
+
+int32_t
+DGraph_edge_vertex_to( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t id
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "edge present", (*current).ep[id] != NULL );
+   INVARIANT( current );
+
+   int32_t result = -1;
+
+   result = ( *(*current).ep[id] ).v_to;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_vertex_start
+*/
+
+void
+DGraph_vertex_start( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   ( *(*current).first_cursor ).vcursor = 0;
+
+   if ( ( (*current).vcount - (*current).vnot_filled ) > 0 )
+   {
+      ( *(*current).first_cursor ).vcursor = 0;
+   }
+
+   while
+   (
+      ( (*current).vp[ ( *(*current).first_cursor ).vcursor ] == NULL )
+      &&
+      ( ( *(*current).first_cursor ).vcursor < (*current).vcount )
+   )
+   {
+      ( *(*current).first_cursor ).vcursor++;
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_cursor_vertex_start
+*/
+
+void
+DGraph_cursor_vertex_start( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "current not null", (*cursor).dgraph != NULL );
+   PRECONDITION( "current type ok", ( ( *(*cursor).dgraph )._type == DGRAPH_TYPE ) && ( ( *(*cursor).dgraph )._edge_type == Edge_Code ) && ( ( *(*cursor).dgraph )._value_type == Value_Code ) );
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   INVARIANT( (*cursor).dgraph );
+
+   DGraph_type( Prefix ) *current = NULL;
+
+   current = (*cursor).dgraph;
+
+   (*cursor).vcursor = 0;
+
+   if ( ( (*current).vcount - (*current).vnot_filled ) > 0 )
+   {
+      (*cursor).vcursor = 0;
+   }
+
+   while
+   (
+      ( (*current).vp[ (*cursor).vcursor ] == NULL )
+      &&
+      ( (*cursor).vcursor < (*current).vcount )
+   )
+   {
+      (*cursor).vcursor++;
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_vertex_forth
+*/
+
+void
+DGraph_vertex_forth( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "internal cursor not off", cursor_vertex_off( (*current).first_cursor ) == 0 );
+   INVARIANT( current );
+
+   if ( ( *(*current).first_cursor ).vcursor < (*current).vcount )
+   {
+
+      ( *(*current).first_cursor ).vcursor = ( *(*current).first_cursor ).vcursor + 1;
+
+      if ( ( *(*current).first_cursor ).vcursor < (*current).vcount )
+      {
+         while
+         (
+            ( (*current).vp[ ( *(*current).first_cursor ).vcursor ] == NULL )
+            &&
+            ( ( *(*current).first_cursor ).vcursor < (*current).vcount )
+         )
+         {
+            ( *(*current).first_cursor ).vcursor++;
+         }
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_cursor_vertex_forth
+*/
+
+void
+DGraph_cursor_vertex_forth( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   PRECONDITION( "cursor not off", cursor_vertex_off( cursor ) == 0 );
+   INVARIANT( (*cursor).dgraph );
+
+   if ( (*cursor).vcursor < ( *(*cursor).dgraph ).vcount )
+   {
+
+      (*cursor).vcursor = (*cursor).vcursor + 1;
+
+      if ( (*cursor).vcursor < ( *(*cursor).dgraph ).vcount )
+      {
+         while
+         (
+            ( ( *(*cursor).dgraph ).vp[ (*cursor).vcursor ] == NULL )
+            &&
+            ( (*cursor).vcursor < ( *(*cursor).dgraph ).vcount )
+         )
+         {
+            (*cursor).vcursor++;
+         }
+      }
+   }
+
+   INVARIANT( (*cursor).dgraph );
+   UNLOCK( ( *(*cursor).dgraph ).mutex );
+
+   return;
+}
+
+/**
+   DGraph_vertex_id_at
+*/
+
+int32_t
+DGraph_vertex_id_at( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "internal cursor not off", cursor_vertex_off( (*current).first_cursor ) == 0 );
+   INVARIANT( current );
+
+   int32_t result = -1;
+
+   if ( ( *(*current).first_cursor ).vcursor < (*current).vcount )
+   {
+      if
+      (
+         ( (*current).vp[ ( *(*current).first_cursor ).vcursor ] != NULL )
+      )
+      {
+         result = ( *(*current).first_cursor ).vcursor;
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_cursor_vertex_id_at
+*/
+
+int32_t
+DGraph_cursor_vertex_id_at( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   PRECONDITION( "cursor not off", cursor_vertex_off( cursor ) == 0 );
+   INVARIANT( (*cursor).dgraph );
+
+   int32_t result = -1;
+
+   if ( (*cursor).vcursor < ( *(*cursor).dgraph ).vcount )
+   {
+      if
+      (
+         ( ( *(*cursor).dgraph ).vp[ (*cursor).vcursor ] != NULL )
+      )
+      {
+         result = (*cursor).vcursor;
+      }
+   }
+
+   INVARIANT( (*cursor).dgraph );
+   UNLOCK( ( *(*cursor).dgraph ).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_vertex_off
+*/
+
+int32_t
+DGraph_vertex_off( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t result = 0;
+
+   result = cursor_vertex_off( (*current).first_cursor );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_cursor_vertex_off
+*/
+
+int32_t
+DGraph_cursor_vertex_off( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   INVARIANT( (*cursor).dgraph );
+
+   int32_t result = 0;
+
+   result = cursor_vertex_off( cursor );
+
+   INVARIANT( (*cursor).dgraph );
+   UNLOCK( ( *(*cursor).dgraph ).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_start
+*/
+
+void
+DGraph_edge_start( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   ( *(*current).first_cursor ).ecursor = 0;
+
+   if ( ( (*current).ecount - (*current).enot_filled ) > 0 )
+   {
+      ( *(*current).first_cursor ).ecursor = 0;
+   }
+
+   while
+   (
+      ( (*current).ep[ ( *(*current).first_cursor ).ecursor ] == NULL )
+      &&
+      ( ( *(*current).first_cursor ).ecursor < (*current).ecount )
+   )
+   {
+      ( *(*current).first_cursor ).ecursor++;
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_cursor_edge_start
+*/
+
+void
+DGraph_cursor_edge_start( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "current not null", (*cursor).dgraph != NULL );
+   PRECONDITION( "current type ok", ( ( *(*cursor).dgraph )._type == DGRAPH_TYPE ) && ( ( *(*cursor).dgraph )._edge_type == Edge_Code ) && ( ( *(*cursor).dgraph )._value_type == Value_Code ) );
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   INVARIANT( (*cursor).dgraph );
+
+   DGraph_type( Prefix ) *current = NULL;
+
+   current = (*cursor).dgraph;
+
+   (*cursor).ecursor = 0;
+
+   if ( ( (*current).ecount - (*current).enot_filled ) > 0 )
+   {
+      (*cursor).ecursor = 0;
+   }
+
+   while
+   (
+      ( (*current).ep[ (*cursor).ecursor ] == NULL )
+      &&
+      ( (*cursor).ecursor < (*current).ecount )
+   )
+   {
+      (*cursor).ecursor++;
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_edge_forth
+*/
+
+void
+DGraph_edge_forth( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "internal cursor not off", cursor_edge_off( (*current).first_cursor ) == 0 );
+   INVARIANT( current );
+
+   if ( ( *(*current).first_cursor ).ecursor < (*current).ecount )
+   {
+
+      ( *(*current).first_cursor ).ecursor = ( *(*current).first_cursor ).ecursor + 1;
+
+      if ( ( *(*current).first_cursor ).ecursor < (*current).ecount )
+      {
+         while
+         (
+            ( (*current).ep[ ( *(*current).first_cursor ).ecursor ] == NULL )
+            &&
+            ( ( *(*current).first_cursor ).ecursor < (*current).ecount )
+         )
+         {
+            ( *(*current).first_cursor ).ecursor++;
+         }
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return;
+}
+
+/**
+   DGraph_cursor_edge_forth
+*/
+
+void
+DGraph_cursor_edge_forth( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   PRECONDITION( "cursor not off", cursor_edge_off( cursor ) == 0 );
+   INVARIANT( (*cursor).dgraph );
+
+   if ( (*cursor).ecursor < ( *(*cursor).dgraph ).ecount )
+   {
+
+      (*cursor).ecursor = (*cursor).ecursor + 1;
+
+      if ( (*cursor).ecursor < ( *(*cursor).dgraph ).ecount )
+      {
+         while
+         (
+            ( ( *(*cursor).dgraph ).ep[ (*cursor).ecursor ] == NULL )
+            &&
+            ( (*cursor).ecursor < ( *(*cursor).dgraph ).ecount )
+         )
+         {
+            (*cursor).ecursor++;
+         }
+      }
+   }
+
+   INVARIANT( (*cursor).dgraph );
+   UNLOCK( ( *(*cursor).dgraph ).mutex );
+
+   return;
+}
+
+/**
+   DGraph_edge_id_at
+*/
+
+int32_t
+DGraph_edge_id_at( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   PRECONDITION( "internal cursor not off", cursor_edge_off( (*current).first_cursor ) == 0 );
+   INVARIANT( current );
+
+   int32_t result = -1;
+
+   if ( ( *(*current).first_cursor ).ecursor < (*current).ecount )
+   {
+      if
+      (
+         ( (*current).ep[ ( *(*current).first_cursor ).ecursor ] != NULL )
+      )
+      {
+         result = ( *(*current).first_cursor ).ecursor;
+      }
+   }
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_cursor_edge_id_at
+*/
+
+int32_t
+DGraph_cursor_edge_id_at( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   PRECONDITION( "cursor not off", cursor_edge_off( cursor ) == 0 );
+   INVARIANT( (*cursor).dgraph );
+
+   int32_t result = -1;
+
+   if ( (*cursor).ecursor < ( *(*cursor).dgraph ).ecount )
+   {
+      if
+      (
+         ( ( *(*cursor).dgraph ).ep[ (*cursor).ecursor ] != NULL )
+      )
+      {
+         result = (*cursor).ecursor;
+      }
+   }
+
+   INVARIANT( (*cursor).dgraph );
+   UNLOCK( ( *(*cursor).dgraph ).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_edge_off
+*/
+
+int32_t
+DGraph_edge_off( Prefix )
+(
+   DGraph_type( Prefix ) *current
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type ok", ( (*current)._type == DGRAPH_TYPE ) && ( (*current)._edge_type == Edge_Code ) && ( (*current)._value_type == Value_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t result = 0;
+
+   result = cursor_edge_off( (*current).first_cursor );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_cursor_edge_off
+*/
+
+int32_t
+DGraph_cursor_edge_off( Prefix )
+(
+   DGraph_cursor_type( Prefix ) *cursor
+)
+{
+   PRECONDITION( "cursor not null", cursor != NULL );
+   LOCK( ( *(*cursor).dgraph ).mutex );
+   INVARIANT( (*cursor).dgraph );
+
+   int32_t result = 0;
+
+   result = cursor_edge_off( cursor );
+
+   INVARIANT( (*cursor).dgraph );
+   UNLOCK( ( *(*cursor).dgraph ).mutex );
+
+   return result;
+}
+
+/**
+   DGraph_connected_vertices_breadth_first
+*/
+
+int32_t *
+DGraph_connected_vertices_breadth_first( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t vertex_id,
+   int32_t *count
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "vertex_id OK", vertex_id >= 0 );
+   PRECONDITION( "count OK", count != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t *queue = NULL;
+   int32_t qcount = 0;
+   int32_t qcapacity = 0;
+   int32_t *is_visited = NULL;
+   int32_t ivcount = 0;
+   int32_t ivcapacity = 0;
+
+   // allocate queue and is_visited arrays
+   queue = ( int32_t * ) calloc(  START_CAPACITY, sizeof( int32_t ) );
+   CHECK( "queue allocate correctly", queue != NULL );
+   qcount = 0;
+   qcapacity = START_CAPACITY;
+
+   is_visited = ( int32_t * ) calloc(  START_CAPACITY, sizeof( int32_t ) );
+   CHECK( "is_visited allocate correctly", is_visited != NULL );
+   ivcount = 0;
+   ivcapacity = START_CAPACITY;
+
+   // find all vertices connected to vertex_id breadth first search
+   find_connected_vertices_breadth_first
+   (
+      current,
+      vertex_id,
+      &queue,
+      &qcount,
+      &qcapacity,
+      &is_visited,
+      &ivcount,
+      &ivcapacity
+   );
+
+   // deallocate queue
+   free( queue );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   // result is in is_visited
+   (*count) = ivcount;
+
+   return is_visited;
+}
+
+/**
+   DGraph_connected_vertices_depth_first
+*/
+
+int32_t *
+DGraph_connected_vertices_depth_first( Prefix )
+(
+   DGraph_type( Prefix ) *current,
+   int32_t vertex_id,
+   int32_t *count
+)
+{
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "vertex_id OK", vertex_id >= 0 );
+   PRECONDITION( "count OK", count != NULL );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
+
+   int32_t *is_visited = NULL;
+   int32_t ivcount = 0;
+   int32_t ivcapacity = 0;
+
+   // allocate is_visited arrays
+   is_visited = ( int32_t * ) calloc(  START_CAPACITY, sizeof( int32_t ) );
+   CHECK( "is_visited allocate correctly", is_visited != NULL );
+
+   ivcount = 0;
+   ivcapacity = START_CAPACITY;
+
+   // find all vertices connected to vertex_id depth first search
+   find_connected_vertices_depth_first
+   (
+      current,
+      vertex_id,
+      &is_visited,
+      &ivcount,
+      &ivcapacity
+   );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
+
+   // result is in is_visited
+   (*count) = ivcount;
+
+   return is_visited;
+}
+
 
 #ifdef __cplusplus
 }

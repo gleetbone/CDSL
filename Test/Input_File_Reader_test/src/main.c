@@ -17,7 +17,58 @@ int
 add_test_make( void );
 
 int
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
+
+int
+add_test_make_cstring( void );
+
+int
+add_test_dispose( void );
+
+int
+add_test_deep_dispose( void );
+
+int
 add_test_empty( void );
+
+int
+add_test_tokens( void );
+
+int
+add_test_line( void );
+
+int
+add_test_line_number( void );
+
+int
+add_test_file_name( void );
+
+int
+add_test_eof( void );
+
+int
+add_test_is_skip_comments( void );
+
+int
+add_test_put_is_skip_comments( void );
+
+int
+add_test_forth( void );
 
 int
 add_test_one_line( void );
@@ -75,6 +126,23 @@ int main(int argc, char *argv[] )
    // add tests for Input_File_Reader
 
    add_test_make();
+   add_test_make_cstring();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_is_equal();
+   add_test_is_deep_equal();
+   add_test_copy();
+   add_test_deep_copy();
+   add_test_dispose();
+   add_test_deep_dispose();
+   add_test_tokens();
+   add_test_line();
+   add_test_line_number();
+   add_test_file_name();
+   add_test_eof();
+   add_test_is_skip_comments();
+   add_test_put_is_skip_comments();
+   add_test_forth();
    add_test_empty();
    add_test_one_line();
    add_test_one_line_comment();

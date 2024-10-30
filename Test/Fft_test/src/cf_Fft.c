@@ -1,7 +1,7 @@
 /**
  @file cf_Fft.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "implementation file for fft of matrices of complex floats"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 

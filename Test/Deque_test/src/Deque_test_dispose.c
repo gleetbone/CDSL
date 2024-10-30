@@ -1,8 +1,8 @@
 /**
  @file Deque_test_dispose.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Deque_make"
+ @version 2.0.0
+ @brief: "tests for Deque_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Deque_make.
+ Unit tests for Deque_t
 
 */
 
@@ -45,7 +45,7 @@ void test_dispose_1( void )
    CU_ASSERT( i_deque_count( deque ) == 1 );
    CU_ASSERT( i_deque_is_empty( deque ) == 0 );
  
-   i_deque_dispose( deque );
+   i_deque_dispose( &deque );
 
    return;
 }

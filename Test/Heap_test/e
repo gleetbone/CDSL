@@ -1,0 +1,24 @@
+==== Building Heap_test (debug) ====
+s_Heap.c
+i_Heap.c
+In file included from ../src/i_Heap.c:37:
+../../../Heap/Heap.c: In function ‘i_heap_deep_dispose’:
+../../../Heap/Heap.c:851:10: warning: unused variable ‘array’ [-Wunused-variable]
+  851 |    Type *array = (**current).array;
+      |          ^~~~~
+../../../Heap/Heap.c: In function ‘i_heap_prune_and_dispose’:
+../../../Heap/Heap.c:1235:10: warning: variable ‘array’ set but not used [-Wunused-but-set-variable]
+ 1235 |    Type *array = NULL;
+      |          ^~~~~
+../../../Heap/Heap.c:1234:12: warning: variable ‘heap_count’ set but not used [-Wunused-but-set-variable]
+ 1234 |    int32_t heap_count = 0;
+      |            ^~~~~~~~~~
+../../../Heap/Heap.c: In function ‘i_heap_keep_and_dispose’:
+../../../Heap/Heap.c:1290:10: warning: variable ‘array’ set but not used [-Wunused-but-set-variable]
+ 1290 |    Type *array = NULL;
+      |          ^~~~~
+../../../Heap/Heap.c: In function ‘i_heap_wipe_out_and_dispose’:
+../../../Heap/Heap.c:1346:10: warning: unused variable ‘array’ [-Wunused-variable]
+ 1346 |    Type *array = (*heap).array;
+      |          ^~~~~
+Linking Heap_test

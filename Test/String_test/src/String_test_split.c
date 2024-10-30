@@ -1,7 +1,7 @@
 /**
  @file string_test_split.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -55,17 +55,17 @@ void test_split_1( void )
    
    CU_ASSERT( string_is_equal( result[0], stringt ) == 1 );
    
-   string_dispose_with_contents( stringt );
-   string_dispose_with_contents( result[0] );
+   string_deep_dispose( &stringt );
+   string_deep_dispose( &result[0] );
  
    stringt = string_make_from_cstring( "b" );
    
    CU_ASSERT( string_is_equal( result[1], stringt ) == 1 );
    
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( separators );
-   string_dispose_with_contents( stringt );
-   string_dispose_with_contents( result[1] );
+   string_deep_dispose( &string );
+   string_deep_dispose( &separators );
+   string_deep_dispose( &stringt );
+   string_deep_dispose( &result[1] );
    free( result );
  
    return;
@@ -96,24 +96,24 @@ void test_split_2( void )
    
    CU_ASSERT( string_is_equal( result[0], stringt ) == 1 );
    
-   string_dispose_with_contents( stringt );
-   string_dispose_with_contents( result[0] );
+   string_deep_dispose( &stringt );
+   string_deep_dispose( &result[0] );
   
    stringt = string_make_from_cstring( "b" );
    
    CU_ASSERT( string_is_equal( result[1], stringt ) == 1 );
    
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( stringt );
-   string_dispose_with_contents( result[1] );
+   string_deep_dispose( &string );
+   string_deep_dispose( &stringt );
+   string_deep_dispose( &result[1] );
  
    stringt = string_make_from_cstring( "c" );
    
    CU_ASSERT( string_is_equal( result[2], stringt ) == 1 );
    
-   string_dispose_with_contents( separators );
-   string_dispose_with_contents( stringt );
-   string_dispose_with_contents( result[2] );
+   string_deep_dispose( &separators );
+   string_deep_dispose( &stringt );
+   string_deep_dispose( &result[2] );
    free( result );
  
    return;
@@ -142,12 +142,12 @@ void test_split_3( void )
 
    for ( i=0; i<count; i++ )
    {
-      string_dispose_with_contents( result[i] );
+      string_deep_dispose( &result[i] );
    }
    
    free( result );
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( separators );
+   string_deep_dispose( &string );
+   string_deep_dispose( &separators );
  
    return;
 }

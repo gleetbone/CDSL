@@ -1,7 +1,7 @@
 /**
  @file Cable_test_keep_head.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -55,7 +55,7 @@ void test_keep_head_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "a" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_keep_head_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ab" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -97,7 +97,7 @@ void test_keep_head_3( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abc" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -118,7 +118,7 @@ void test_keep_head_4( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -139,7 +139,7 @@ void test_keep_head_5( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "a" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -160,7 +160,7 @@ void test_keep_head_6( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ab" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -181,7 +181,7 @@ void test_keep_head_7( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abc" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -202,7 +202,7 @@ void test_keep_head_8( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefg" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

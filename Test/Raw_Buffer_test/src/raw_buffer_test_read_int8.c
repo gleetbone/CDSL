@@ -1,8 +1,8 @@
 /**
  @file raw_buffer_test_read_int8.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for soa_node_iterator_make_str"
+ @version 2.0.0
+ @brief: "tests for raw_buffer_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_iterator_make_str.
+ Unit tests for raw_buffer_t
 
 */
 
@@ -43,7 +43,7 @@ void test_read_int8_1( void )
 
    CU_ASSERT( value == 0 );
       
-   raw_buffer_dispose_with_contents( raw_buffer );
+   raw_buffer_deep_dispose( &raw_buffer );
 
    return;
 }
@@ -67,7 +67,55 @@ void test_read_int8_2( void )
 
    CU_ASSERT( value == 126 );
    
-   raw_buffer_dispose_with_contents( raw_buffer );
+   raw_buffer_deep_dispose( &raw_buffer );
+
+   return;
+}
+
+/**
+   test_read_int8_3
+*/
+
+void test_read_int8_3( void )
+{
+   raw_buffer_t *raw_buffer = raw_buffer_make( 16 );
+   int8_t value = 0;
+   
+   raw_buffer_put_int8_be( raw_buffer, 126, 0 );
+   value = raw_buffer_read_int8_be( raw_buffer, 0 );
+
+   CU_ASSERT( value == 126 );
+   
+   raw_buffer_put_int8_be( raw_buffer, 126, 7 );
+   value = raw_buffer_read_int8_be( raw_buffer, 7 );
+
+   CU_ASSERT( value == 126 );
+   
+   raw_buffer_deep_dispose( &raw_buffer );
+
+   return;
+}
+
+/**
+   test_read_int8_4
+*/
+
+void test_read_int8_4( void )
+{
+   raw_buffer_t *raw_buffer = raw_buffer_make( 16 );
+   int8_t value = 0;
+   
+   raw_buffer_put_int8_le( raw_buffer, 126, 0 );
+   value = raw_buffer_read_int8_le( raw_buffer, 0 );
+
+   CU_ASSERT( value == 126 );
+   
+   raw_buffer_put_int8_le( raw_buffer, 126, 7 );
+   value = raw_buffer_read_int8_le( raw_buffer, 7 );
+
+   CU_ASSERT( value == 126 );
+   
+   raw_buffer_deep_dispose( &raw_buffer );
 
    return;
 }
@@ -93,6 +141,12 @@ add_test_read_int8( void )
 
    // test_read_int8_2
    add_test_to_suite( p_suite, test_read_int8_2, "test_read_int8_2" );
+
+   // test_read_int8_3
+   add_test_to_suite( p_suite, test_read_int8_3, "test_read_int8_3" );
+
+   // test_read_int8_4
+   add_test_to_suite( p_suite, test_read_int8_4, "test_read_int8_4" );
 
    return CUE_SUCCESS;
 

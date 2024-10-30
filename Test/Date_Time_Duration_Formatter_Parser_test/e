@@ -1,0 +1,5 @@
+==== Building Date_Time_Duration_Formatter_Parser_test (debug) ====
+main.c
+make[1]: *** No rule to make target '../src/Date_Time_Formatter_Parser_test_make.c', needed by 'obj/Debug/Date_Time_Formatter_Parser_test_make.o'.  Stop.
+Makefile:16: recipe for target 'Date_Time_Duration_Formatter_Parser_test' failed
+make: *** [Date_Time_Duration_Formatter_Parser_test] Error 2

@@ -6,6 +6,7 @@ There is also a BSTree_kv version that is implemented as a tree of keys with an 
 
 ### Protocols Supported
 
-- P_Clonable
+- P_Basic
 - P_Iterable
 - P_DIterable
+

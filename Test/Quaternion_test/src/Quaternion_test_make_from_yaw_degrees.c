@@ -1,8 +1,8 @@
 /**
  @file Quaternion_test_make_from_yaw_degrees.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Quaternion_make"
+ @version 2.0.0
+ @brief: "tests for Quaternion_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Quaternion_make.
+ Unit tests for Quaternion_t
 
 */
 
@@ -46,8 +46,8 @@ void test_make_from_yaw_degrees_1( void )
    CU_ASSERT( fq != NULL );
    CU_ASSERT( f_quaternion_is_approximately_equal( fq, fq1, 0.0001 ) == 1.0 );
 
-   f_quaternion_dispose( fq );
-   f_quaternion_dispose( fq1 );
+   f_quaternion_dispose( &fq );
+   f_quaternion_dispose( &fq1 );
 
    return;
 }
@@ -66,8 +66,8 @@ void test_make_from_yaw_degrees_2( void )
    CU_ASSERT( dq != NULL );
    CU_ASSERT( d_quaternion_is_approximately_equal( dq, dq1, 0.0001 ) == 1.0 );
 
-   d_quaternion_dispose( dq );
-   d_quaternion_dispose( dq1 );
+   d_quaternion_dispose( &dq );
+   d_quaternion_dispose( &dq1 );
 
    return;
 }

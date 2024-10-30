@@ -1,7 +1,7 @@
 /**
  @file Cable_test_as_cstring.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -59,7 +59,7 @@ void test_as_cstring_1( void )
    CU_ASSERT( strcmp( cp, "abcd" ) == 0 );
 
    free( cp );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -84,7 +84,7 @@ void test_as_cstring_2( void )
    CU_ASSERT( strcmp( cp, "abcdefghij" ) == 0 );
 
    free( cp );
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

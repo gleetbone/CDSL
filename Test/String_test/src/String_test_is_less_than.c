@@ -1,7 +1,7 @@
 /**
  @file string_test_is_less_than.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -44,8 +44,8 @@ void test_is_less_than_1( void )
    
    CU_ASSERT( string_is_less_than( string, string1 ) == 0 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }
@@ -64,8 +64,8 @@ void test_is_less_than_2( void )
    
    CU_ASSERT( string_is_less_than( string, string1 ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }
@@ -84,8 +84,8 @@ void test_is_less_than_3( void )
    
    CU_ASSERT( string_is_less_than( string, string1 ) == 0 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }
@@ -104,8 +104,8 @@ void test_is_less_than_4( void )
    
    CU_ASSERT( string_is_less_than( string, string1 ) == 1 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }
@@ -124,8 +124,25 @@ void test_is_less_than_5( void )
    
    CU_ASSERT( string_is_less_than( string, string1 ) == 0 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
+
+   return;
+}
+
+/**
+   test_is_less_than_6
+*/
+
+void test_is_less_than_6( void )
+{
+   string_t *string = NULL;
+   
+   string = string_make_from_cstring( "abc" );
+   
+   CU_ASSERT( string_is_less_than( string, string ) == 0 );
+ 
+   string_deep_dispose( &string );
 
    return;
 }
@@ -159,6 +176,9 @@ add_test_is_less_than( void )
 
    // test_is_less_than_5
    add_test_to_suite( p_suite, test_is_less_than_5, "test_is_less_than_5" );
+
+   // test_is_less_than_6
+   add_test_to_suite( p_suite, test_is_less_than_6, "test_is_less_than_6" );
 
    return CUE_SUCCESS;
    

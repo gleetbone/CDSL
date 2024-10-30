@@ -1,7 +1,7 @@
 /**
  @file SList_test_append_first.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_append"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_item_at.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -55,8 +56,8 @@ void test_append_first_1( void )
 
    CU_ASSERT( int_slist_item_at( list ) == 24 );
 
-   int_slist_dispose( list );
-   int_slist_dispose( list1 );
+   int_slist_dispose( &list );
+   int_slist_dispose( &list1 );
 
    return;
 }
@@ -93,8 +94,8 @@ void test_append_first_2( void )
 
    CU_ASSERT( int_slist_count( list ) == 2 );
 
-   int_slist_dispose( list );
-   int_slist_dispose( list1 );
+   int_slist_dispose( &list );
+   int_slist_dispose( &list1 );
 
    return;
 }
@@ -139,8 +140,60 @@ void test_append_first_3( void )
 
    CU_ASSERT( int_slist_count( list ) == 4 );
 
-   int_slist_dispose( list );
-   int_slist_dispose( list1 );
+   int_slist_dispose( &list );
+   int_slist_dispose( &list1 );
+
+   return;
+}
+
+/**
+   test_append_first_4
+*/
+
+void test_append_first_4( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s3 = string_make_from_cstring( "3" );
+   string_t *s4 = string_make_from_cstring( "4" );
+
+   list = s_slist_make();
+   
+   s_slist_put_last( list, s1 );
+   s_slist_put_last( list, s2 );
+
+   s_slist_t *list1 = NULL;
+
+   list1 = s_slist_make();
+   s_slist_put_last( list1, s3 );
+   s_slist_put_last( list1, s4 );
+   
+   s_slist_start( list );
+   
+   s_slist_append_first( list, list1 );
+
+   s_slist_start( list );
+   
+   CU_ASSERT( s_slist_item_at( list ) == s3 );
+
+   s_slist_forth( list );
+
+   CU_ASSERT( s_slist_item_at( list ) == s4 );
+
+   s_slist_forth( list );
+
+   CU_ASSERT( s_slist_item_at( list ) == s1 );
+   
+   s_slist_forth( list );
+
+   CU_ASSERT( s_slist_item_at( list ) == s2 );
+
+   CU_ASSERT( s_slist_count( list ) == 4 );
+
+   s_slist_dispose( &list1 );
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -168,6 +221,9 @@ add_test_append_first( void )
 
    // test_append_first_3
    add_test_to_suite( p_suite, test_append_first_3, "test_append_first_3" );
+
+   // test_append_first_4
+   add_test_to_suite( p_suite, test_append_first_4, "test_append_first_4" );
 
    return CUE_SUCCESS;
 

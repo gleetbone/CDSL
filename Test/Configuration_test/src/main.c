@@ -1,11 +1,12 @@
 /*
-   Tests for path_utilities
+   Tests for configuration_t
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "CUnit/Basic.h"
+#include "base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +18,28 @@ int
 add_test_make( void );
 
 int
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
 add_test_dispose( void );
+
+int
+add_test_deep_dispose( void );
 
 int
 add_test_put( void );
@@ -73,6 +95,9 @@ int main()
 {
    CU_ErrorCode result;
 
+   // enable core dump on failure
+   core_dump_enable();
+   
    // initialize the CUnit test registry
    result = CU_initialize_registry();
    if ( result != CUE_SUCCESS )
@@ -83,7 +108,14 @@ int main()
    // add tests for path utilites
 
    add_test_make();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_copy();
+   add_test_deep_copy();
+   add_test_is_equal();
+   add_test_is_deep_equal();
    add_test_dispose();
+   add_test_deep_dispose();
    add_test_put();
    add_test_item();
    add_test_has();
@@ -96,7 +128,7 @@ int main()
    // Run all tests using the CUnit Basic interface
 
    // set the test mode to verbose
-   CU_basic_set_mode(CU_BRM_VERBOSE);
+   CU_basic_set_mode( CU_BRM_VERBOSE );
 
    // run the tests
    CU_basic_run_tests();

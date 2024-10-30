@@ -1,8 +1,8 @@
 /**
  @file Deque_test_put_last.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Deque_put_last"
+ @version 2.0.0
+ @brief: "tests for Deque_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Deque_first_at.
+ Unit tests for Deque_t
 
 */
 
@@ -46,7 +46,7 @@ void test_put_last_1( void )
 
    CU_ASSERT( i_deque_count( deque ) == 1 );
 
-   i_deque_dispose( deque );
+   i_deque_dispose( &deque );
 
    return;
 }
@@ -70,7 +70,7 @@ void test_put_last_2( void )
    CU_ASSERT( i_deque_first( deque ) == 24 );
    CU_ASSERT( i_deque_last( deque ) == 7 );
 
-   i_deque_dispose( deque );
+   i_deque_dispose( &deque );
 
    return;
 }

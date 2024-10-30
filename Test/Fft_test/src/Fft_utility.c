@@ -1,8 +1,8 @@
 /**
  @file Fft_utility.c
  @author Greg Lee
- @version 1.0.0
- @brief: "utilities for testing Fft"
+ @version 2.0.0
+ @brief: "utilities for testing Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Utilities for testing Fft.
+ Utilities for testing Fft_t
 
 */
 

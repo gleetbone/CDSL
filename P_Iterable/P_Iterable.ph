@@ -42,19 +42,15 @@
    Defines
 */
 
-#define P_ITERABLE 0x5A000300
+#define P_ITERABLE_COUNT                  0
+#define P_ITERABLE_ITEM                   1
+#define P_ITERABLE_OFF                    2
+#define P_ITERABLE_IS_EMPTY               3
+#define P_ITERABLE_START                  4
+#define P_ITERABLE_FORTH                  5
 
-#define P_ITERABLE_DISPOSE                0
-#define P_ITERABLE_DISPOSE_WITH_CONTENTS  1
-#define P_ITERABLE_COUNT                  2
-#define P_ITERABLE_ITEM                   3
-#define P_ITERABLE_OFF                    4
-#define P_ITERABLE_IS_EMPTY               5
-#define P_ITERABLE_START                  6
-#define P_ITERABLE_FORTH                  7
-
-#define P_ITERABLE_FUNCTION_MAX           7
-#define P_ITERABLE_FUNCTION_COUNT         8
+#define P_ITERABLE_FUNCTION_MAX           5
+#define P_ITERABLE_FUNCTION_COUNT         6
 
 #endif /* P_ITERABLE_PH */
 

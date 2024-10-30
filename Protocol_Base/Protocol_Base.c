@@ -1,7 +1,7 @@
 /**
  @file Protocol_Base.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Protocol Base"
  
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
@@ -42,9 +42,8 @@
 #include "Protocol_Base.h"
 #include "Protocol_Base.ph"
 
-#define PROTOCOL_MASK 0xFF000000
-#define PROTOCOL_VALID_OBJECT 0xA5000000
-#define PROTOCOL_VALID_PROTOCOL 0x5A000000
+#include <stddef.h>
+#include <stdarg.h>
 
 int32_t
 protocol_base_is_valid_object( protocol_base_t *object )
@@ -61,6 +60,19 @@ protocol_base_is_valid_protocol( int32_t protocol_id )
 int32_t
 protocol_base_supports_protocol( protocol_base_t *object, int32_t protocol_id )
 {
+   return (*object).supports_protocol( protocol_id );
+}
+
+int32_t
+protocol_supported_by_arg( int32_t protocol_id, ... )
+{
+   protocol_base_t *object = NULL;
+   va_list ap;
+   
+   va_start( ap, protocol_id );
+   object = va_arg( ap, protocol_base_t * );
+   va_end( ap );
+   
    return (*object).supports_protocol( protocol_id );
 }
 

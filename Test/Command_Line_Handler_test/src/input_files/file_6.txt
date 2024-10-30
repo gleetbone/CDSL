@@ -1,0 +1,9 @@
+c "arg one" ar"g
+command arg 
+
+c arg -option arg
+c arg -p arg
+x
+q
+
+

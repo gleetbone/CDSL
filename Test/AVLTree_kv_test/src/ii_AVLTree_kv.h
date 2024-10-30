@@ -23,7 +23,10 @@
 extern "C" {
 #endif
  
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix ii
 #define Key int32_t
@@ -33,7 +36,7 @@ extern "C" {
 
 #undef Prefix
 #undef Key
-#undef Value
+#undef Type
 
 #ifdef __cplusplus
 }

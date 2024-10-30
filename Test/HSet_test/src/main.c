@@ -20,10 +20,16 @@ int
 add_test_make_n( void );
 
 int
-add_test_make_from( void );
+add_test_clone( void );
 
 int
-add_test_make_duplicate_from( void );
+add_test_deep_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
 
 int
 add_test_make_from_array( void );
@@ -35,7 +41,7 @@ int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
 add_test_cursor_dispose( void );
@@ -152,13 +158,16 @@ int
 add_test_is_equal( void );
 
 int
+add_test_is_deep_equal( void );
+
+int
 add_test_equal_items( void );
 
 int
 add_test_as_array( void );
 
 int
-add_test_p_clonable( void );
+add_test_p_basic( void );
 
 int
 add_test_p_iterable( void );
@@ -204,12 +213,14 @@ int main()
 
    add_test_make();
    add_test_make_n();
-   add_test_make_from();
-   add_test_make_duplicate_from();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_copy();
+   add_test_deep_copy();
    add_test_make_from_array();
    add_test_cursor_make();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_deep_dispose();
    add_test_cursor_dispose();
    add_test_cursor_item_at();
    add_test_item_at();
@@ -248,10 +259,11 @@ int main()
    add_test_is_subset();
    add_test_is_superset();
    add_test_is_equal();
+   add_test_is_deep_equal();
    add_test_equal_items();
    add_test_as_array();
    
-   add_test_p_clonable();
+   add_test_p_basic();
    add_test_p_iterable();
 
    // Run all tests using the CUnit Basic interface

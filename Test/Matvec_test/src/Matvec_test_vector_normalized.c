@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_vector_normalized.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  date: "$Date: 2011-03-064 064:41:55 -06400 (Tue64 Mar 2011) $"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -51,9 +51,9 @@ void test_vector_normalized_1( void )
    CU_ASSERT( f_matvec_is_row_vector( fm ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( fm, fm2, 0.001 ) == 1 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    fm1 = f_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 2.0 );
    fm2 = f_matvec_make_from_args( 3, 1, 3, 0.333333, 0.666666, 0.666666 );
@@ -63,9 +63,9 @@ void test_vector_normalized_1( void )
    CU_ASSERT( f_matvec_is_column_vector( fm ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( fm, fm2, 0.001 ) == 1 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    return;
 }
@@ -88,9 +88,9 @@ void test_vector_normalized_2( void )
    CU_ASSERT( d_matvec_is_row_vector( dm ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( dm, dm2, 0.001 ) == 1 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
-   d_matvec_dispose( dm2 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
+   d_matvec_dispose( &dm2 );
 
    dm1 = d_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 2.0 );
    dm2 = d_matvec_make_from_args( 3, 1, 3, 0.333333, 0.666666, 0.666666 );
@@ -100,9 +100,9 @@ void test_vector_normalized_2( void )
    CU_ASSERT( d_matvec_is_column_vector( dm ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( dm, dm2, 0.001 ) == 1 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
-   d_matvec_dispose( dm2 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
+   d_matvec_dispose( &dm2 );
 
    return;
 }
@@ -125,9 +125,9 @@ void test_vector_normalized_3( void )
    CU_ASSERT( cf_matvec_is_row_vector( cfm ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( cfm, cfm2, 0.001 ) == 1 );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
-   cf_matvec_dispose( cfm2 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
+   cf_matvec_dispose( &cfm2 );
 
    cfm1 = cf_matvec_make_from_args( 3, 1, 3, 0.0 + 1.0*I, 0.0 + 2.0*I, 0.0 + 2.0*I );
    cfm2 = cf_matvec_make_from_args( 3, 1, 3, 0.0 + 0.333333*I, 0.0 + 0.666666*I, 0.0 + 0.666666*I );
@@ -137,9 +137,9 @@ void test_vector_normalized_3( void )
    CU_ASSERT( cf_matvec_is_column_vector( cfm ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( cfm, cfm2, 0.001 ) == 1 );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
-   cf_matvec_dispose( cfm2 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
+   cf_matvec_dispose( &cfm2 );
 
    return;
 }
@@ -163,9 +163,9 @@ void test_vector_normalized_4( void )
    CU_ASSERT( cd_matvec_is_row_vector( cdm ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( cdm, cdm2, 0.001 ) == 1 );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
-   cd_matvec_dispose( cdm2 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
+   cd_matvec_dispose( &cdm2 );
 
    cdm1 = cd_matvec_make_from_args( 3, 1, 3, 0.0 + 1.0*I, 0.0 + 2.0*I, 0.0 + 2.0*I );
    cdm2 = cd_matvec_make_from_args( 3, 1, 3, 0.0 + 0.333333*I, 0.0 + 0.666666*I, 0.0 + 0.666666*I );
@@ -175,9 +175,9 @@ void test_vector_normalized_4( void )
    CU_ASSERT( cd_matvec_is_column_vector( cdm ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( cdm, cdm2, 0.001 ) == 1 );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
-   cd_matvec_dispose( cdm2 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
+   cd_matvec_dispose( &cdm2 );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file Fft_test_set_output.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Fft_make"
+ @version 2.0.0
+ @brief: "tests for Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Fft_make.
+ Unit tests for Fft_t
 
 */
 
@@ -54,8 +54,8 @@ void test_set_output_1( void )
    CU_ASSERT( v != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_output( cffft ), v, 0.000001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
 
    return;
 }
@@ -78,8 +78,8 @@ void test_set_output_2( void )
    CU_ASSERT( v != NULL );
    CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_output( cdfft ), v, 0.000001 ) == 1 );
 
-   cd_fft_dispose_with_contents( cdfft );
-   cd_matvec_dispose( v );
+   cd_fft_deep_dispose( &cdfft );
+   cd_matvec_dispose( &v );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file Fft_test_make.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Fft_make"
+ @version 2.0.0
+ @brief: "tests for Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Fft_make.
+ Unit tests for Fft_t
 
 */
 
@@ -48,7 +48,7 @@ void test_make_1( void )
 
    CU_ASSERT( cffft != NULL );
 
-   cf_fft_dispose_with_contents( cffft );
+   cf_fft_deep_dispose( &cffft );
 
    return;
 }
@@ -65,7 +65,7 @@ void test_make_2( void )
 
    CU_ASSERT( cdfft != NULL );
 
-   cd_fft_dispose_with_contents( cdfft );
+   cd_fft_deep_dispose( &cdfft );
 
    return;
 }

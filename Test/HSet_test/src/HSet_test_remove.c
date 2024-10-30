@@ -1,7 +1,7 @@
 /**
  @file HSet_test_remove.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_put.
+ Unit tests for HSet_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -50,7 +51,7 @@ void test_remove_1( void )
    
    CU_ASSERT( i_hset_count( hset ) == 0 );
    
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -81,7 +82,7 @@ void test_remove_2( void )
    CU_ASSERT( i_hset_has( hset, 24 ) == 0 );
    CU_ASSERT( i_hset_has( hset, 13 ) == 0 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -111,7 +112,7 @@ void test_remove_3( void )
    CU_ASSERT( i_hset_has( hset, 24 ) == 0 );
    CU_ASSERT( i_hset_has( hset, 13 ) == 1 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -140,7 +141,7 @@ void test_remove_4( void )
    CU_ASSERT( i_hset_has( hset, 13 ) == 1 );
    CU_ASSERT( i_hset_has( hset, 7 ) == 0 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -169,7 +170,41 @@ void test_remove_5( void )
    CU_ASSERT( i_hset_has( hset, 13 ) == 1 );
    CU_ASSERT( i_hset_has( hset, 39 ) == 1 );
 
-   i_hset_dispose( hset );
+   i_hset_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_remove_6
+*/
+
+void test_remove_6( void )
+{
+   s_hset_t *hset = NULL;
+
+   hset = s_hset_make();
+
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   string_t *s3 = string_make_from_cstring( "c" ); 
+   
+   s_hset_put( hset, s1 );
+   s_hset_put( hset, s2 );
+   s_hset_put( hset, s3 );
+
+   CU_ASSERT( s_hset_has( hset, s1 ) == 1 );
+   CU_ASSERT( s_hset_has( hset, s2 ) == 1 );
+   CU_ASSERT( s_hset_has( hset, s3 ) == 1 );
+
+   s_hset_remove( hset, s1 );
+
+   CU_ASSERT( s_hset_has( hset, s1 ) == 0 );
+   CU_ASSERT( s_hset_has( hset, s2 ) == 1 );
+   CU_ASSERT( s_hset_has( hset, s3 ) == 1 );
+
+   string_deep_dispose( &s1 );
+   s_hset_deep_dispose( &hset );
 
    return;
 }
@@ -203,6 +238,9 @@ add_test_remove( void )
 
    // test_make_5
    add_test_to_suite( p_suite, test_remove_5, "test_remove_5" );
+
+   // test_make_6
+   add_test_to_suite( p_suite, test_remove_6, "test_remove_6" );
 
    return CUE_SUCCESS;
 

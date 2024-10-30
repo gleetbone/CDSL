@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_as_array.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -51,7 +51,7 @@ void test_as_array_1( void )
    CU_ASSERT( array[1] == 2.0 );
    CU_ASSERT( array[2] == 3.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    fm = f_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 3.0 );
    array = f_matvec_as_array( fm );
@@ -62,7 +62,7 @@ void test_as_array_1( void )
    CU_ASSERT( array[1] == 2.0 );
    CU_ASSERT( array[2] == 3.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    fm = f_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 3.0, 4.0 );
    array = f_matvec_as_array( fm );
@@ -73,7 +73,7 @@ void test_as_array_1( void )
    CU_ASSERT( array[2] == 3.0 );
    CU_ASSERT( array[3] == 4.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    return;
 }
@@ -96,7 +96,7 @@ void test_as_array_2( void )
    CU_ASSERT( array[1] == 2.0 );
    CU_ASSERT( array[2] == 3.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    dm = d_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 3.0 );
    array = d_matvec_as_array( dm );
@@ -107,7 +107,7 @@ void test_as_array_2( void )
    CU_ASSERT( array[1] == 2.0 );
    CU_ASSERT( array[2] == 3.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    dm = d_matvec_make_from_args( 2, 2, 4, 1.0, 2.0, 3.0, 4.0 );
    array = d_matvec_as_array( dm );
@@ -118,7 +118,7 @@ void test_as_array_2( void )
    CU_ASSERT( array[2] == 3.0 );
    CU_ASSERT( array[3] == 4.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    return;
 }
@@ -141,7 +141,7 @@ void test_as_array_3( void )
    CU_ASSERT( array[1] == 2.0 + 2.0*I );
    CU_ASSERT( array[2] == 3.0 + 3.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    cfm = cf_matvec_make_from_args( 3, 1, 3, 1.0 + 1.0*I, 2.0 + 2.0*I, 3.0 + 3.0*I );
    array = cf_matvec_as_array( cfm );
@@ -152,7 +152,7 @@ void test_as_array_3( void )
    CU_ASSERT( array[1] == 2.0 + 2.0*I );
    CU_ASSERT( array[2] == 3.0 + 3.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    cfm = cf_matvec_make_from_args( 2, 2, 4, 1.0 + 1.0*I, 2.0 + 2.0*I, 3.0 + 3.0*I, 4.0 + 4.0*I );
    array = cf_matvec_as_array( cfm );
@@ -163,7 +163,7 @@ void test_as_array_3( void )
    CU_ASSERT( array[2] == 3.0 + 3.0*I );
    CU_ASSERT( array[3] == 4.0 + 4.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    return;
 }
@@ -186,7 +186,7 @@ void test_as_array_4( void )
    CU_ASSERT( array[1] == 2.0 + 2.0*I );
    CU_ASSERT( array[2] == 3.0 + 3.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    cdm = cd_matvec_make_from_args( 3, 1, 3, 1.0 + 1.0*I, 2.0 + 2.0*I, 3.0 + 3.0*I );
    array = cd_matvec_as_array( cdm );
@@ -197,7 +197,7 @@ void test_as_array_4( void )
    CU_ASSERT( array[1] == 2.0 + 2.0*I );
    CU_ASSERT( array[2] == 3.0 + 3.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    cdm = cd_matvec_make_from_args( 2, 2, 4, 1.0 + 1.0*I, 2.0 + 2.0*I, 3.0 + 3.0*I, 4.0 + 4.0*I );
    array = cd_matvec_as_array( cdm );
@@ -208,7 +208,7 @@ void test_as_array_4( void )
    CU_ASSERT( array[2] == 3.0 + 3.0*I );
    CU_ASSERT( array[3] == 4.0 + 4.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    return;
 }

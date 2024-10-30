@@ -1,7 +1,7 @@
 /**
  @file string_test_capacity.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -42,7 +42,7 @@ void test_capacity_1( void )
    
    CU_ASSERT( string_capacity( string ) == 13 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -59,7 +59,7 @@ void test_capacity_2( void )
    
    CU_ASSERT( string_capacity( string ) == 5 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }

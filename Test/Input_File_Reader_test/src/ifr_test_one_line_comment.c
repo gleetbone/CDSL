@@ -1,8 +1,8 @@
 /**
  @file ifr_test_one_line_comment.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_test_one_line_comment"
+ @version 2.0.0
+ @brief: "tests for ifr_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for ifr_t
 
 */
 
@@ -37,7 +37,7 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 void test_one_line_comment_1( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
+   string_t *file_name = NULL;
    s_dlist_t *list = NULL;
    
    string_t *t1 = NULL;
@@ -52,9 +52,9 @@ void test_one_line_comment_1( void )
    t4 = string_make_from_cstring( "--" );
    t5 = string_make_from_cstring( "four" );
    
-   filename = string_make_from_cstring( "src/input_files/f_one_line_comment.txt" );
+   file_name = string_make_from_cstring( "src/input_files/f_one_line_comment.txt" );
    
-   ifr = ifr_make( filename );
+   ifr = ifr_make( file_name );
 
    ifr_forth( ifr );
    
@@ -82,13 +82,13 @@ void test_one_line_comment_1( void )
    
    CU_ASSERT( string_is_equal( s_dlist_item_at( list ), t5 ) == 1 );
  
-   ifr_dispose( ifr );
-   string_dispose_with_contents( filename );
-   string_dispose_with_contents( t1 );
-   string_dispose_with_contents( t2 );
-   string_dispose_with_contents( t3 );
-   string_dispose_with_contents( t4 );
-   string_dispose_with_contents( t5 );
+   ifr_deep_dispose( &ifr );
+   string_deep_dispose( &file_name );
+   string_deep_dispose( &t1 );
+   string_deep_dispose( &t2 );
+   string_deep_dispose( &t3 );
+   string_deep_dispose( &t4 );
+   string_deep_dispose( &t5 );
    
    return;
 }
@@ -100,9 +100,9 @@ void test_one_line_comment_1( void )
 void test_one_line_comment_2( void )
 {
    ifr_t *ifr = NULL;
-   string_t *filename = NULL;
+   string_t *file_name = NULL;
    s_dlist_t *list = NULL;
-   int32_t skip_comments = 0;
+   int32_t is_skip_comments = 0;
    
    string_t *t1 = NULL;
    string_t *t2 = NULL;
@@ -112,14 +112,14 @@ void test_one_line_comment_2( void )
    t2 = string_make_from_cstring( "two" );
    t3 = string_make_from_cstring( "three" );
    
-   filename = string_make_from_cstring( "src/input_files/f_one_line_comment.txt" );
+   file_name = string_make_from_cstring( "src/input_files/f_one_line_comment.txt" );
    
-   ifr = ifr_make( filename );
-   ifr_set_skip_comments( ifr, 1 );
+   ifr = ifr_make( file_name );
+   ifr_put_is_skip_comments( ifr, 1 );
 
-   skip_comments = ifr_skip_comments( ifr );
+   is_skip_comments = ifr_is_skip_comments( ifr );
 
-   CU_ASSERT( skip_comments == 1 );
+   CU_ASSERT( is_skip_comments == 1 );
 
    ifr_forth( ifr );
    
@@ -140,11 +140,11 @@ void test_one_line_comment_2( void )
    CU_ASSERT( string_is_equal( s_dlist_item_at( list ), t3 ) == 1 );
  
       
-   ifr_dispose( ifr );
-   string_dispose_with_contents( filename );
-   string_dispose_with_contents( t1 );
-   string_dispose_with_contents( t2 );
-   string_dispose_with_contents( t3 );
+   ifr_deep_dispose( &ifr );
+   string_deep_dispose( &file_name );
+   string_deep_dispose( &t1 );
+   string_deep_dispose( &t2 );
+   string_deep_dispose( &t3 );
    
    return;
 }

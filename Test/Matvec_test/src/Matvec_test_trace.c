@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_trace.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -48,7 +48,7 @@ void test_trace_1( void )
    CU_ASSERT( fm != NULL );
    CU_ASSERT( x == 5.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    fm = f_matvec_make_from_args( 2, 2, 4, 0.0, 2.0, 3.0, 4.0 );
    x = f_matvec_trace( fm );
@@ -56,7 +56,7 @@ void test_trace_1( void )
    CU_ASSERT( fm != NULL );
    CU_ASSERT( x == 4.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    return;
 }
@@ -75,7 +75,7 @@ void test_trace_2( void )
    CU_ASSERT( dm != NULL );
    CU_ASSERT( x == 5.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    return;
 }
@@ -96,7 +96,7 @@ void test_trace_3( void )
    CU_ASSERT( cfm != NULL );
    CU_ASSERT( x == 5.0 + 5.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    return;
 }
@@ -116,7 +116,7 @@ void test_trace_4( void )
    CU_ASSERT( cdm != NULL );
    CU_ASSERT( x == 5.0 + 5.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    return;
 }

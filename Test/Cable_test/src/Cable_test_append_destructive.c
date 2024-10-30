@@ -1,7 +1,7 @@
 /**
  @file Cable_test_append_destructive.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -59,7 +59,7 @@ void test_append_destructive_1( void )
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdx" ) == 1 );
    CU_ASSERT( cable1 == NULL );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -84,7 +84,7 @@ void test_append_destructive_2( void )
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdxyz" ) == 1 );
    CU_ASSERT( cable1 == NULL );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -109,7 +109,7 @@ void test_append_destructive_3( void )
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefghijx" ) == 1 );
    CU_ASSERT( cable1 == NULL );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -134,7 +134,7 @@ void test_append_destructive_4( void )
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefghijxyz" ) == 1 );
    CU_ASSERT( cable1 == NULL );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

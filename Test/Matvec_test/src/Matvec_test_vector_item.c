@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_vector_item.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -49,7 +49,7 @@ void test_vector_item_1( void )
    CU_ASSERT( f_matvec_vector_item( fm, 1 ) == 2.0 );
    CU_ASSERT( f_matvec_vector_item( fm, 2 ) == 3.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    fm = f_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 3.0 );
 
@@ -59,7 +59,7 @@ void test_vector_item_1( void )
    CU_ASSERT( f_matvec_vector_item( fm, 1 ) == 2.0 );
    CU_ASSERT( f_matvec_vector_item( fm, 2 ) == 3.0 );
 
-   f_matvec_dispose( fm );
+   f_matvec_dispose( &fm );
 
    return;
 }
@@ -80,7 +80,7 @@ void test_vector_item_2( void )
    CU_ASSERT( d_matvec_vector_item( dm, 1 ) == 2.0 );
    CU_ASSERT( d_matvec_vector_item( dm, 2 ) == 3.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    dm = d_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 3.0 );
 
@@ -90,7 +90,7 @@ void test_vector_item_2( void )
    CU_ASSERT( d_matvec_vector_item( dm, 1 ) == 2.0 );
    CU_ASSERT( d_matvec_vector_item( dm, 2 ) == 3.0 );
 
-   d_matvec_dispose( dm );
+   d_matvec_dispose( &dm );
 
    return;
 }
@@ -111,7 +111,7 @@ void test_vector_item_3( void )
    CU_ASSERT( cf_matvec_vector_item( cfm, 1 ) == 2.0 + 2.0*I );
    CU_ASSERT( cf_matvec_vector_item( cfm, 2 ) == 3.0 + 3.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    cfm = cf_matvec_make_from_args( 3, 1, 3, 1.0 + 1.0*I, 2.0 + 2.0*I, 3.0 + 3.0*I );
 
@@ -121,7 +121,7 @@ void test_vector_item_3( void )
    CU_ASSERT( cf_matvec_vector_item( cfm, 1 ) == 2.0 + 2.0*I );
    CU_ASSERT( cf_matvec_vector_item( cfm, 2 ) == 3.0 + 3.0*I );
 
-   cf_matvec_dispose( cfm );
+   cf_matvec_dispose( &cfm );
 
    return;
 }
@@ -142,7 +142,7 @@ void test_vector_item_4( void )
    CU_ASSERT( cd_matvec_vector_item( cdm, 1 ) == 2.0 + 2.0*I );
    CU_ASSERT( cd_matvec_vector_item( cdm, 2 ) == 3.0 + 3.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    cdm = cd_matvec_make_from_args( 3, 1, 3, 1.0 + 1.0*I, 2.0 + 2.0*I, 3.0 + 3.0*I );
 
@@ -153,7 +153,7 @@ void test_vector_item_4( void )
    CU_ASSERT( cd_matvec_vector_item( cdm, 1 ) == 2.0 + 2.0*I );
    CU_ASSERT( cd_matvec_vector_item( cdm, 2 ) == 3.0 + 3.0*I );
 
-   cd_matvec_dispose( cdm );
+   cd_matvec_dispose( &cdm );
 
    return;
 }

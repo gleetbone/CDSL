@@ -1,7 +1,7 @@
 /**
  @file Cable_test_hash_code.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -52,7 +52,7 @@ void test_hash_code_1( void )
    CU_ASSERT( cable != NULL );
    CU_ASSERT( cable_hash_code( cable ) == 1633837924 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -70,7 +70,7 @@ void test_hash_code_2( void )
    CU_ASSERT( cable != NULL );
    CU_ASSERT( cable_hash_code( cable ) == 156759146 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

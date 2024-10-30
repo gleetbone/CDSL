@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_key_at.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_kv_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_BSTree_kv.h"
+#include "ss_BSTree_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -46,7 +47,7 @@ void test_key_at_1( void )
 
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 1 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -74,7 +75,7 @@ void test_key_at_2( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 3 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -102,7 +103,7 @@ void test_key_at_3( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 3 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -130,7 +131,7 @@ void test_key_at_4( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 3 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -166,7 +167,7 @@ void test_key_at_5( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 6 );
   
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -202,7 +203,7 @@ void test_key_at_6( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 6 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -238,7 +239,7 @@ void test_key_at_7( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 6 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -274,7 +275,57 @@ void test_key_at_8( void )
    ii_bstree_kv_forth( bstree );
    CU_ASSERT( ii_bstree_kv_key_at( bstree ) == 7 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_key_at_9
+*/
+
+void test_key_at_9( void )
+{
+   ss_bstree_kv_t *bstree = NULL;
+   
+   string_t *s2 = NULL;
+   string_t *s20 = NULL;
+   string_t *s4 = NULL;
+   string_t *s40 = NULL;
+   string_t *s6 = NULL;
+   string_t *s60 = NULL;
+   string_t *s7 = NULL;
+   string_t *s70 = NULL;
+   
+   s2 = string_make_from_cstring( "2" );
+   s20 = string_make_from_cstring( "20" );
+   s4 = string_make_from_cstring( "4" );
+   s40 = string_make_from_cstring( "40" );
+   s6 = string_make_from_cstring( "6" );
+   s60 = string_make_from_cstring( "60" );
+   s7 = string_make_from_cstring( "7" );
+   s70 = string_make_from_cstring( "70" );
+   
+   bstree = ss_bstree_kv_make();
+   
+   ss_bstree_kv_put( bstree, s40, s4 );
+   ss_bstree_kv_put( bstree, s20, s2 );
+   ss_bstree_kv_put( bstree, s60, s6 );
+   ss_bstree_kv_put( bstree, s70, s7 );
+   
+   ss_bstree_kv_start( bstree );
+   CU_ASSERT( ss_bstree_kv_key_at( bstree ) == s2 );
+
+   ss_bstree_kv_forth( bstree );
+   CU_ASSERT( ss_bstree_kv_key_at( bstree ) == s4 );
+
+   ss_bstree_kv_forth( bstree );
+   CU_ASSERT( ss_bstree_kv_key_at( bstree ) == s6 );
+
+   ss_bstree_kv_forth( bstree );
+   CU_ASSERT( ss_bstree_kv_key_at( bstree ) == s7 );
+ 
+   ss_bstree_kv_deep_dispose( &bstree );
 
    return;
 }
@@ -317,6 +368,9 @@ add_test_key_at( void )
 
    // test_key_at_8
    add_test_to_suite( p_suite, test_key_at_8, "test_key_at_8" );
+
+   // test_key_at_9
+   add_test_to_suite( p_suite, test_key_at_9, "test_key_at_9" );
 
    return CUE_SUCCESS;
    

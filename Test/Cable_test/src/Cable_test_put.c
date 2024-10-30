@@ -1,7 +1,7 @@
 /**
  @file Cable_test_put.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -63,7 +63,7 @@ void test_put_1( void )
    CU_ASSERT( cable_item( cable, 2 ) == 'y' );
    CU_ASSERT( cable_item( cable, 3 ) == 'z' );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -104,7 +104,7 @@ void test_put_2( void )
    CU_ASSERT( cable_item( cable, 8 ) == 'E' );
    CU_ASSERT( cable_item( cable, 9 ) == 'F' );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

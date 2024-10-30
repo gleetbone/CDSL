@@ -1,7 +1,7 @@
 /**
  @file cd_Matvec.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "implementation file for matrices of complex doubles"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 

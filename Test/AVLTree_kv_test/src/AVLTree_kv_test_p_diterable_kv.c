@@ -1,7 +1,7 @@
 /**
  @file AVLTree_test_p_diterable_kv.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree P_DIterable"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_kv_t
 
 */
 
@@ -26,8 +26,10 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_AVLTree_kv.h"
+#include "ss_AVLTree_kv.h"
 #include "Protocol_Base.h"
 #include "ii_DIterable_kv.h"
+#include "ss_DIterable_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -47,9 +49,7 @@ void test_p_diterable_kv_1( void )
    CU_ASSERT( tree != NULL );
    CU_ASSERT( pb_tree != NULL );
 
-   CU_ASSERT( ii_diterable_kv_dispose_f( pb_tree ) == ii_avltree_kv_dispose );
-
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
  
    return;
 }
@@ -69,9 +69,7 @@ void test_p_diterable_kv_2( void )
    CU_ASSERT( tree != NULL );
    CU_ASSERT( pb_tree != NULL );
 
-   CU_ASSERT( ii_diterable_kv_dispose_with_contents_f( pb_tree ) == ii_avltree_kv_dispose_with_contents );
-
-   ii_diterable_kv_dispose_with_contents( pb_tree );
+   ii_avltree_kv_deep_dispose( &tree );
 
    return;
 }
@@ -93,10 +91,9 @@ void test_p_diterable_kv_3( void )
 
    ii_avltree_kv_put( tree, 24, 240 );
 
-   CU_ASSERT( ii_diterable_kv_count_f( pb_tree ) == ii_avltree_kv_count );
    CU_ASSERT( ii_diterable_kv_count( pb_tree ) == 1 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -119,10 +116,9 @@ void test_p_diterable_kv_4( void )
    ii_avltree_kv_put( tree, 24, 240 );
    ii_avltree_kv_start( tree );
 
-   CU_ASSERT( ii_diterable_kv_value_f( pb_tree ) == ii_avltree_kv_item_at );
    CU_ASSERT( ii_diterable_kv_value( pb_tree) == 24 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -145,10 +141,9 @@ void test_p_diterable_kv_4a( void )
    ii_avltree_kv_put( tree, 24, 240 );
    ii_avltree_kv_start( tree );
 
-   CU_ASSERT( ii_diterable_kv_key_f( pb_tree ) == ii_avltree_kv_key_at );
    CU_ASSERT( ii_diterable_kv_key( pb_tree) == 240 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -170,10 +165,9 @@ void test_p_diterable_kv_5( void )
 
    ii_avltree_kv_put( tree, 24, 240 );
 
-   CU_ASSERT( ii_diterable_kv_off_f( pb_tree ) == ii_avltree_kv_off );
    CU_ASSERT( ii_diterable_kv_off( pb_tree ) == 1 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -193,10 +187,9 @@ void test_p_diterable_kv_6( void )
    CU_ASSERT( tree != NULL );
    CU_ASSERT( pb_tree != NULL );
 
-   CU_ASSERT( ii_diterable_kv_is_empty_f( pb_tree ) == ii_avltree_kv_is_empty );
    CU_ASSERT( ii_diterable_kv_is_empty( pb_tree ) == 1 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -219,10 +212,9 @@ void test_p_diterable_kv_7( void )
    ii_avltree_kv_put( tree, 24, 240 );
    ii_diterable_kv_start( pb_tree );
 
-   CU_ASSERT( ii_diterable_kv_value_f( pb_tree ) == ii_avltree_kv_item_at );
    CU_ASSERT( ii_diterable_kv_value( pb_tree) == 24 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -248,10 +240,9 @@ void test_p_diterable_kv_8( void )
    ii_avltree_kv_start( tree );
    ii_diterable_kv_forth( pb_tree );
 
-   CU_ASSERT( ii_diterable_kv_forth_f( pb_tree ) == ii_avltree_kv_forth );
    CU_ASSERT( ii_diterable_kv_value( pb_tree) == 24 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -275,10 +266,9 @@ void test_p_diterable_kv_9( void )
    ii_avltree_kv_put( tree, 13, 130 );
    ii_diterable_kv_finish( pb_tree );
 
-   CU_ASSERT( ii_diterable_kv_finish_f( pb_tree ) == ii_avltree_kv_finish );
    CU_ASSERT( ii_diterable_kv_value( pb_tree) == 24 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
@@ -304,13 +294,51 @@ void test_p_diterable_kv_10( void )
    ii_avltree_kv_finish( tree );
    ii_diterable_kv_back( pb_tree );
 
-   CU_ASSERT( ii_diterable_kv_back_f( pb_tree ) == ii_avltree_kv_back );
    CU_ASSERT( ii_diterable_kv_value( pb_tree) == 13 );
 
-   ii_diterable_kv_dispose( pb_tree );
+   ii_avltree_kv_dispose( &tree );
 
    return;
 }
+
+/**
+   test_p_diterable_kv_11
+*/
+
+void test_p_diterable_kv_11( void )
+{
+   ss_avltree_kv_t *tree = NULL;
+   protocol_base_t *pb_tree = NULL;
+
+   string_t *s1 = NULL;
+   string_t *s10 = NULL;
+   string_t *s2 = NULL;
+   string_t *s20 = NULL;
+   
+   s1 = string_make_from_cstring( "1" );
+   s10 = string_make_from_cstring( "10" );
+   s2 = string_make_from_cstring( "2" );
+   s20 = string_make_from_cstring( "20" );
+   
+   tree = ss_avltree_kv_make();
+   pb_tree = ( protocol_base_t * ) tree;
+
+   CU_ASSERT( tree != NULL );
+   CU_ASSERT( pb_tree != NULL );
+
+   ss_avltree_kv_put( tree, s20, s2 );
+   ss_avltree_kv_put( tree, s10, s1 );
+
+   ss_avltree_kv_finish( tree );
+   ss_diterable_kv_back( pb_tree );
+
+   CU_ASSERT( ss_diterable_kv_value( pb_tree) == s10 );
+
+   ss_avltree_kv_deep_dispose( &tree );
+
+   return;
+}
+
 
 int
 add_test_p_diterable_kv( void )
@@ -359,6 +387,9 @@ add_test_p_diterable_kv( void )
 
    // test_p_diterable_kv_10
    add_test_to_suite( p_suite, test_p_diterable_kv_10, "test_p_diterable_kv_10" );
+
+   // test_p_diterable_kv_11
+   add_test_to_suite( p_suite, test_p_diterable_kv_11, "test_p_diterable_kv_11" );
 
    return CUE_SUCCESS;
    

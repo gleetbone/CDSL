@@ -1,7 +1,7 @@
 /**
  @file ii_AVLTree_kv.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "implementation file for AVL tree of ints"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Defines for int_DList type.
+ Defines for ii_avltree_kv type.
 
 */
 
@@ -22,13 +22,17 @@
 extern "C" {
 #endif
  
-#define KEY_EQUALITY_FUNCTION( arg1, arg2 ) ( ( arg1 == arg2 ) )
+#define KEY_DEEP_EQUAL_FUNCTION( arg1, arg2 ) ( ( arg1 == arg2 ) )
+#define KEY_DEEP_DISPOSE_FUNCTION( arg )
+#define KEY_DEEP_CLONE_FUNCTION( arg ) ( arg )
+#define KEY_ORDER_FUNCTION( arg1, arg2 ) ( ( arg1 <= arg2  ) )
+#define KEY_DEFAULT 0
 
-#define KEY_DISPOSE_FUNCTION( arg )
-#define KEY_DUPLICATE_FUNCTION( arg ) ( arg )
-#define KEY_ORDER_FUNCTION( arg1, arg2 ) ( ( arg1 < arg2  ) )
-#define VALUE_DISPOSE_FUNCTION( arg )
-#define VALUE_DUPLICATE_FUNCTION( arg ) ( arg )
+#define VALUE_DEEP_EQUAL_FUNCTION( arg1, arg2 ) ( ( arg1 == arg2 ) )
+#define VALUE_DEEP_DISPOSE_FUNCTION( arg )
+#define VALUE_DEEP_CLONE_FUNCTION( arg ) ( arg )
+#define VALUE_ORDER_FUNCTION( arg1, arg2 ) ( ( arg1 <= arg2  ) )
+#define VALUE_DEFAULT 0
 
 #define PRE_FILE DBC_YES
 #define POST_FILE DBC_YES

@@ -1,7 +1,7 @@
 /**
  @file AVLTree_test_put.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_kv_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_AVLTree_kv.h"
+#include "ss_AVLTree_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -45,7 +46,7 @@ void test_put_1( void )
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 1 );
    CU_ASSERT( ii_avltree_kv_is_empty( avltree ) == 0 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -66,7 +67,7 @@ void test_put_2( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 3 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -87,7 +88,7 @@ void test_put_3( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 3 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -108,7 +109,7 @@ void test_put_4( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 3 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -134,7 +135,7 @@ void test_put_5( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 4 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -160,7 +161,7 @@ void test_put_6( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 4 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -186,7 +187,7 @@ void test_put_7( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 4 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
@@ -212,10 +213,51 @@ void test_put_8( void )
    
    CU_ASSERT( ii_avltree_kv_count( avltree ) == 4 );
  
-   ii_avltree_kv_dispose( avltree );
+   ii_avltree_kv_dispose( &avltree );
 
    return;
 }
+
+/**
+   test_put_9
+*/
+
+void test_put_9( void )
+{
+   ss_avltree_kv_t *avltree = NULL;
+   
+   string_t *s2 = NULL;
+   string_t *s20 = NULL;
+   string_t *s4 = NULL;
+   string_t *s40 = NULL;
+   string_t *s6 = NULL;
+   string_t *s60 = NULL;
+   string_t *s7 = NULL;
+   string_t *s70 = NULL;
+   
+   s2 = string_make_from_cstring( "2" );
+   s20 = string_make_from_cstring( "20" );
+   s4 = string_make_from_cstring( "4" );
+   s40 = string_make_from_cstring( "40" );
+   s6 = string_make_from_cstring( "6" );
+   s60 = string_make_from_cstring( "60" );
+   s7 = string_make_from_cstring( "7" );
+   s70 = string_make_from_cstring( "70" );
+   
+   avltree = ss_avltree_kv_make();
+   
+   ss_avltree_kv_put( avltree, s40, s4 );
+   ss_avltree_kv_put( avltree, s20, s2 );
+   ss_avltree_kv_put( avltree, s60, s6 );
+   ss_avltree_kv_put( avltree, s70, s7 );
+   
+   CU_ASSERT( ss_avltree_kv_count( avltree ) == 4 );
+ 
+   ss_avltree_kv_deep_dispose( &avltree );
+
+   return;
+}
+
 
 int
 add_test_put( void )
@@ -255,6 +297,9 @@ add_test_put( void )
 
    // test_put_8
    add_test_to_suite( p_suite, test_put_8, "test_put_8" );
+
+   // test_put_9
+   add_test_to_suite( p_suite, test_put_9, "test_put_9" );
 
    return CUE_SUCCESS;
    

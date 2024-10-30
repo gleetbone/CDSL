@@ -1,7 +1,7 @@
 /**
  @file string_test_as_float64.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -42,7 +42,7 @@ void test_as_float64_1( void )
    
    CU_ASSERT( string_as_float64( string ) == 0.0 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -59,7 +59,7 @@ void test_as_float64_2( void )
    
    CU_ASSERT( string_as_float64( string ) == 123.0 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_as_float64_3( void )
    
    CU_ASSERT( string_as_float64( string ) == 123.25 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -93,7 +93,7 @@ void test_as_float64_4( void )
    
    CU_ASSERT( string_as_float64( string ) == 100.0 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -110,7 +110,7 @@ void test_as_float64_5( void )
    
    CU_ASSERT( string_as_float64( string ) == 0.125 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -127,7 +127,7 @@ void test_as_float64_6( void )
    
    CU_ASSERT( string_as_float64( string ) == 1250.0 );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }

@@ -17,13 +17,16 @@ int
 add_test_make( void );
 
 int
-add_test_make_from( void );
-
-int
-add_test_make_duplicate_from( void );
-
-int
 add_test_make_from_array( void );
+
+int
+add_test_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_clone( void );
 
 int
 add_test_cursor_make( void );
@@ -32,7 +35,7 @@ int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
 add_test_cursor_dispose( void );
@@ -78,6 +81,9 @@ add_test_cursor_off( void );
 
 int
 add_test_is_empty( void );
+
+int
+add_test_is_equal( void );
 
 int
 add_test_is_first( void );
@@ -254,10 +260,49 @@ int
 add_test_wipe_out_and_dispose( void );
 
 int
+add_test_has( void );
+
+int
+add_test_has_eq_fn( void );
+
+int
+add_test_search_forth( void );
+
+int
+add_test_search_forth_eq_fn( void );
+
+int
+add_test_search_back( void );
+
+int
+add_test_search_back_eq_fn( void );
+
+int
+add_test_cursor_search_forth( void );
+
+int
+add_test_cursor_search_forth_eq_fn( void );
+
+int
+add_test_cursor_search_back( void );
+
+int
+add_test_cursor_search_back_eq_fn( void );
+
+int
+add_test_occurrences( void );
+
+int
+add_test_occurrences_eq_fn( void );
+
+int
+add_test_swap( void );
+
+int
 add_test_sort( void );
 
 int
-add_test_p_clonable( void );
+add_test_p_basic( void );
 
 int
 add_test_p_indexable( void );
@@ -308,12 +353,13 @@ int main()
    // add tests for AList_make
 
    add_test_make();
-   add_test_make_from();
-   add_test_make_duplicate_from();
    add_test_make_from_array();
+   add_test_clone();
+   add_test_copy();
+   add_test_deep_clone();
    add_test_cursor_make();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_deep_dispose();
    add_test_cursor_dispose();
    add_test_cursor_item_at();
    add_test_item_at();
@@ -329,6 +375,7 @@ int main()
    add_test_off();
    add_test_cursor_off();
    add_test_is_empty();
+   add_test_is_equal();
    add_test_is_first();
    add_test_is_last();
    add_test_index();
@@ -388,8 +435,22 @@ int main()
    add_test_wipe_out();
    add_test_wipe_out_and_dispose();
    
+   add_test_has();
+   add_test_has_eq_fn();
+   add_test_search_forth();
+   add_test_search_forth_eq_fn();
+   add_test_search_back();
+   add_test_search_back_eq_fn();
+   add_test_cursor_search_forth();
+   add_test_cursor_search_forth_eq_fn();
+   add_test_cursor_search_back();
+   add_test_cursor_search_back_eq_fn();
+   add_test_occurrences();
+   add_test_occurrences_eq_fn();
+   add_test_swap();
+   
    add_test_sort();
-   add_test_p_clonable();
+   add_test_p_basic();
    add_test_p_indexable();
    add_test_p_iterable();
    add_test_p_diterable();

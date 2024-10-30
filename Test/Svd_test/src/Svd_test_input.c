@@ -1,7 +1,7 @@
 /**
  @file Svd_test_input.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Svd_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -57,7 +57,7 @@ void test_input_1( void )
    CU_ASSERT( m != NULL );
    CU_ASSERT( m == m1 );
 
-   f_svd_dispose_with_contents( fsvd );
+   f_svd_deep_dispose( &fsvd );
 
    return;
 }
@@ -80,7 +80,7 @@ void test_input_2( void )
    CU_ASSERT( m != NULL );
    CU_ASSERT( m == m1 );
 
-   d_svd_dispose_with_contents( dsvd );
+   d_svd_deep_dispose( &dsvd );
 
    return;
 }
@@ -105,7 +105,7 @@ void test_input_3( void )
    CU_ASSERT( m != NULL );
    CU_ASSERT( m == m1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
+   cf_svd_deep_dispose( &cfsvd );
 
    return;
 }
@@ -129,7 +129,7 @@ void test_input_4( void )
    CU_ASSERT( m != NULL );
    CU_ASSERT( m == m1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
+   cd_svd_deep_dispose( &cdsvd );
 
    return;
 }

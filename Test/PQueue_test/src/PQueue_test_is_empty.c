@@ -1,7 +1,7 @@
 /**
  @file PQueue_test_is_empty.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for PQueue_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -46,7 +46,7 @@ void test_is_empty_1( void )
 
    CU_ASSERT( int_pqueue_is_empty( pqueue ) == 0 );
 
-   int_pqueue_dispose( pqueue );
+   int_pqueue_dispose( &pqueue );
 
    return;
 }
@@ -79,7 +79,7 @@ void test_is_empty_2( void )
 
    CU_ASSERT( int_pqueue_is_empty( pqueue ) == 1 );
 
-   int_pqueue_dispose( pqueue );
+   int_pqueue_dispose( &pqueue );
 
    return;
 }

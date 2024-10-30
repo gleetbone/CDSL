@@ -1,7 +1,7 @@
 /**
  @file RBTree_test_back.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_make.
+ Unit tests for RBTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_RBTree.h"
+#include "s_RBTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -48,7 +49,7 @@ void test_back_1( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -79,7 +80,7 @@ void test_back_2( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -110,7 +111,7 @@ void test_back_3( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -141,7 +142,7 @@ void test_back_4( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -180,7 +181,7 @@ void test_back_5( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
   
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -219,7 +220,7 @@ void test_back_6( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -258,7 +259,7 @@ void test_back_7( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
    return;
 }
@@ -297,8 +298,52 @@ void test_back_8( void )
    i_rbtree_back( rbtree );
    CU_ASSERT( i_rbtree_off( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
+   i_rbtree_dispose( &rbtree );
    
+   return;
+}
+
+/**
+   test_back_9
+   
+            4
+         2      6
+                  7   
+*/
+
+void test_back_9( void )
+{
+   s_rbtree_t *rbtree = NULL;
+   
+   rbtree = s_rbtree_make();
+   
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   string_t *s7 = string_make_from_cstring( "7" );
+   
+   s_rbtree_put( rbtree, s4 );
+   s_rbtree_put( rbtree, s2 );
+   s_rbtree_put( rbtree, s6 );
+   s_rbtree_put( rbtree, s7 );
+   
+   s_rbtree_finish( rbtree );
+   CU_ASSERT( s_rbtree_item_at( rbtree ) == s7 );
+ 
+   s_rbtree_back( rbtree );
+   CU_ASSERT( s_rbtree_item_at( rbtree ) == s6 );
+ 
+   s_rbtree_back( rbtree );
+   CU_ASSERT( s_rbtree_item_at( rbtree ) == s4 );
+ 
+   s_rbtree_back( rbtree );
+   CU_ASSERT( s_rbtree_item_at( rbtree ) == s2 );
+ 
+   s_rbtree_back( rbtree );
+   CU_ASSERT( s_rbtree_off( rbtree ) == 1 );
+ 
+   s_rbtree_deep_dispose( &rbtree );
+
    return;
 }
 
@@ -340,6 +385,9 @@ add_test_back( void )
 
    // test_back_8
    add_test_to_suite( p_suite, test_back_8, "test_back_8" );
+
+   // test_back_9
+   add_test_to_suite( p_suite, test_back_9, "test_back_9" );
 
    return CUE_SUCCESS;
    

@@ -1,17 +1,17 @@
 /**
  @file Quaternion.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Quaternions"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function definitions for the opaque Quaternion_t type.
@@ -43,7 +43,7 @@ extern "C" {
 
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>   
+#include <math.h>
 #ifdef MULTITHREADED
 #include MULTITHREAD_INCLUDE
 #endif
@@ -53,8 +53,6 @@ extern "C" {
 /**
    defines
 */
-
-#define QUATERNION_TYPE 0xA5000B01
 
 #define DTOR (M_PI/180.0)
 #define RTOD (180.0/M_PI)
@@ -77,10 +75,10 @@ extern "C" {
 
 struct Quaternion_struct( Prefix )
 {
-   int32_t type;
-   int32_t item_type;
-   
-   // quaternion entries
+   int32_t _type;
+   int32_t _item_type;
+
+   // current entries
    Type q0;
    Type q1;
    Type q2;
@@ -119,25 +117,26 @@ void invariant( p )
 Quaternion_type( Prefix ) *
 Quaternion_make( Prefix )( Type q0, Type q1, Type q2, Type q3 )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set elements
-   (*quaternion).q0 = q0;
-   (*quaternion).q1 = q1;
-   (*quaternion).q2 = q2;
-   (*quaternion).q3 = q3;
+   (*result).q0 = q0;
+   (*result).q1 = q1;
+   (*result).q2 = q2;
+   (*result).q3 = q3;
 
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( quaternion );
+   INVARIANT( result );
 
-   return quaternion;
+   return result;
 }
 
 /**
@@ -147,25 +146,26 @@ Quaternion_make( Prefix )( Type q0, Type q1, Type q2, Type q3 )
 Quaternion_type( Prefix ) *
 Quaternion_make_default( Prefix )( void )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set elements
-   (*quaternion).q0 = 1.0;
-   (*quaternion).q1 = 0.0;
-   (*quaternion).q2 = 0.0;
-   (*quaternion).q3 = 0.0;
+   (*result).q0 = 1.0;
+   (*result).q1 = 0.0;
+   (*result).q2 = 0.0;
+   (*result).q3 = 0.0;
 
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( quaternion );
+   INVARIANT( result );
 
-   return quaternion;
+   return result;
 }
 
 /**
@@ -176,27 +176,28 @@ Quaternion_type( Prefix ) *
 Quaternion_make_from( Prefix )( Quaternion_type( Prefix ) *other )
 {
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
 
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set elements
-   (*quaternion).q0 = (*other).q0;
-   (*quaternion).q1 = (*other).q1;
-   (*quaternion).q2 = (*other).q2;
-   (*quaternion).q3 = (*other).q3;
+   (*result).q0 = (*other).q0;
+   (*result).q1 = (*other).q1;
+   (*result).q2 = (*other).q2;
+   (*result).q3 = (*other).q3;
 
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( quaternion );
+   INVARIANT( result );
 
-   return quaternion;
+   return result;
 }
 
 /**
@@ -208,25 +209,26 @@ Quaternion_make_from_array( Prefix )( Type *array )
 {
    PRECONDITION( "array not null", array != NULL );
 
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set elements
-   (*quaternion).q0 = array[0];
-   (*quaternion).q1 = array[1];
-   (*quaternion).q2 = array[2];
-   (*quaternion).q3 = array[3];
+   (*result).q0 = array[0];
+   (*result).q1 = array[1];
+   (*result).q2 = array[2];
+   (*result).q3 = array[3];
 
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( quaternion );
+   INVARIANT( result );
 
-   return quaternion;
+   return result;
 }
 
 /**
@@ -239,25 +241,26 @@ Quaternion_make_from_vector( Prefix )( Matvec_type( Mv_Prefix ) *matvec )
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 4 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 4 ) ) ) );
 
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    // set elements
-   (*quaternion).q0 = Matvec_vector_item( Mv_Prefix )( matvec, 0 );
-   (*quaternion).q1 = Matvec_vector_item( Mv_Prefix )( matvec, 1 );
-   (*quaternion).q2 = Matvec_vector_item( Mv_Prefix )( matvec, 2 );
-   (*quaternion).q3 = Matvec_vector_item( Mv_Prefix )( matvec, 3 );
+   (*result).q0 = Matvec_vector_item( Mv_Prefix )( matvec, 0 );
+   (*result).q1 = Matvec_vector_item( Mv_Prefix )( matvec, 1 );
+   (*result).q2 = Matvec_vector_item( Mv_Prefix )( matvec, 2 );
+   (*result).q3 = Matvec_vector_item( Mv_Prefix )( matvec, 3 );
 
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( quaternion );
+   INVARIANT( result );
 
-   return quaternion;
+   return result;
 }
 
 /**
@@ -270,32 +273,33 @@ Quaternion_make_from_rotation_about_vector( Prefix )( Type angle, Matvec_type( M
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 3 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 3 ) ) ) );
 
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Matvec_type( Mv_Prefix ) *v = Matvec_vector_normalized( Mv_Prefix )( matvec );
 
-   Type c = cos( angle/2.0 );
-   Type s = sin( angle/2.0 );
-   
+   Type c = cos( angle / 2.0 );
+   Type s = sin( angle / 2.0 );
+
    // set elements
-   (*quaternion).q0 = c;
-   (*quaternion).q1 = s*Matvec_vector_item( Mv_Prefix )( v, 0 );
-   (*quaternion).q2 = s*Matvec_vector_item( Mv_Prefix )( v, 1 );
-   (*quaternion).q3 = s*Matvec_vector_item( Mv_Prefix )( v, 2 );
+   (*result).q0 = c;
+   (*result).q1 = s * Matvec_vector_item( Mv_Prefix )( v, 0 );
+   (*result).q2 = s * Matvec_vector_item( Mv_Prefix )( v, 1 );
+   (*result).q3 = s * Matvec_vector_item( Mv_Prefix )( v, 2 );
 
-   Matvec_dispose( Mv_Prefix )( v );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Matvec_dispose( Mv_Prefix )( &v );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -308,32 +312,33 @@ Quaternion_make_from_rotation_degrees_about_vector( Prefix )( Type angle, Matvec
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 3 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 3 ) ) ) );
 
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Matvec_type( Mv_Prefix ) *v = Matvec_vector_normalized( Mv_Prefix )( matvec );
 
-   Type c = cos( DTOR*angle/2.0 );
-   Type s = sin( DTOR*angle/2.0 );
-   
+   Type c = cos( DTOR * angle / 2.0 );
+   Type s = sin( DTOR * angle / 2.0 );
+
    // set elements
-   (*quaternion).q0 = c;
-   (*quaternion).q1 = s*Matvec_vector_item( Mv_Prefix )( v, 0 );
-   (*quaternion).q2 = s*Matvec_vector_item( Mv_Prefix )( v, 1 );
-   (*quaternion).q3 = s*Matvec_vector_item( Mv_Prefix )( v, 2 );
+   (*result).q0 = c;
+   (*result).q1 = s * Matvec_vector_item( Mv_Prefix )( v, 0 );
+   (*result).q2 = s * Matvec_vector_item( Mv_Prefix )( v, 1 );
+   (*result).q3 = s * Matvec_vector_item( Mv_Prefix )( v, 2 );
 
-   Matvec_dispose( Mv_Prefix )( v );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Matvec_dispose( Mv_Prefix )( &v );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -343,33 +348,34 @@ Quaternion_make_from_rotation_degrees_about_vector( Prefix )( Type angle, Matvec
 Quaternion_type( Prefix ) *
 Quaternion_make_from_rotation_about_xyz( Prefix )( Type angle, Type x, Type y, Type z )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
-   Type c = cos( angle/2.0 );
-   Type s = sin( angle/2.0 );
-   Type d = sqrt( x*x + y*y + z*z );
-   
+   Type c = cos( angle / 2.0 );
+   Type s = sin( angle / 2.0 );
+   Type d = sqrt( x * x + y * y + z * z );
+
    // set elements
-   (*quaternion).q0 = c;
+   (*result).q0 = c;
    if ( d > 0.0 )
    {
-      d = 1.0/d;
-      (*quaternion).q1 = s*x*d;
-      (*quaternion).q2 = s*y*d;
-      (*quaternion).q3 = s*z*d;
+      d = 1.0 / d;
+      (*result).q1 = s * x * d;
+      (*result).q2 = s * y * d;
+      (*result).q3 = s * z * d;
    }
 
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   INVARIANT( quaternion );
+   INVARIANT( result );
 
-   return quaternion;
+   return result;
 }
 
 /**
@@ -379,33 +385,34 @@ Quaternion_make_from_rotation_about_xyz( Prefix )( Type angle, Type x, Type y, T
 Quaternion_type( Prefix ) *
 Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( Type angle, Type x, Type y, Type z )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
-   Type c = cos( DTOR*angle/2.0 );
-   Type s = sin( DTOR*angle/2.0 );
-   Type d = sqrt( x*x + y*y + z*z );
-   
+   Type c = cos( DTOR * angle / 2.0 );
+   Type s = sin( DTOR * angle / 2.0 );
+   Type d = sqrt( x * x + y * y + z * z );
+
    // set elements
-   (*quaternion).q0 = c;
+   (*result).q0 = c;
    if ( d > 0.0 )
    {
-      d = 1.0/d;
-      (*quaternion).q1 = s*x*d;
-      (*quaternion).q2 = s*y*d;
-      (*quaternion).q3 = s*z*d;
+      d = 1.0 / d;
+      (*result).q1 = s * x * d;
+      (*result).q2 = s * y * d;
+      (*result).q3 = s * z * d;
    }
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -415,42 +422,43 @@ Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( Type angle, Type x, T
 Quaternion_type( Prefix ) *
 Quaternion_make_from_roll_pitch_yaw( Prefix )( Type roll, Type pitch, Type yaw )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *qroll = NULL;
    Quaternion_type( Prefix ) *qpitch = NULL;
    Quaternion_type( Prefix ) *qyaw = NULL;
-   
+
    qroll = Quaternion_make_from_rotation_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
    qpitch = Quaternion_make_from_rotation_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
    qyaw = Quaternion_make_from_rotation_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
    q = Quaternion_multiplied( Prefix )( qyaw, qpitch  );
    Quaternion_multiply( Prefix )( q, qroll  );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( qroll  );
-   Quaternion_dispose( Prefix )( qpitch  );
-   Quaternion_dispose( Prefix )( qyaw  );
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &qroll  );
+   Quaternion_dispose( Prefix )( &qpitch  );
+   Quaternion_dispose( Prefix )( &qyaw  );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -460,42 +468,43 @@ Quaternion_make_from_roll_pitch_yaw( Prefix )( Type roll, Type pitch, Type yaw )
 Quaternion_type( Prefix ) *
 Quaternion_make_from_roll_pitch_yaw_degrees( Prefix )( Type roll, Type pitch, Type yaw )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *qroll = NULL;
    Quaternion_type( Prefix ) *qpitch = NULL;
    Quaternion_type( Prefix ) *qyaw = NULL;
-   
+
    qroll = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
    qpitch = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
    qyaw = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
    q = Quaternion_multiplied( Prefix )( qyaw, qpitch  );
    Quaternion_multiply( Prefix )( q, qroll  );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( qroll  );
-   Quaternion_dispose( Prefix )( qpitch  );
-   Quaternion_dispose( Prefix )( qyaw  );
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &qroll  );
+   Quaternion_dispose( Prefix )( &qpitch  );
+   Quaternion_dispose( Prefix )( &qyaw  );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -505,32 +514,33 @@ Quaternion_make_from_roll_pitch_yaw_degrees( Prefix )( Type roll, Type pitch, Ty
 Quaternion_type( Prefix ) *
 Quaternion_make_from_roll( Prefix )( Type roll )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -540,32 +550,33 @@ Quaternion_make_from_roll( Prefix )( Type roll )
 Quaternion_type( Prefix ) *
 Quaternion_make_from_roll_degrees( Prefix )( Type roll )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -575,32 +586,33 @@ Quaternion_make_from_roll_degrees( Prefix )( Type roll )
 Quaternion_type( Prefix ) *
 Quaternion_make_from_pitch( Prefix )( Type pitch )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -610,32 +622,33 @@ Quaternion_make_from_pitch( Prefix )( Type pitch )
 Quaternion_type( Prefix ) *
 Quaternion_make_from_pitch_degrees( Prefix )( Type pitch )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -645,32 +658,33 @@ Quaternion_make_from_pitch_degrees( Prefix )( Type pitch )
 Quaternion_type( Prefix ) *
 Quaternion_make_from_yaw( Prefix )( Type yaw )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 /**
@@ -680,32 +694,33 @@ Quaternion_make_from_yaw( Prefix )( Type yaw )
 Quaternion_type( Prefix ) *
 Quaternion_make_from_yaw_degrees( Prefix )( Type yaw )
 {
-   // allocate quaternion struct
-   Quaternion_type( Prefix ) * quaternion
+   // allocate result struct
+   Quaternion_type( Prefix ) * result
       = ( Quaternion_type( Prefix ) * ) calloc( 1, sizeof( Quaternion_type( Prefix ) ) );
+   CHECK( "result allocated correctly", result != NULL );
 
    // set type
-   (*quaternion).type = QUATERNION_TYPE;
-   (*quaternion).item_type = Type_Code;
+   (*result)._type = QUATERNION_TYPE;
+   (*result)._item_type = Type_Code;
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*result).q0 = (*q).q0;
+   (*result).q1 = (*q).q1;
+   (*result).q2 = (*q).q2;
+   (*result).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   MULTITHREAD_MUTEX_INIT( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
 
-   INVARIANT( quaternion );
+   MULTITHREAD_MUTEX_INIT( (*result).mutex );
 
-   return quaternion;
+   INVARIANT( result );
+
+   return result;
 }
 
 
@@ -714,17 +729,21 @@ Quaternion_make_from_yaw_degrees( Prefix )( Type yaw )
 */
 
 void
-Quaternion_dispose( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_dispose( Prefix )( Quaternion_type( Prefix ) **current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current not null", *current != NULL );
+   PRECONDITION( "current type OK", ( (**current)._type == QUATERNION_TYPE ) && ( (**current)._item_type == Type_Code ) );
+   LOCK( (**current).mutex );
+   INVARIANT(*current);
 
-   MULTITHREAD_MUTEX_DESTROY( (*quaternion).mutex );
+   MULTITHREAD_MUTEX_DESTROY( (**current).mutex );
 
-   // delete quaternion struct
-   free( quaternion );
+   // delete current struct
+   free(*current);
+
+   // set to NULL
+   *current = NULL;
 
    return;
 }
@@ -734,22 +753,23 @@ Quaternion_dispose( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type *
-Quaternion_as_array( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_as_array( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type *result = ( Type * ) calloc( 4, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
 
-   result[0] = (*quaternion).q0;
-   result[1] = (*quaternion).q1;
-   result[2] = (*quaternion).q2;
-   result[3] = (*quaternion).q3;
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   result[0] = (*current).q0;
+   result[1] = (*current).q1;
+   result[2] = (*current).q2;
+   result[3] = (*current).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -759,22 +779,22 @@ Quaternion_as_array( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Matvec_type( Mv_Prefix ) *
-Quaternion_as_vector( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_as_vector( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Mv_Prefix ) *result = Matvec_make_column_vector( Mv_Prefix )( 4 );;
 
-   Matvec_vector_put( Mv_Prefix )( result, (*quaternion).q0, 0 );
-   Matvec_vector_put( Mv_Prefix )( result, (*quaternion).q1, 1 );
-   Matvec_vector_put( Mv_Prefix )( result, (*quaternion).q2, 2 );
-   Matvec_vector_put( Mv_Prefix )( result, (*quaternion).q3, 3 );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Matvec_vector_put( Mv_Prefix )( result, (*current).q0, 0 );
+   Matvec_vector_put( Mv_Prefix )( result, (*current).q1, 1 );
+   Matvec_vector_put( Mv_Prefix )( result, (*current).q2, 2 );
+   Matvec_vector_put( Mv_Prefix )( result, (*current).q3, 3 );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -784,17 +804,17 @@ Quaternion_as_vector( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_q0( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_q0( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*quaternion).q0;
+   Type result = (*current).q0;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -804,17 +824,17 @@ Quaternion_q0( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_q1( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_q1( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*quaternion).q1;
+   Type result = (*current).q1;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -824,17 +844,17 @@ Quaternion_q1( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_q2( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_q2( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*quaternion).q2;
+   Type result = (*current).q2;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -844,17 +864,17 @@ Quaternion_q2( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_q3( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_q3( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*quaternion).q3;
+   Type result = (*current).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -864,17 +884,17 @@ Quaternion_q3( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_magnitude( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_magnitude( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = sqrt( (*quaternion).q0*(*quaternion).q0 + (*quaternion).q1*(*quaternion).q1 + (*quaternion).q2*(*quaternion).q2 + (*quaternion).q3*(*quaternion).q3 );
+   Type result = sqrt( (*current).q0 * (*current).q0 + (*current).q1 * (*current).q1 + (*current).q2 * (*current).q2 + (*current).q3 * (*current).q3 );
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -884,17 +904,17 @@ Quaternion_magnitude( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_squared_magnitude( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_squared_magnitude( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type result = (*quaternion).q0*(*quaternion).q0 + (*quaternion).q1*(*quaternion).q1 + (*quaternion).q2*(*quaternion).q2 + (*quaternion).q3*(*quaternion).q3;
+   Type result = (*current).q0 * (*current).q0 + (*current).q1 * (*current).q1 + (*current).q2 * (*current).q2 + (*current).q3 * (*current).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -904,36 +924,36 @@ Quaternion_squared_magnitude( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 int32_t
-Quaternion_is_equal( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_is_equal( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
-   
-   result = (*quaternion).q0 == (*other).q0;
-   
+
+   result = (*current).q0 == (*other).q0;
+
    if ( result == 1 )
    {
-      result = (*quaternion).q1 == (*other).q1;
+      result = (*current).q1 == (*other).q1;
    }
-   
+
    if ( result == 1 )
    {
-      result = (*quaternion).q2 == (*other).q2;
+      result = (*current).q2 == (*other).q2;
    }
-   
+
    if ( result == 1 )
    {
-      result = (*quaternion).q3 == (*other).q3;
+      result = (*current).q3 == (*other).q3;
    }
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -943,65 +963,65 @@ Quaternion_is_equal( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion
 */
 
 int32_t
-Quaternion_is_approximately_equal( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other, Type precision )
+Quaternion_is_approximately_equal( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other, Type precision )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
    PRECONDITION( "precision not negative", precision >= 0.0 );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    int32_t result = 1;
    Type max = 0.0;
    Type d = 0.0;
-   
-   // get max magnitude entry of quaternion
-   max = ( Type ) fabs( (*quaternion).q0 );   
-   
-   if ( ( Type ) fabs( max ) < (*quaternion).q1 )
+
+   // get max magnitude entry of current
+   max = ( Type ) fabs( (*current).q0 );
+
+   if ( ( Type ) fabs( max ) < (*current).q1 )
    {
-      max = ( Type ) fabs( (*quaternion).q1 );
+      max = ( Type ) fabs( (*current).q1 );
    }
-   
-   if ( ( Type ) fabs( max ) < (*quaternion).q2 )
+
+   if ( ( Type ) fabs( max ) < (*current).q2 )
    {
-      max = ( Type ) fabs( (*quaternion).q2 );
+      max = ( Type ) fabs( (*current).q2 );
    }
-   
-   if ( ( Type ) fabs( max ) < (*quaternion).q3 )
+
+   if ( ( Type ) fabs( max ) < (*current).q3 )
    {
-      max = ( Type ) fabs( (*quaternion).q3 );
+      max = ( Type ) fabs( (*current).q3 );
    }
-   
+
    // get value for comparing differences
-   max = max*precision;
-   
+   max = max * precision;
+
    // compare differences to max
-   d = ( Type ) fabs( (*quaternion).q0 - (*other).q0 );
+   d = ( Type ) fabs( (*current).q0 - (*other).q0 );
    result = ( d < max );
-   
+
    if ( result == 1 )
    {
-      d = ( Type ) fabs( (*quaternion).q1 - (*other).q1 );
+      d = ( Type ) fabs( (*current).q1 - (*other).q1 );
       result = ( d < max );
    }
-   
+
    if ( result == 1 )
    {
-      d = ( Type ) fabs( (*quaternion).q2 - (*other).q2 );
+      d = ( Type ) fabs( (*current).q2 - (*other).q2 );
       result = ( d < max );
    }
-   
+
    if ( result == 1 )
    {
-      d = ( Type ) fabs( (*quaternion).q3 - (*other).q3 );
+      d = ( Type ) fabs( (*current).q3 - (*other).q3 );
       result = ( d < max );
    }
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1011,36 +1031,36 @@ Quaternion_is_approximately_equal( Prefix )( Quaternion_type( Prefix ) *quaterni
 */
 
 void
-Quaternion_set( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value, int32_t i )
+Quaternion_set( Prefix )( Quaternion_type( Prefix ) *current, Type value, int32_t i )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "i OK", ( ( i >= 0 ) && ( i < 4 ) ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
    switch( i )
    {
       case 0:
-      (*quaternion).q0 = value;
-      break;
-      
+         (*current).q0 = value;
+         break;
+
       case 1:
-      (*quaternion).q1 = value;
-      break;
-      
+         (*current).q1 = value;
+         break;
+
       case 2:
-      (*quaternion).q2 = value;
-      break;
-      
+         (*current).q2 = value;
+         break;
+
       case 3:
-      (*quaternion).q3 = value;
-      break;
+         (*current).q3 = value;
+         break;
    }
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1050,18 +1070,18 @@ Quaternion_set( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value, int
 */
 
 void
-Quaternion_set_q0( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
+Quaternion_set_q0( Prefix )( Quaternion_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*quaternion).q0 = value;
+   (*current).q0 = value;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1071,18 +1091,18 @@ Quaternion_set_q0( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
 */
 
 void
-Quaternion_set_q1( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
+Quaternion_set_q1( Prefix )( Quaternion_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*quaternion).q1 = value;
+   (*current).q1 = value;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1092,18 +1112,18 @@ Quaternion_set_q1( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
 */
 
 void
-Quaternion_set_q2( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
+Quaternion_set_q2( Prefix )( Quaternion_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*quaternion).q2 = value;
+   (*current).q2 = value;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1113,18 +1133,18 @@ Quaternion_set_q2( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
 */
 
 void
-Quaternion_set_q3( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
+Quaternion_set_q3( Prefix )( Quaternion_type( Prefix ) *current, Type value )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    // set item with value
-   (*quaternion).q3 = value;
+   (*current).q3 = value;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1134,21 +1154,21 @@ Quaternion_set_q3( Prefix )( Quaternion_type( Prefix ) *quaternion, Type value )
 */
 
 void
-Quaternion_set_from( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_set_from( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 = (*other).q0;
-   (*quaternion).q1 = (*other).q1;
-   (*quaternion).q2 = (*other).q2;
-   (*quaternion).q3 = (*other).q3;
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 = (*other).q0;
+   (*current).q1 = (*other).q1;
+   (*current).q2 = (*other).q2;
+   (*current).q3 = (*other).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1158,21 +1178,21 @@ Quaternion_set_from( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion
 */
 
 void
-Quaternion_set_from_array( Prefix )( Quaternion_type( Prefix ) *quaternion, Type *other )
+Quaternion_set_from_array( Prefix )( Quaternion_type( Prefix ) *current, Type *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 = other[0];
-   (*quaternion).q1 = other[1];
-   (*quaternion).q2 = other[2];
-   (*quaternion).q3 = other[3];
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 = other[0];
+   (*current).q1 = other[1];
+   (*current).q2 = other[2];
+   (*current).q3 = other[3];
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1182,22 +1202,22 @@ Quaternion_set_from_array( Prefix )( Quaternion_type( Prefix ) *quaternion, Type
 */
 
 void
-Quaternion_set_from_vector( Prefix )( Quaternion_type( Prefix ) *quaternion, Matvec_type( Mv_Prefix ) *matvec )
+Quaternion_set_from_vector( Prefix )( Quaternion_type( Prefix ) *current, Matvec_type( Mv_Prefix ) *matvec )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 4 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 4 ) ) ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 = Matvec_vector_item( Mv_Prefix )( matvec , 0 );
-   (*quaternion).q1 = Matvec_vector_item( Mv_Prefix )( matvec , 1 );
-   (*quaternion).q2 = Matvec_vector_item( Mv_Prefix )( matvec , 2 );
-   (*quaternion).q3 = Matvec_vector_item( Mv_Prefix )( matvec , 3 );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 = Matvec_vector_item( Mv_Prefix )( matvec, 0 );
+   (*current).q1 = Matvec_vector_item( Mv_Prefix )( matvec, 1 );
+   (*current).q2 = Matvec_vector_item( Mv_Prefix )( matvec, 2 );
+   (*current).q3 = Matvec_vector_item( Mv_Prefix )( matvec, 3 );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1207,30 +1227,30 @@ Quaternion_set_from_vector( Prefix )( Quaternion_type( Prefix ) *quaternion, Mat
 */
 
 void
-Quaternion_set_from_rotation_about_vector( Prefix )( Quaternion_type( Prefix ) *quaternion, Type angle, Matvec_type( Mv_Prefix ) *matvec )
+Quaternion_set_from_rotation_about_vector( Prefix )( Quaternion_type( Prefix ) *current, Type angle, Matvec_type( Mv_Prefix ) *matvec )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 3 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 3 ) ) ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Mv_Prefix ) *v = Matvec_vector_normalized( Mv_Prefix )( matvec );
 
-   Type c = cos( angle/2.0 );
-   Type s = sin( angle/2.0 );
-   
-   // set elements
-   (*quaternion).q0 = c;
-   (*quaternion).q1 = s*Matvec_vector_item( Mv_Prefix )( v, 0 );
-   (*quaternion).q2 = s*Matvec_vector_item( Mv_Prefix )( v, 1 );
-   (*quaternion).q3 = s*Matvec_vector_item( Mv_Prefix )( v, 2 );
+   Type c = cos( angle / 2.0 );
+   Type s = sin( angle / 2.0 );
 
-   Matvec_dispose( Mv_Prefix )( v );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   // set elements
+   (*current).q0 = c;
+   (*current).q1 = s * Matvec_vector_item( Mv_Prefix )( v, 0 );
+   (*current).q2 = s * Matvec_vector_item( Mv_Prefix )( v, 1 );
+   (*current).q3 = s * Matvec_vector_item( Mv_Prefix )( v, 2 );
+
+   Matvec_dispose( Mv_Prefix )( &v );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1240,30 +1260,30 @@ Quaternion_set_from_rotation_about_vector( Prefix )( Quaternion_type( Prefix ) *
 */
 
 void
-Quaternion_set_from_rotation_degrees_about_vector( Prefix )( Quaternion_type( Prefix ) *quaternion, Type angle, Matvec_type( Mv_Prefix ) *matvec )
+Quaternion_set_from_rotation_degrees_about_vector( Prefix )( Quaternion_type( Prefix ) *current, Type angle, Matvec_type( Mv_Prefix ) *matvec )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 3 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 3 ) ) ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Mv_Prefix ) *v = Matvec_vector_normalized( Mv_Prefix )( matvec );
 
-   Type c = cos( DTOR*angle/2.0 );
-   Type s = sin( DTOR*angle/2.0 );
-   
-   // set elements
-   (*quaternion).q0 = c;
-   (*quaternion).q1 = s*Matvec_vector_item( Mv_Prefix )( v, 0 );
-   (*quaternion).q2 = s*Matvec_vector_item( Mv_Prefix )( v, 1 );
-   (*quaternion).q3 = s*Matvec_vector_item( Mv_Prefix )( v, 2 );
+   Type c = cos( DTOR * angle / 2.0 );
+   Type s = sin( DTOR * angle / 2.0 );
 
-   Matvec_dispose( Mv_Prefix )( v );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   // set elements
+   (*current).q0 = c;
+   (*current).q1 = s * Matvec_vector_item( Mv_Prefix )( v, 0 );
+   (*current).q2 = s * Matvec_vector_item( Mv_Prefix )( v, 1 );
+   (*current).q3 = s * Matvec_vector_item( Mv_Prefix )( v, 2 );
+
+   Matvec_dispose( Mv_Prefix )( &v );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1273,29 +1293,29 @@ Quaternion_set_from_rotation_degrees_about_vector( Prefix )( Quaternion_type( Pr
 */
 
 void
-Quaternion_set_from_rotation_about_xyz( Prefix )( Quaternion_type( Prefix ) *quaternion, Type angle, Type x, Type y, Type z )
+Quaternion_set_from_rotation_about_xyz( Prefix )( Quaternion_type( Prefix ) *current, Type angle, Type x, Type y, Type z )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type c = cos( angle/2.0 );
-   Type s = sin( angle/2.0 );
-   Type d = sqrt( x*x + y*y + z*z );
-   
+   Type c = cos( angle / 2.0 );
+   Type s = sin( angle / 2.0 );
+   Type d = sqrt( x * x + y * y + z * z );
+
    // set elements
-   (*quaternion).q0 = c;
+   (*current).q0 = c;
    if ( d > 0.0 )
    {
-      d = 1.0/d;
-      (*quaternion).q1 = s*x*d;
-      (*quaternion).q2 = s*y*d;
-      (*quaternion).q3 = s*z*d;
+      d = 1.0 / d;
+      (*current).q1 = s * x * d;
+      (*current).q2 = s * y * d;
+      (*current).q3 = s * z * d;
    }
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1305,29 +1325,29 @@ Quaternion_set_from_rotation_about_xyz( Prefix )( Quaternion_type( Prefix ) *qua
 */
 
 void
-Quaternion_set_from_rotation_degrees_about_xyz( Prefix )( Quaternion_type( Prefix ) *quaternion, Type angle, Type x, Type y, Type z )
+Quaternion_set_from_rotation_degrees_about_xyz( Prefix )( Quaternion_type( Prefix ) *current, Type angle, Type x, Type y, Type z )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Type c = cos( DTOR*angle/2.0 );
-   Type s = sin( DTOR*angle/2.0 );
-   Type d = sqrt( x*x + y*y + z*z );
-   
+   Type c = cos( DTOR * angle / 2.0 );
+   Type s = sin( DTOR * angle / 2.0 );
+   Type d = sqrt( x * x + y * y + z * z );
+
    // set elements
-   (*quaternion).q0 = c;
+   (*current).q0 = c;
    if ( d > 0.0 )
    {
-      d = 1.0/d;
-      (*quaternion).q1 = s*x*d;
-      (*quaternion).q2 = s*y*d;
-      (*quaternion).q3 = s*z*d;
+      d = 1.0 / d;
+      (*current).q1 = s * x * d;
+      (*current).q2 = s * y * d;
+      (*current).q3 = s * z * d;
    }
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1337,38 +1357,38 @@ Quaternion_set_from_rotation_degrees_about_xyz( Prefix )( Quaternion_type( Prefi
 */
 
 void
-Quaternion_set_from_roll_pitch_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion, Type roll, Type pitch, Type yaw )
+Quaternion_set_from_roll_pitch_yaw( Prefix )( Quaternion_type( Prefix ) *current, Type roll, Type pitch, Type yaw )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *qroll = NULL;
    Quaternion_type( Prefix ) *qpitch = NULL;
    Quaternion_type( Prefix ) *qyaw = NULL;
-   
+
    qroll = Quaternion_make_from_rotation_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
    qpitch = Quaternion_make_from_rotation_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
    qyaw = Quaternion_make_from_rotation_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
    q = Quaternion_multiplied( Prefix )( qyaw, qpitch  );
    Quaternion_multiply( Prefix )( q, qroll  );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( qroll  );
-   Quaternion_dispose( Prefix )( qpitch  );
-   Quaternion_dispose( Prefix )( qyaw  );
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &qroll  );
+   Quaternion_dispose( Prefix )( &qpitch  );
+   Quaternion_dispose( Prefix )( &qyaw  );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1378,38 +1398,38 @@ Quaternion_set_from_roll_pitch_yaw( Prefix )( Quaternion_type( Prefix ) *quatern
 */
 
 void
-Quaternion_set_from_roll_pitch_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion, Type roll, Type pitch, Type yaw )
+Quaternion_set_from_roll_pitch_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *current, Type roll, Type pitch, Type yaw )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *qroll = NULL;
    Quaternion_type( Prefix ) *qpitch = NULL;
    Quaternion_type( Prefix ) *qyaw = NULL;
-   
+
    qroll = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
    qpitch = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
    qyaw = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
    q = Quaternion_multiplied( Prefix )( qyaw, qpitch  );
    Quaternion_multiply( Prefix )( q, qroll  );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( qroll  );
-   Quaternion_dispose( Prefix )( qpitch  );
-   Quaternion_dispose( Prefix )( qyaw  );
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &qroll  );
+   Quaternion_dispose( Prefix )( &qpitch  );
+   Quaternion_dispose( Prefix )( &qyaw  );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1419,28 +1439,28 @@ Quaternion_set_from_roll_pitch_yaw_degrees( Prefix )( Quaternion_type( Prefix ) 
 */
 
 void
-Quaternion_set_from_roll( Prefix )( Quaternion_type( Prefix ) *quaternion, Type roll )
+Quaternion_set_from_roll( Prefix )( Quaternion_type( Prefix ) *current, Type roll )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1450,28 +1470,28 @@ Quaternion_set_from_roll( Prefix )( Quaternion_type( Prefix ) *quaternion, Type 
 */
 
 void
-Quaternion_set_from_roll_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion, Type roll )
+Quaternion_set_from_roll_degrees( Prefix )( Quaternion_type( Prefix ) *current, Type roll )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( roll, 1.0, 0.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1481,28 +1501,28 @@ Quaternion_set_from_roll_degrees( Prefix )( Quaternion_type( Prefix ) *quaternio
 */
 
 void
-Quaternion_set_from_pitch( Prefix )( Quaternion_type( Prefix ) *quaternion, Type pitch )
+Quaternion_set_from_pitch( Prefix )( Quaternion_type( Prefix ) *current, Type pitch )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1512,28 +1532,28 @@ Quaternion_set_from_pitch( Prefix )( Quaternion_type( Prefix ) *quaternion, Type
 */
 
 void
-Quaternion_set_from_pitch_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion, Type pitch )
+Quaternion_set_from_pitch_degrees( Prefix )( Quaternion_type( Prefix ) *current, Type pitch )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( pitch, 0.0, 1.0, 0.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1543,28 +1563,28 @@ Quaternion_set_from_pitch_degrees( Prefix )( Quaternion_type( Prefix ) *quaterni
 */
 
 void
-Quaternion_set_from_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion, Type yaw )
+Quaternion_set_from_yaw( Prefix )( Quaternion_type( Prefix ) *current, Type yaw )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1574,28 +1594,28 @@ Quaternion_set_from_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion, Type y
 */
 
 void
-Quaternion_set_from_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion, Type yaw )
+Quaternion_set_from_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *current, Type yaw )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
-   
+
    q = Quaternion_make_from_rotation_degrees_about_xyz( Prefix )( yaw, 0.0, 0.0, 1.0 );
-   
+
    // set elements
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
 
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1607,42 +1627,42 @@ Quaternion_set_from_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion
 
 void
 Quaternion_interpolate( Prefix )
-( 
-   Quaternion_type( Prefix ) *quaternion, 
+(
+   Quaternion_type( Prefix ) *current,
    Quaternion_type( Prefix ) *other,
    Type current_weight,
    Type other_weight
 )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
 
    q  =  Quaternion_make( Prefix )
          (
-            (*quaternion).q0*current_weight + (*other).q0*other_weight,
-            (*quaternion).q1*current_weight + (*other).q1*other_weight,
-            (*quaternion).q2*current_weight + (*other).q2*other_weight,
-            (*quaternion).q3*current_weight + (*other).q3*other_weight
+            (*current).q0 * current_weight + (*other).q0 * other_weight,
+            (*current).q1 * current_weight + (*other).q1 * other_weight,
+            (*current).q2 * current_weight + (*other).q2 * other_weight,
+            (*current).q3 * current_weight + (*other).q3 * other_weight
          );
-         
+
    Quaternion_normalize( Prefix )( q );
 
-   (*quaternion).q0 = (*q).q0;
-   (*quaternion).q1 = (*q).q1;
-   (*quaternion).q2 = (*q).q2;
-   (*quaternion).q3 = (*q).q3;
-   
+   (*current).q0 = (*q).q0;
+   (*current).q1 = (*q).q1;
+   (*current).q2 = (*q).q2;
+   (*current).q3 = (*q).q3;
+
    // dispose of intermediate products
-   Quaternion_dispose( Prefix )( q  );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q  );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -1653,35 +1673,35 @@ Quaternion_interpolate( Prefix )
 
 Quaternion_type( Prefix ) *
 Quaternion_interpolated( Prefix )
-( 
-   Quaternion_type( Prefix ) *quaternion, 
+(
+   Quaternion_type( Prefix ) *current,
    Quaternion_type( Prefix ) *other,
    Type current_weight,
    Type other_weight
 )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = NULL;
 
-   result   
+   result
       =  Quaternion_make( Prefix )
          (
-            (*quaternion).q0*current_weight + (*other).q0*other_weight,
-            (*quaternion).q1*current_weight + (*other).q1*other_weight,
-            (*quaternion).q2*current_weight + (*other).q2*other_weight,
-            (*quaternion).q3*current_weight + (*other).q3*other_weight
+            (*current).q0 * current_weight + (*other).q0 * other_weight,
+            (*current).q1 * current_weight + (*other).q1 * other_weight,
+            (*current).q2 * current_weight + (*other).q2 * other_weight,
+            (*current).q3 * current_weight + (*other).q3 * other_weight
          );
-         
+
    Quaternion_normalize( Prefix )( result );
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1691,35 +1711,36 @@ Quaternion_interpolated( Prefix )
 */
 
 Type *
-Quaternion_get_roll_pitch_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_roll_pitch_yaw( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type *result = ( Type * ) calloc( 3, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
-   result[0] 
+   Quaternion_type( Prefix ) *q = current;
+
+   result[0]
       =  atan2
-         ( 
-            2.0*( (*q).q2*(*q).q3 + (*q).q0*(*q).q1 ),
-            (*q).q0*(*q).q0 - (*q).q1*(*q).q1 - (*q).q2*(*q).q2 + (*q).q3*(*q).q3
-         );
-      
-   result[1] = asin( -2.0*( (*q).q1*(*q).q3 - (*q).q0*(*q).q2 ) );
-   
-   result[2] 
-      =  atan2
-         ( 
-            2.0*( (*q).q1*(*q).q2 + (*q).q0*(*q).q3 ),
-            (*q).q0*(*q).q0 + (*q).q1*(*q).q1 - (*q).q2*(*q).q2 - (*q).q3*(*q).q3
+         (
+            2.0 * ( (*q).q2 * (*q).q3 + (*q).q0 * (*q).q1 ),
+            (*q).q0 * (*q).q0 - (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3
          );
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   result[1] = asin( -2.0 * ( (*q).q1 * (*q).q3 - (*q).q0 * (*q).q2 ) );
+
+   result[2]
+      =  atan2
+         (
+            2.0 * ( (*q).q1 * (*q).q2 + (*q).q0 * (*q).q3 ),
+            (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 - (*q).q3 * (*q).q3
+         );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1729,35 +1750,36 @@ Quaternion_get_roll_pitch_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type *
-Quaternion_get_roll_pitch_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_roll_pitch_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type *result = ( Type * ) calloc( 3, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
-   result[0] 
-      =  atan2
-         ( 
-            2.0*( (*q).q2*(*q).q3 + (*q).q0*(*q).q1 ),
-            (*q).q0*(*q).q0 - (*q).q1*(*q).q1 - (*q).q2*(*q).q2 + (*q).q3*(*q).q3
-         )*RTOD;
-      
-   result[1] = asin( -2.0*( (*q).q1*(*q).q3 - (*q).q0*(*q).q2 ) )*RTOD;
-   
-   result[2] 
-      =  atan2
-         ( 
-            2.0*( (*q).q1*(*q).q2 + (*q).q0*(*q).q3 ),
-            (*q).q0*(*q).q0 + (*q).q1*(*q).q1 - (*q).q2*(*q).q2 - (*q).q3*(*q).q3
-         )*RTOD;
+   Quaternion_type( Prefix ) *q = current;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   result[0]
+      =  atan2
+         (
+            2.0 * ( (*q).q2 * (*q).q3 + (*q).q0 * (*q).q1 ),
+            (*q).q0 * (*q).q0 - (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3
+         ) * RTOD;
+
+   result[1] = asin( -2.0 * ( (*q).q1 * (*q).q3 - (*q).q0 * (*q).q2 ) ) * RTOD;
+
+   result[2]
+      =  atan2
+         (
+            2.0 * ( (*q).q1 * (*q).q2 + (*q).q0 * (*q).q3 ),
+            (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 - (*q).q3 * (*q).q3
+         ) * RTOD;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1767,26 +1789,26 @@ Quaternion_get_roll_pitch_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *quat
 */
 
 Type
-Quaternion_get_roll( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_roll( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = 0.0;
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
+   Quaternion_type( Prefix ) *q = current;
+
    result
       =  atan2
-         ( 
-            2.0*( (*q).q2*(*q).q3 + (*q).q0*(*q).q1 ),
-            (*q).q0*(*q).q0 - (*q).q1*(*q).q1 - (*q).q2*(*q).q2 + (*q).q3*(*q).q3
+         (
+            2.0 * ( (*q).q2 * (*q).q3 + (*q).q0 * (*q).q1 ),
+            (*q).q0 * (*q).q0 - (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3
          );
-      
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1796,26 +1818,26 @@ Quaternion_get_roll( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_get_roll_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_roll_degrees( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = 0.0;
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
+   Quaternion_type( Prefix ) *q = current;
+
    result
       =  atan2
-         ( 
-            2.0*( (*q).q2*(*q).q3 + (*q).q0*(*q).q1 ),
-            (*q).q0*(*q).q0 - (*q).q1*(*q).q1 - (*q).q2*(*q).q2 + (*q).q3*(*q).q3
-         )*RTOD;
-      
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+         (
+            2.0 * ( (*q).q2 * (*q).q3 + (*q).q0 * (*q).q1 ),
+            (*q).q0 * (*q).q0 - (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3
+         ) * RTOD;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1825,21 +1847,21 @@ Quaternion_get_roll_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_get_pitch( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_pitch( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = 0;
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
-   result = asin( -2.0*( (*q).q1*(*q).q3 - (*q).q0*(*q).q2 ) );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_type( Prefix ) *q = current;
+
+   result = asin( -2.0 * ( (*q).q1 * (*q).q3 - (*q).q0 * (*q).q2 ) );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1849,21 +1871,21 @@ Quaternion_get_pitch( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_get_pitch_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_pitch_degrees( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = 0;
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
-   result = asin( -2.0*( (*q).q1*(*q).q3 - (*q).q0*(*q).q2 ) )*RTOD;
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_type( Prefix ) *q = current;
+
+   result = asin( -2.0 * ( (*q).q1 * (*q).q3 - (*q).q0 * (*q).q2 ) ) * RTOD;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1873,26 +1895,26 @@ Quaternion_get_pitch_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_get_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_yaw( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = 0.0;
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
+   Quaternion_type( Prefix ) *q = current;
+
    result
       =  atan2
-         ( 
-            2.0*( (*q).q1*(*q).q2 + (*q).q0*(*q).q3 ),
-            (*q).q0*(*q).q0 + (*q).q1*(*q).q1 - (*q).q2*(*q).q2 - (*q).q3*(*q).q3
+         (
+            2.0 * ( (*q).q1 * (*q).q2 + (*q).q0 * (*q).q3 ),
+            (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 - (*q).q3 * (*q).q3
          );
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -1902,166 +1924,168 @@ Quaternion_get_yaw( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Type
-Quaternion_get_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_get_yaw_degrees( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type result = 0.0;
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   
+   Quaternion_type( Prefix ) *q = current;
+
    result
       =  atan2
-         ( 
-            2.0*( (*q).q1*(*q).q2 + (*q).q0*(*q).q3 ),
-            (*q).q0*(*q).q0 + (*q).q1*(*q).q1 - (*q).q2*(*q).q2 - (*q).q3*(*q).q3
-         )*RTOD;
+         (
+            2.0 * ( (*q).q1 * (*q).q2 + (*q).q0 * (*q).q3 ),
+            (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 - (*q).q2 * (*q).q2 - (*q).q3 * (*q).q3
+         ) * RTOD;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
    Quaternion_rotate_vector
-*/                                    
+*/
 
 void
-Quaternion_rotate_vector( Prefix )( Quaternion_type( Prefix ) *quaternion, Matvec_type( Mv_Prefix ) *matvec )
+Quaternion_rotate_vector( Prefix )( Quaternion_type( Prefix ) *current, Matvec_type( Mv_Prefix ) *matvec )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 3 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 3 ) ) ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *r = NULL;
    Quaternion_type( Prefix ) *s = NULL;
-   
+
    // set up return and temp variables
    q  =  Quaternion_make( Prefix )
-         ( 
-            0.0, 
-            Matvec_vector_x( Mv_Prefix )( matvec ), 
-            Matvec_vector_y( Mv_Prefix )( matvec ), 
-            Matvec_vector_z( Mv_Prefix )( matvec ) 
+         (
+            0.0,
+            Matvec_vector_x( Mv_Prefix )( matvec ),
+            Matvec_vector_y( Mv_Prefix )( matvec ),
+            Matvec_vector_z( Mv_Prefix )( matvec )
          );
-   r = Quaternion_make_from( Prefix )( quaternion );
+   r = Quaternion_make_from( Prefix )( current );
    s = Quaternion_inverse( Prefix )( r );
-   
-   // perform the rotation as a sequence of quaternion multiplications
+
+   // perform the rotation as a sequence of current multiplications
    Quaternion_multiply( Prefix )( r, q );
    Quaternion_multiply( Prefix )( r, s );
-   
+
    Matvec_vector_put_x( Mv_Prefix )( matvec, (*r).q1 );
    Matvec_vector_put_y( Mv_Prefix )( matvec, (*r).q2 );
    Matvec_vector_put_z( Mv_Prefix )( matvec, (*r).q3 );
-   
+
    // dispose of temp variables
-   Quaternion_dispose( Prefix )( q );
-   Quaternion_dispose( Prefix )( r );
-   Quaternion_dispose( Prefix )( s );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q );
+   Quaternion_dispose( Prefix )( &r );
+   Quaternion_dispose( Prefix )( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
 
 /**
    Quaternion_rotated_vector
-*/                                    
+*/
 
 Matvec_type( Mv_Prefix ) *
-Quaternion_rotated_vector( Prefix )( Quaternion_type( Prefix ) *quaternion, Matvec_type( Mv_Prefix ) *matvec )
+Quaternion_rotated_vector( Prefix )( Quaternion_type( Prefix ) *current, Matvec_type( Mv_Prefix ) *matvec )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "matvec not null", matvec != NULL );
    PRECONDITION( "matvec is ok", ( ( ( Matvec_rows( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_columns( Mv_Prefix )( matvec ) == 3 ) ) || ( ( Matvec_columns( Mv_Prefix )( matvec ) == 1 ) && ( Matvec_rows( Mv_Prefix )( matvec ) == 3 ) ) ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Matvec_type( Mv_Prefix ) *result = NULL;
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *r = NULL;
    Quaternion_type( Prefix ) *s = NULL;
-   
+
    // set up return and temp variables
    result = Matvec_make_from( Prefix )( matvec );
    q  =  Quaternion_make( Prefix )
-         ( 
-            0.0, 
-            Matvec_vector_x( Mv_Prefix )( matvec ), 
-            Matvec_vector_y( Mv_Prefix )( matvec ), 
-            Matvec_vector_z( Mv_Prefix )( matvec ) 
+         (
+            0.0,
+            Matvec_vector_x( Mv_Prefix )( matvec ),
+            Matvec_vector_y( Mv_Prefix )( matvec ),
+            Matvec_vector_z( Mv_Prefix )( matvec )
          );
-   r = Quaternion_make_from( Prefix )( quaternion );
+   r = Quaternion_make_from( Prefix )( current );
    s = Quaternion_inverse( Prefix )( r );
-   
-   // perform the rotation as a sequence of quaternion multiplications
+
+   // perform the rotation as a sequence of current multiplications
    Quaternion_multiply( Prefix )( r, q );
    Quaternion_multiply( Prefix )( r, s );
-   
+
    Matvec_vector_put_x( Mv_Prefix )( result, (*r).q1 );
    Matvec_vector_put_y( Mv_Prefix )( result, (*r).q2 );
    Matvec_vector_put_z( Mv_Prefix )( result, (*r).q3 );
-   
+
    // dispose of temp variables
-   Quaternion_dispose( Prefix )( q );
-   Quaternion_dispose( Prefix )( r );
-   Quaternion_dispose( Prefix )( s );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q );
+   Quaternion_dispose( Prefix )( &r );
+   Quaternion_dispose( Prefix )( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
 
 /**
    Quaternion_rotate_xyz
-*/                                    
+*/
 
 Type *
-Quaternion_rotate_xyz( Prefix )( Quaternion_type( Prefix ) *quaternion, Type x, Type y, Type z )
+Quaternion_rotate_xyz( Prefix )( Quaternion_type( Prefix ) *current, Type x, Type y, Type z )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Type *result = NULL;
    Quaternion_type( Prefix ) *q = NULL;
    Quaternion_type( Prefix ) *r = NULL;
    Quaternion_type( Prefix ) *s = NULL;
-   
+
    // set up return and temp variables
    result = ( Type * ) calloc( 3, sizeof( Type ) );
+   CHECK( "result allocated correctly", result != NULL );
+
    q  =  Quaternion_make( Prefix )( 0.0, x, y, z );
-   r = Quaternion_make_from( Prefix )( quaternion );
+   r = Quaternion_make_from( Prefix )( current );
    s = Quaternion_inverse( Prefix )( r );
-   
-   // perform the rotation as a sequence of quaternion multiplications
+
+   // perform the rotation as a sequence of current multiplications
    Quaternion_multiply( Prefix )( r, q );
    Quaternion_multiply( Prefix )( r, s );
-   
+
    result[0] = (*r).q1;
    result[1] = (*r).q2;
    result[2] = (*r).q3;
-   
+
    // dispose of temp variables
-   Quaternion_dispose( Prefix )( q );
-   Quaternion_dispose( Prefix )( r );
-   Quaternion_dispose( Prefix )( s );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   Quaternion_dispose( Prefix )( &q );
+   Quaternion_dispose( Prefix )( &r );
+   Quaternion_dispose( Prefix )( &s );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2071,20 +2095,20 @@ Quaternion_rotate_xyz( Prefix )( Quaternion_type( Prefix ) *quaternion, Type x, 
 */
 
 void
-Quaternion_scale( Prefix )( Quaternion_type( Prefix ) *quaternion, Type scale )
+Quaternion_scale( Prefix )( Quaternion_type( Prefix ) *current, Type scale )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 = (*quaternion).q0*scale;
-   (*quaternion).q1 = (*quaternion).q1*scale;
-   (*quaternion).q2 = (*quaternion).q2*scale;
-   (*quaternion).q3 = (*quaternion).q3*scale;
+   (*current).q0 = (*current).q0 * scale;
+   (*current).q1 = (*current).q1 * scale;
+   (*current).q2 = (*current).q2 * scale;
+   (*current).q3 = (*current).q3 * scale;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2094,22 +2118,22 @@ Quaternion_scale( Prefix )( Quaternion_type( Prefix ) *quaternion, Type scale )
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_scaled( Prefix )( Quaternion_type( Prefix ) *quaternion, Type scale )
+Quaternion_scaled( Prefix )( Quaternion_type( Prefix ) *current, Type scale )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = Quaternion_make_default( Prefix )();
-   
-   (*result).q0 = (*quaternion).q0*scale;
-   (*result).q1 = (*quaternion).q1*scale;
-   (*result).q2 = (*quaternion).q2*scale;
-   (*result).q3 = (*quaternion).q3*scale;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*result).q0 = (*current).q0 * scale;
+   (*result).q1 = (*current).q1 * scale;
+   (*result).q2 = (*current).q2 * scale;
+   (*result).q3 = (*current).q3 * scale;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2119,20 +2143,20 @@ Quaternion_scaled( Prefix )( Quaternion_type( Prefix ) *quaternion, Type scale )
 */
 
 void
-Quaternion_conjugate( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_conjugate( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 =  (*quaternion).q0;
-   (*quaternion).q1 = -(*quaternion).q1;
-   (*quaternion).q2 = -(*quaternion).q2;
-   (*quaternion).q3 = -(*quaternion).q3;
+   (*current).q0 =  (*current).q0;
+   (*current).q1 = -(*current).q1;
+   (*current).q2 = -(*current).q2;
+   (*current).q3 = -(*current).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2142,22 +2166,22 @@ Quaternion_conjugate( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_conjugated( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_conjugated( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = Quaternion_make_default( Prefix )();
-   
-   (*result).q0 =  (*quaternion).q0;
-   (*result).q1 = -(*quaternion).q1;
-   (*result).q2 = -(*quaternion).q2;
-   (*result).q3 = -(*quaternion).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*result).q0 =  (*current).q0;
+   (*result).q1 = -(*current).q1;
+   (*result).q2 = -(*current).q2;
+   (*result).q3 = -(*current).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2167,27 +2191,27 @@ Quaternion_conjugated( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 void
-Quaternion_invert( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_invert( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   Type m = (*q).q0*(*q).q0 + (*q).q1*(*q).q1 + (*q).q2*(*q).q2 + (*q).q3*(*q).q3;
+   Quaternion_type( Prefix ) *q = current;
+   Type m = (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 + (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3;
    if ( m > 0.0 )
    {
-      m = 1.0/m;
+      m = 1.0 / m;
    }
-      
-   (*quaternion).q0 =  m*(*quaternion).q0;
-   (*quaternion).q1 = -m*(*quaternion).q1;
-   (*quaternion).q2 = -m*(*quaternion).q2;
-   (*quaternion).q3 = -m*(*quaternion).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 =  m * (*current).q0;
+   (*current).q1 = -m * (*current).q1;
+   (*current).q2 = -m * (*current).q2;
+   (*current).q3 = -m * (*current).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2197,28 +2221,28 @@ Quaternion_invert( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_inverse( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_inverse( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = Quaternion_make_default( Prefix )();
-   Quaternion_type( Prefix ) *q = quaternion;
-   Type m = (*q).q0*(*q).q0 + (*q).q1*(*q).q1 + (*q).q2*(*q).q2 + (*q).q3*(*q).q3;
+   Quaternion_type( Prefix ) *q = current;
+   Type m = (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 + (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3;
    if ( m > 0.0 )
    {
-      m = 1.0/m;
+      m = 1.0 / m;
    }
-   
-   (*result).q0 =  m*(*quaternion).q0;
-   (*result).q1 = -m*(*quaternion).q1;
-   (*result).q2 = -m*(*quaternion).q2;
-   (*result).q3 = -m*(*quaternion).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*result).q0 =  m * (*current).q0;
+   (*result).q1 = -m * (*current).q1;
+   (*result).q2 = -m * (*current).q2;
+   (*result).q3 = -m * (*current).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2228,28 +2252,28 @@ Quaternion_inverse( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 void
-Quaternion_normalize( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_normalize( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Quaternion_type( Prefix ) *q = quaternion;
-   Type m = (*q).q0*(*q).q0 + (*q).q1*(*q).q1 + (*q).q2*(*q).q2 + (*q).q3*(*q).q3;
+   Quaternion_type( Prefix ) *q = current;
+   Type m = (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 + (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3;
    if ( m > 0.0 )
    {
       m = sqrt( m );
-      m = 1.0/m;
+      m = 1.0 / m;
    }
-      
-   (*quaternion).q0 = m*(*quaternion).q0;
-   (*quaternion).q1 = m*(*quaternion).q1;
-   (*quaternion).q2 = m*(*quaternion).q2;
-   (*quaternion).q3 = m*(*quaternion).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 = m * (*current).q0;
+   (*current).q1 = m * (*current).q1;
+   (*current).q2 = m * (*current).q2;
+   (*current).q3 = m * (*current).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2259,29 +2283,29 @@ Quaternion_normalize( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_normalized( Prefix )( Quaternion_type( Prefix ) *quaternion )
+Quaternion_normalized( Prefix )( Quaternion_type( Prefix ) *current )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = Quaternion_make_default( Prefix )();
-   Quaternion_type( Prefix ) *q = quaternion;
-   Type m = (*q).q0*(*q).q0 + (*q).q1*(*q).q1 + (*q).q2*(*q).q2 + (*q).q3*(*q).q3;
+   Quaternion_type( Prefix ) *q = current;
+   Type m = (*q).q0 * (*q).q0 + (*q).q1 * (*q).q1 + (*q).q2 * (*q).q2 + (*q).q3 * (*q).q3;
    if ( m > 0.0 )
    {
       m = sqrt( m );
-      m = 1.0/m;
+      m = 1.0 / m;
    }
-   
-   (*result).q0 = m*(*quaternion).q0;
-   (*result).q1 = m*(*quaternion).q1;
-   (*result).q2 = m*(*quaternion).q2;
-   (*result).q3 = m*(*quaternion).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*result).q0 = m * (*current).q0;
+   (*result).q1 = m * (*current).q1;
+   (*result).q2 = m * (*current).q2;
+   (*result).q3 = m * (*current).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2291,22 +2315,22 @@ Quaternion_normalized( Prefix )( Quaternion_type( Prefix ) *quaternion )
 */
 
 void
-Quaternion_add( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_add( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 = (*quaternion).q0 + (*other).q0;
-   (*quaternion).q1 = (*quaternion).q1 + (*other).q1;
-   (*quaternion).q2 = (*quaternion).q2 + (*other).q2;
-   (*quaternion).q3 = (*quaternion).q3 + (*other).q3;
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 = (*current).q0 + (*other).q0;
+   (*current).q1 = (*current).q1 + (*other).q1;
+   (*current).q2 = (*current).q2 + (*other).q2;
+   (*current).q3 = (*current).q3 + (*other).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2316,26 +2340,26 @@ Quaternion_add( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_added( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_added( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = NULL;
 
    result = Quaternion_make_default( Prefix )();
 
-   (*result).q0 = (*quaternion).q0 + (*other).q0;
-   (*result).q1 = (*quaternion).q1 + (*other).q1;
-   (*result).q2 = (*quaternion).q2 + (*other).q2;
-   (*result).q3 = (*quaternion).q3 + (*other).q3;
+   (*result).q0 = (*current).q0 + (*other).q0;
+   (*result).q1 = (*current).q1 + (*other).q1;
+   (*result).q2 = (*current).q2 + (*other).q2;
+   (*result).q3 = (*current).q3 + (*other).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2345,22 +2369,22 @@ Quaternion_added( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_ty
 */
 
 void
-Quaternion_subtract( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_subtract( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   (*quaternion).q0 = (*quaternion).q0 - (*other).q0;
-   (*quaternion).q1 = (*quaternion).q1 - (*other).q1;
-   (*quaternion).q2 = (*quaternion).q2 - (*other).q2;
-   (*quaternion).q3 = (*quaternion).q3 - (*other).q3;
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   (*current).q0 = (*current).q0 - (*other).q0;
+   (*current).q1 = (*current).q1 - (*other).q1;
+   (*current).q2 = (*current).q2 - (*other).q2;
+   (*current).q3 = (*current).q3 - (*other).q3;
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2370,26 +2394,26 @@ Quaternion_subtract( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_subtracted( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_subtracted( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = NULL;
 
    result = Quaternion_make_default( Prefix )();
 
-   (*result).q0 = (*quaternion).q0 - (*other).q0;
-   (*result).q1 = (*quaternion).q1 - (*other).q1;
-   (*result).q2 = (*quaternion).q2 - (*other).q2;
-   (*result).q3 = (*quaternion).q3 - (*other).q3;
+   (*result).q0 = (*current).q0 - (*other).q0;
+   (*result).q1 = (*current).q1 - (*other).q1;
+   (*result).q2 = (*current).q2 - (*other).q2;
+   (*result).q3 = (*current).q3 - (*other).q3;
 
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }
@@ -2399,16 +2423,16 @@ Quaternion_subtracted( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaterni
 */
 
 void
-Quaternion_multiply( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_multiply( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
-   Quaternion_type( Prefix ) *q = quaternion;
+   Quaternion_type( Prefix ) *q = current;
    Quaternion_type( Prefix ) *o = other;
 
    Type q0 = 0;
@@ -2416,20 +2440,20 @@ Quaternion_multiply( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion
    Type q2 = 0;
    Type q3 = 0;
 
-   // perform multiplication   
-   q0 = (*q).q0*(*o).q0 - (*q).q1*(*o).q1 - (*q).q2*(*o).q2 - (*q).q3*(*o).q3;
-   q1 = (*q).q0*(*o).q1 + (*q).q1*(*o).q0 + (*q).q2*(*o).q3 - (*q).q3*(*o).q2;
-   q2 = (*q).q0*(*o).q2 - (*q).q1*(*o).q3 + (*q).q2*(*o).q0 + (*q).q3*(*o).q1;
-   q3 = (*q).q0*(*o).q3 + (*q).q1*(*o).q2 - (*q).q2*(*o).q1 + (*q).q3*(*o).q0;
-   
-   // put result into quaternion
+   // perform multiplication
+   q0 = (*q).q0 * (*o).q0 - (*q).q1 * (*o).q1 - (*q).q2 * (*o).q2 - (*q).q3 * (*o).q3;
+   q1 = (*q).q0 * (*o).q1 + (*q).q1 * (*o).q0 + (*q).q2 * (*o).q3 - (*q).q3 * (*o).q2;
+   q2 = (*q).q0 * (*o).q2 - (*q).q1 * (*o).q3 + (*q).q2 * (*o).q0 + (*q).q3 * (*o).q1;
+   q3 = (*q).q0 * (*o).q3 + (*q).q1 * (*o).q2 - (*q).q2 * (*o).q1 + (*q).q3 * (*o).q0;
+
+   // put result into current
    (*q).q0 = q0;
    (*q).q1 = q1;
    (*q).q2 = q2;
    (*q).q3 = q3;
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return;
 }
@@ -2439,17 +2463,17 @@ Quaternion_multiply( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion
 */
 
 Quaternion_type( Prefix ) *
-Quaternion_multiplied( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaternion_type( Prefix ) *other )
+Quaternion_multiplied( Prefix )( Quaternion_type( Prefix ) *current, Quaternion_type( Prefix ) *other )
 {
-   PRECONDITION( "quaternion not null", quaternion != NULL );
-   PRECONDITION( "quaternion type OK", ( (*quaternion).type == QUATERNION_TYPE ) && ( (*quaternion).item_type == Type_Code ) );
+   PRECONDITION( "current not null", current != NULL );
+   PRECONDITION( "current type OK", ( (*current)._type == QUATERNION_TYPE ) && ( (*current)._item_type == Type_Code ) );
    PRECONDITION( "other not null", other != NULL );
-   PRECONDITION( "other type OK", ( (*other).type == QUATERNION_TYPE ) && ( (*other).item_type == Type_Code ) );
-   LOCK( (*quaternion).mutex );
-   INVARIANT( quaternion );
+   PRECONDITION( "other type OK", ( (*other)._type == QUATERNION_TYPE ) && ( (*other)._item_type == Type_Code ) );
+   LOCK( (*current).mutex );
+   INVARIANT( current );
 
    Quaternion_type( Prefix ) *result = NULL;
-   Quaternion_type( Prefix ) *q = quaternion;
+   Quaternion_type( Prefix ) *q = current;
    Quaternion_type( Prefix ) *o = other;
 
    Type q0 = 0;
@@ -2457,17 +2481,17 @@ Quaternion_multiplied( Prefix )( Quaternion_type( Prefix ) *quaternion, Quaterni
    Type q2 = 0;
    Type q3 = 0;
 
-   // perform multiplication   
-   q0 = (*q).q0*(*o).q0 - (*q).q1*(*o).q1 - (*q).q2*(*o).q2 - (*q).q3*(*o).q3;
-   q1 = (*q).q0*(*o).q1 + (*q).q1*(*o).q0 + (*q).q2*(*o).q3 - (*q).q3*(*o).q2;
-   q2 = (*q).q0*(*o).q2 - (*q).q1*(*o).q3 + (*q).q2*(*o).q0 + (*q).q3*(*o).q1;
-   q3 = (*q).q0*(*o).q3 + (*q).q1*(*o).q2 - (*q).q2*(*o).q1 + (*q).q3*(*o).q0;
-   
+   // perform multiplication
+   q0 = (*q).q0 * (*o).q0 - (*q).q1 * (*o).q1 - (*q).q2 * (*o).q2 - (*q).q3 * (*o).q3;
+   q1 = (*q).q0 * (*o).q1 + (*q).q1 * (*o).q0 + (*q).q2 * (*o).q3 - (*q).q3 * (*o).q2;
+   q2 = (*q).q0 * (*o).q2 - (*q).q1 * (*o).q3 + (*q).q2 * (*o).q0 + (*q).q3 * (*o).q1;
+   q3 = (*q).q0 * (*o).q3 + (*q).q1 * (*o).q2 - (*q).q2 * (*o).q1 + (*q).q3 * (*o).q0;
+
    // make result
    result = Quaternion_make( Prefix )( q0, q1, q2, q3 );
-   
-   INVARIANT( quaternion );
-   UNLOCK( (*quaternion).mutex );
+
+   INVARIANT( current );
+   UNLOCK( (*current).mutex );
 
    return result;
 }

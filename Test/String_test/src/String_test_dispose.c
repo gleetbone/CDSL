@@ -1,7 +1,7 @@
 /**
  @file string_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make.
+ Unit tests for string_t
 
 */
 
@@ -47,10 +47,7 @@ void test_dispose_1( void )
    CU_ASSERT( string_capacity( string ) == 6 );
    CU_ASSERT( string_is_empty( string ) == 0 );
  
-   s = string_as_cstring( string );
-
-   string_dispose( string );
-   free( s );
+   string_dispose( &string );
    
    return;
 }

@@ -1,7 +1,7 @@
 /**
  @file Cable_test_remove_head.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -55,7 +55,7 @@ void test_remove_head_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "bcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_remove_head_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "cd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -97,7 +97,7 @@ void test_remove_head_3( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "d" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -118,7 +118,7 @@ void test_remove_head_4( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -139,7 +139,7 @@ void test_remove_head_5( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "bcdefghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -160,7 +160,7 @@ void test_remove_head_6( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "cdefghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -181,7 +181,7 @@ void test_remove_head_7( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "hij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -202,7 +202,7 @@ void test_remove_head_8( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "j" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

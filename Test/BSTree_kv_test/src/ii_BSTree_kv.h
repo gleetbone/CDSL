@@ -16,14 +16,17 @@
 
 */
 
-#ifndef INT_INT_BSTREE_KV_H_
-#define INT_INT_BSTREE_KV_H_
+#ifndef II_BSTREE_KV_H_
+#define II_BSTREE_KV_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
  
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix ii
 #define Key int32_t
@@ -33,13 +36,13 @@ extern "C" {
 
 #undef Prefix
 #undef Key
-#undef Value
+#undef Type
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INT_INT_BSTREE_KV_H_ */
+#endif /* II_BSTREE_KV_H_ */
 
 /* End of file */
 

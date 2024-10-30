@@ -1,0 +1,176 @@
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0.5600.4
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgtk-3.so.0.2200.30
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgdk-3.so.0.2200.30
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0.4000.14
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0.4000.14
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libpango-1.0.so.0.4000.14
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0.0.0
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libatk-1.0.so.0.22810.1
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0.5600.4
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0.3611.0
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0.5600.4
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.5600.4
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0.5600.4
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.10.1
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/lib/x86_64-linux-gnu/libexpat.so.1.6.7
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.6.3.0
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libpixman-1.so.0.34.0
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libfreetype.so.6.15.0
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libcairo.so.2.11510.0
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libatspi.so.0.0.1
+}
+{
+   a name
+   Memcheck:Leak
+   ...
+   fun:*
+   ...
+   obj:/lib/x86_64-linux-gnu/libdbus-1.so.3.19.4
+}
+{
+   Ignore dlopen bug.
+   Memcheck:Leak
+   ...
+   fun:_dl_open
+   ...
+}
+

@@ -1,5 +1,5 @@
 /*
-   Tests for path_utilities
+   Tests for LSearcher_t
 */
 
 #include <stdlib.h>
@@ -12,6 +12,18 @@ extern "C" {
 #endif
 
 // test suite declarations
+
+int
+add_test_make( void );
+
+int
+add_test_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_is_equal( void );
 
 int
 add_test_search( void );
@@ -56,6 +68,10 @@ int main()
 
    // add tests for path utilites
 
+   add_test_make();
+   add_test_clone();
+   add_test_copy();
+   add_test_is_equal();
    add_test_search();
    add_test_all();
    

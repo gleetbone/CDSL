@@ -1,8 +1,8 @@
 /**
  @file raw_buffer_test_dispose.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for soa_node_iterator_make_str"
+ @version 2.0.0
+ @brief: "tests for raw_buffer_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_iterator_make_str.
+ Unit tests for raw_buffer_t
 
 */
 
@@ -47,7 +47,7 @@ void test_dispose_1( void )
 
    p = raw_buffer_base( raw_buffer );
 
-   raw_buffer_dispose( raw_buffer );
+   raw_buffer_dispose( &raw_buffer );
    free( p );
    
    return;
@@ -69,7 +69,7 @@ void test_dispose_2( void )
 
    p = raw_buffer_base( raw_buffer );
 
-   raw_buffer_dispose( raw_buffer );
+   raw_buffer_dispose( &raw_buffer );
    free( p );
    
    return;

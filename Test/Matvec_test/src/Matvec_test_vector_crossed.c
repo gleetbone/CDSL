@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_vector_crossed.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  date: "$Date: 2011-03-064 064:41:55 -06400 (Tue64 Mar 2011) $"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -53,9 +53,9 @@ void test_vector_crossed_1( void )
    CU_ASSERT( f_matvec_vector_item( fm, 1 ) == -6.0 );
    CU_ASSERT( f_matvec_vector_item( fm, 2 ) == 13.0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    fm1 = f_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 3.0 );
    fm2 = f_matvec_make_from_args( 3, 1, 3, -4.0, 5.0, -6.0 );
@@ -67,9 +67,9 @@ void test_vector_crossed_1( void )
    CU_ASSERT( f_matvec_vector_item( fm, 1 ) == -6.0 );
    CU_ASSERT( f_matvec_vector_item( fm, 2 ) == 13.0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    return;
 }
@@ -94,9 +94,9 @@ void test_vector_crossed_2( void )
    CU_ASSERT( d_matvec_vector_item( dm, 1 ) == -6.0 );
    CU_ASSERT( d_matvec_vector_item( dm, 2 ) == 13.0 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
-   d_matvec_dispose( dm2 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
+   d_matvec_dispose( &dm2 );
 
    dm1 = d_matvec_make_from_args( 3, 1, 3, 1.0, 2.0, 3.0 );
    dm2 = d_matvec_make_from_args( 3, 1, 3, -4.0, 5.0, -6.0 );
@@ -108,9 +108,9 @@ void test_vector_crossed_2( void )
    CU_ASSERT( d_matvec_vector_item( dm, 1 ) == -6.0 );
    CU_ASSERT( d_matvec_vector_item( dm, 2 ) == 13.0 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
-   d_matvec_dispose( dm2 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
+   d_matvec_dispose( &dm2 );
 
    return;
 }
@@ -135,9 +135,9 @@ void test_vector_crossed_3( void )
    CU_ASSERT( cf_matvec_vector_item( cfm, 1 ) == -6.0 + 0.0*I );
    CU_ASSERT( cf_matvec_vector_item( cfm, 2 ) == 5.0 + 8.0*I );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
-   cf_matvec_dispose( cfm2 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
+   cf_matvec_dispose( &cfm2 );
 
    cfm1 = cf_matvec_make_from_args( 3, 1, 3, 1.0 + 0.0*I, 0.0 + 2.0*I, 3.0 + 0.0*I );
    cfm2 = cf_matvec_make_from_args( 3, 1, 3, -4.0 + 0.0*I, 5.0 + 0.0*I, -6.0 + 0.0*I );
@@ -149,9 +149,9 @@ void test_vector_crossed_3( void )
    CU_ASSERT( cf_matvec_vector_item( cfm, 1 ) == -6.0 + 0.0*I );
    CU_ASSERT( cf_matvec_vector_item( cfm, 2 ) == 5.0 + 8.0*I );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
-   cf_matvec_dispose( cfm2 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
+   cf_matvec_dispose( &cfm2 );
 
    return;
 }
@@ -177,9 +177,9 @@ void test_vector_crossed_4( void )
    CU_ASSERT( cd_matvec_vector_item( cdm, 1 ) == -6.0 + 0.0*I );
    CU_ASSERT( cd_matvec_vector_item( cdm, 2 ) == 5.0 + 8.0*I );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
-   cd_matvec_dispose( cdm2 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
+   cd_matvec_dispose( &cdm2 );
 
    cdm1 = cd_matvec_make_from_args( 3, 1, 3, 1.0 + 0.0*I, 0.0 + 2.0*I, 3.0 + 0.0*I );
    cdm2 = cd_matvec_make_from_args( 3, 1, 3, -4.0 + 0.0*I, 5.0 + 0.0*I, -6.0 + 0.0*I );
@@ -191,9 +191,9 @@ void test_vector_crossed_4( void )
    CU_ASSERT( cd_matvec_vector_item( cdm, 1 ) == -6.0 + 0.0*I );
    CU_ASSERT( cd_matvec_vector_item( cdm, 2 ) == 5.0 + 8.0*I );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
-   cd_matvec_dispose( cdm2 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
+   cd_matvec_dispose( &cdm2 );
 
    return;
 }

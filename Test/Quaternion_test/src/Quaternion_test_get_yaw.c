@@ -1,8 +1,8 @@
 /**
  @file Quaternion_test_get_yaw.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Quaternion_make"
+ @version 2.0.0
+ @brief: "tests for Quaternion_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Quaternion_make.
+ Unit tests for Quaternion_t
 
 */
 
@@ -46,7 +46,7 @@ void test_get_yaw_1( void )
    CU_ASSERT( fq != NULL );
    CU_ASSERT( x == 0.0 );
 
-   f_quaternion_dispose( fq );
+   f_quaternion_dispose( &fq );
 
    fq = f_quaternion_make_from_yaw( M_PI/3.0);
    x = f_quaternion_get_yaw( fq );
@@ -54,7 +54,7 @@ void test_get_yaw_1( void )
    CU_ASSERT( fq != NULL );
    CU_ASSERT( fabs( x - M_PI/3.0 ) < 0.0001 );
 
-   f_quaternion_dispose( fq );
+   f_quaternion_dispose( &fq );
 
    return;
 }
@@ -73,7 +73,7 @@ void test_get_yaw_2( void )
    CU_ASSERT( dq != NULL );
    CU_ASSERT( x == 0.0 );
 
-   d_quaternion_dispose( dq );
+   d_quaternion_dispose( &dq );
 
    dq = d_quaternion_make_from_yaw( M_PI/3.0 );
    x = d_quaternion_get_yaw( dq );
@@ -81,7 +81,7 @@ void test_get_yaw_2( void )
    CU_ASSERT( dq != NULL );
    CU_ASSERT( fabs( x - M_PI/3.0 ) < 0.0001 );
 
-   d_quaternion_dispose( dq );
+   d_quaternion_dispose( &dq );
 
    return;
 }

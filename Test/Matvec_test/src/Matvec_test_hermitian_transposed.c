@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_hermitian_transposed.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -56,8 +56,8 @@ void test_hermitian_transposed_1( void )
    CU_ASSERT( f_matvec_item( fm, 2, 1 ) == 6.0 );
    CU_ASSERT( f_matvec_item( fm, 2, 2 ) == 9.0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
 
    fm1 = f_matvec_make_from_args( 3, 2, 9, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 );
    fm = f_matvec_hermitian_transposed( fm1 );
@@ -70,8 +70,8 @@ void test_hermitian_transposed_1( void )
    CU_ASSERT( f_matvec_item( fm, 1, 1 ) == 4.0 );
    CU_ASSERT( f_matvec_item( fm, 1, 2 ) == 6.0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
 
    return;
 }
@@ -98,8 +98,8 @@ void test_hermitian_transposed_2( void )
    CU_ASSERT( d_matvec_item( dm, 2, 1 ) == 6.0 );
    CU_ASSERT( d_matvec_item( dm, 2, 2 ) == 9.0 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
 
    return;
 }
@@ -128,8 +128,8 @@ void test_hermitian_transposed_3( void )
    CU_ASSERT( cf_matvec_item( cfm, 2, 1 ) == 6.0 - 6.0*I );
    CU_ASSERT( cf_matvec_item( cfm, 2, 2 ) == 9.0 - 9.0*I );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
 
    return;
 }
@@ -157,8 +157,8 @@ void test_hermitian_transposed_4( void )
    CU_ASSERT( cd_matvec_item( cdm, 2, 1 ) == 6.0 - 6.0*I );
    CU_ASSERT( cd_matvec_item( cdm, 2, 2 ) == 9.0 - 9.0*I );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
 
    return;
 }

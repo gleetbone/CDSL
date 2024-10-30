@@ -1,7 +1,7 @@
 /**
  @file Circular_Buffer_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Circular_Buffer_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Circular_Buffer_make.
+ Unit tests for Circular_Buffer_t
 
 */
 
@@ -44,7 +44,7 @@ void test_dispose_1( void )
    CU_ASSERT( i_circular_buffer_count( circular_buffer ) == 0 );
    CU_ASSERT( i_circular_buffer_is_empty( circular_buffer ) == 1 );
  
-   i_circular_buffer_dispose( circular_buffer );
+   i_circular_buffer_dispose( &circular_buffer );
 
    return;
 }

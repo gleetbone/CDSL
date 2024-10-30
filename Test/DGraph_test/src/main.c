@@ -1,5 +1,5 @@
 /*
-   Tests for directed graphs
+   Tests for DGraph
 */
 
 #include <stdlib.h>
@@ -14,205 +14,25 @@ extern "C" {
 // test suite declarations
 
 int
-add_test_make_depth( void );
-
-int
-add_test_make_breadth( void );
-
-int
-add_test_cursor_make_depth( void );
-
-int
-add_test_cursor_make_breadth( void );
-
-int
-add_test_vertex_make( void );
+add_test_make( void );
 
 int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
-add_test_cursor_dispose( void );
+add_test_vertex_add( void );
 
 int
-add_test_vertex_dispose( void );
+add_test_vertex_remove( void );
 
 int
-add_test_vertex_dispose_with_contents( void );
+add_test_vertex_remove_and_dispose( void );
 
 int
-add_test_value( void );
-
-int
-add_test_edge_value_from_to( void );
-
-int
-add_test_edge_value( void );
-
-int
-add_test_edge_vertex_from( void );
-
-int
-add_test_edge_vertex_to( void );
-
-int
-add_test_cursor_value_at( void );
-
-int
-add_test_value_at( void );
-
-int
-add_test_cursor_at( void );
-
-int
-add_test_at( void );
-
-int
-add_test_as_array( void );
-
-int
-add_test_cursor_edge_value_at( void );
-
-int
-add_test_edge_value_at( void );
-
-int
-add_test_cursor_edge_at( void );
-
-int
-add_test_edge_at( void );
-
-int
-add_test_edge_from_to( void );
-
-int
-add_test_edges_as_array( void );
-
-int
-add_test_count( void );
-
-int
-add_test_edge_count( void );
-
-int
-add_test_are_adjacent( void );
-
-int
-add_test_off( void );
-
-int
-add_test_cursor_off( void );
-
-int
-add_test_is_empty( void );
-
-int
-add_test_edge_off( void );
-
-int
-add_test_cursor_edge_off( void );
-
-int
-add_test_edge_is_empty( void );
-
-int
-add_test_is_connected( void );
-
-int
-add_test_has( void );
-
-int
-add_test_edge_has( void );
-
-int
-add_test_has_value( void );
-
-int
-add_test_edge_has_value( void );
-
-int
-add_test_neighbors_from( void );
-
-int
-add_test_neighbors_to( void );
-
-int
-add_test_cursor_forth( void );
-
-int
-add_test_cursor_start( void );
-
-int
-add_test_forth( void );
-
-int
-add_test_start( void );
-
-int
-add_test_find_value( void );
-
-int
-add_test_find_next_value( void );
-
-int
-add_test_cursor_find_value( void );
-
-int
-add_test_cursor_find_next_value( void );
-
-int
-add_test_cursor_edge_forth( void );
-
-int
-add_test_cursor_edge_start( void );
-
-int
-add_test_edge_forth( void );
-
-int
-add_test_edge_start( void );
-
-int
-add_test_edge_find_value( void );
-
-int
-add_test_edge_find_next_value( void );
-
-int
-add_test_cursor_edge_find_value( void );
-
-int
-add_test_cursor_edge_find_next_value( void );
-
-int
-add_test_put( void );
-
-int
-add_test_edge_put( void );
-
-int
-add_test_set_value( void );
-
-int
-add_test_edge_set( void );
-
-int
-add_test_edge_set_value( void );
-
-int
-add_test_remove( void );
-
-int
-add_test_remove_and_dispose( void );
-
-int
-add_test_edge_remove_from_to( void );
-
-int
-add_test_edge_remove_and_dispose_from_to( void );
+add_test_edge_add( void );
 
 int
 add_test_edge_remove( void );
@@ -227,17 +47,124 @@ int
 add_test_wipe_out_and_dispose( void );
 
 int
-add_test_edge_wipe_out( void );
+add_test_wipe_out_edges( void );
 
 int
-add_test_edge_wipe_out_and_dispose( void );
+add_test_wipe_out_edges_and_dispose( void );
 
 int
-add_test_vertex_set_bucket_count( void );
+add_test_vertex_value( void );
 
 int
-add_test_edge_set_bucket_count( void );
+add_test_vertex_value_put( void );
 
+int
+add_test_edge_value( void );
+
+int
+add_test_edge_value_put( void );
+
+int
+add_test_vertex_neighbors_from( void );
+
+int
+add_test_vertex_neighbors_to( void );
+
+int
+add_test_edge_vertex_from( void );
+
+int
+add_test_edge_for_from_to( void );
+
+int
+add_test_vertex_count( void );
+
+int
+add_test_edge_count( void );
+
+int
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
+add_test_vertex_start( void );
+
+int
+add_test_vertex_forth( void );
+
+int
+add_test_vertex_off( void );
+
+int
+add_test_vertex_id_at( void );
+
+int
+add_test_edge_start( void );
+
+int
+add_test_edge_forth( void );
+
+int
+add_test_edge_off( void );
+
+int
+add_test_edge_id_at( void );
+
+int
+add_test_edge_vertex_to( void );
+
+int
+add_test_edge_vertex_from( void );
+
+int
+add_test_make_cursor( void );
+
+int
+add_test_cursor_dispose( void );
+
+int
+add_test_cursor_vertex_start( void );
+
+int
+add_test_cursor_vertex_forth( void );
+
+int
+add_test_cursor_vertex_off( void );
+
+int
+add_test_cursor_vertex_id_at( void );
+
+int
+add_test_cursor_edge_start( void );
+
+int
+add_test_cursor_edge_forth( void );
+
+int
+add_test_cursor_edge_off( void );
+
+int
+add_test_cursor_edge_id_at( void );
+
+int
+add_test_connected_vertices_breadth_first( void );
+
+int
+add_test_connected_vertices_depth_first( void );
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name )
@@ -277,82 +204,57 @@ int main()
 
    // add tests for DList_make
 
-   add_test_make_depth();
-   add_test_make_breadth();
-   add_test_cursor_make_depth();
-   add_test_cursor_make_breadth();
-   add_test_vertex_make();
+   add_test_make();
    add_test_dispose();
-   add_test_dispose_with_contents();
-   add_test_cursor_dispose();
-   add_test_vertex_dispose();
-   add_test_vertex_dispose_with_contents();
-   add_test_value();
-   add_test_edge_value_from_to();
-   add_test_edge_value();
-   add_test_edge_vertex_from();
-   add_test_edge_vertex_to();
-   add_test_cursor_value_at();
-   add_test_value_at();
-   add_test_cursor_at();
-   add_test_at();
-   add_test_as_array();
-   add_test_cursor_edge_value_at();
-   add_test_edge_value_at();
-   add_test_cursor_edge_at();
-   add_test_edge_at();
-   add_test_edge_from_to();
-   add_test_edges_as_array();
-   add_test_count();
-   add_test_edge_count();
-   add_test_are_adjacent();
-   add_test_off();
-   add_test_cursor_off();
-   add_test_is_empty();
-   add_test_edge_off();
-   add_test_cursor_edge_off();
-   add_test_edge_is_empty();
-   add_test_is_connected();
-   add_test_has();
-   add_test_edge_has();
-   add_test_has_value();
-   add_test_edge_has_value();
-   add_test_neighbors_from();
-   add_test_neighbors_to();
-   add_test_cursor_forth();
-   add_test_cursor_start();
-   add_test_forth();
-   add_test_start();
-   add_test_find_value();
-   add_test_find_next_value();
-   add_test_cursor_find_value();
-   add_test_cursor_find_next_value();
-   add_test_cursor_edge_forth();
-   add_test_cursor_edge_start();
-   add_test_edge_forth();
-   add_test_edge_start();
-   add_test_edge_find_value();
-   add_test_edge_find_next_value();
-   add_test_cursor_edge_find_value();
-   add_test_cursor_edge_find_next_value();
-   add_test_put();
-   add_test_edge_put();
-   add_test_set_value();
-   add_test_edge_set();
-   add_test_edge_set_value();
-   add_test_remove();
-   add_test_remove_and_dispose();
-   add_test_edge_remove_from_to();
-   add_test_edge_remove_and_dispose_from_to();
+   add_test_deep_dispose();
+   add_test_vertex_add();
+   add_test_vertex_remove();
+   add_test_vertex_remove_and_dispose();
+   add_test_edge_add();
    add_test_edge_remove();
    add_test_edge_remove_and_dispose();
    add_test_wipe_out();
    add_test_wipe_out_and_dispose();
-   add_test_edge_wipe_out();
-   add_test_edge_wipe_out_and_dispose();
-   add_test_vertex_set_bucket_count();
-   add_test_edge_set_bucket_count();
-
+   add_test_wipe_out_edges();
+   add_test_wipe_out_edges_and_dispose();
+   add_test_vertex_value();
+   add_test_vertex_value_put();
+   add_test_edge_value();
+   add_test_edge_value_put();
+   add_test_vertex_neighbors_from();
+   add_test_vertex_neighbors_to();
+   add_test_edge_vertex_from();
+   add_test_edge_for_from_to();
+   add_test_vertex_count();
+   add_test_edge_count();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_copy();
+   add_test_deep_copy();
+   add_test_is_equal();
+   add_test_is_deep_equal();
+   add_test_vertex_start();
+   add_test_vertex_forth();
+   add_test_vertex_off();
+   add_test_vertex_id_at();
+   add_test_edge_start();
+   add_test_edge_forth();
+   add_test_edge_off();
+   add_test_edge_id_at();
+   add_test_edge_vertex_to();
+   add_test_edge_vertex_from();
+   add_test_make_cursor();
+   add_test_cursor_dispose();
+   add_test_cursor_vertex_start();
+   add_test_cursor_vertex_forth();
+   add_test_cursor_vertex_off();
+   add_test_cursor_vertex_id_at();
+   add_test_cursor_edge_start();
+   add_test_cursor_edge_forth();
+   add_test_cursor_edge_off();
+   add_test_cursor_edge_id_at();
+   add_test_connected_vertices_breadth_first();
+   add_test_connected_vertices_depth_first();
 
    // Run all tests using the CUnit Basic interface
 

@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_remove.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_kv_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "ii_BSTree_kv.h"
+#include "ss_BSTree_kv.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -50,7 +51,7 @@ void test_remove_1( void )
    result = ii_bstree_kv_has( bstree, 1 );
    CU_ASSERT( result == 0 );
  
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -83,7 +84,7 @@ void test_remove_2( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -116,7 +117,7 @@ void test_remove_2a( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -149,7 +150,7 @@ void test_remove_2b( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -182,7 +183,7 @@ void test_remove_3( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -215,7 +216,7 @@ void test_remove_3a( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -248,7 +249,7 @@ void test_remove_3b( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -281,7 +282,7 @@ void test_remove_4( void )
   
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -314,7 +315,7 @@ void test_remove_4a( void )
   
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -347,7 +348,7 @@ void test_remove_4b( void )
   
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 2 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -400,7 +401,7 @@ void test_remove_5( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -453,7 +454,7 @@ void test_remove_5a( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -506,7 +507,7 @@ void test_remove_5b( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -559,7 +560,7 @@ void test_remove_5c( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -612,7 +613,7 @@ void test_remove_5d( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -665,7 +666,7 @@ void test_remove_5e( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -718,7 +719,7 @@ void test_remove_5f( void )
  
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
    
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -774,7 +775,7 @@ void test_remove_6( void )
 
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 6 );
 
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -807,7 +808,7 @@ void test_remove_6a( void )
 
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 1 );
 
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -848,7 +849,7 @@ void test_remove_6b( void )
 
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 3 );
 
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
 
    return;
 }
@@ -889,7 +890,65 @@ void test_remove_6c( void )
 
    CU_ASSERT( ii_bstree_kv_count( bstree ) == 3 );
 
-   ii_bstree_kv_dispose( bstree );
+   ii_bstree_kv_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_remove_7
+*/
+
+void test_remove_7( void )
+{
+   ss_bstree_kv_t *bstree = NULL;
+   int32_t result = 0;
+
+   string_t *s1 = NULL;
+   string_t *s10 = NULL;
+   string_t *s2 = NULL;
+   string_t *s20 = NULL;
+   string_t *s3 = NULL;
+   string_t *s30 = NULL;
+   string_t *s4 = NULL;
+   string_t *s40 = NULL;
+   
+   s1 = string_make_from_cstring( "1" );
+   s10 = string_make_from_cstring( "10" );
+   s2 = string_make_from_cstring( "2" );
+   s20 = string_make_from_cstring( "20" );
+   s3 = string_make_from_cstring( "3" );
+   s30 = string_make_from_cstring( "30" );
+   s4 = string_make_from_cstring( "4" );
+   s40 = string_make_from_cstring( "40" );
+   
+   bstree = ss_bstree_kv_make();
+
+   ss_bstree_kv_put( bstree, s40, s4 );
+   ss_bstree_kv_put( bstree, s10, s1 );
+   ss_bstree_kv_put( bstree, s20, s2 );
+   ss_bstree_kv_put( bstree, s30, s3 );
+
+   ss_bstree_kv_remove( bstree, s1 );
+
+   result = ss_bstree_kv_has( bstree, s1 );
+   CU_ASSERT( result == 0 );
+
+   result = ss_bstree_kv_has( bstree, s2 );
+   CU_ASSERT( result == 1 );
+
+   result = ss_bstree_kv_has( bstree, s3 );
+   CU_ASSERT( result == 1 );
+
+   result = ss_bstree_kv_has( bstree, s4 );
+   CU_ASSERT( result == 1 );
+
+   CU_ASSERT( ss_bstree_kv_count( bstree ) == 3 );
+
+   ss_bstree_kv_deep_dispose( &bstree );
+   string_deep_dispose( &s1 );
+   string_deep_dispose( &s10 );
+   
 
    return;
 }
@@ -941,6 +1000,9 @@ add_test_remove( void )
    add_test_to_suite( p_suite, test_remove_6a, "test_remove_6a" );
    add_test_to_suite( p_suite, test_remove_6b, "test_remove_6b" );
    add_test_to_suite( p_suite, test_remove_6c, "test_remove_6c" );
+
+   // test_remove_7
+   add_test_to_suite( p_suite, test_remove_7, "test_remove_7" );
 
    return CUE_SUCCESS;
    

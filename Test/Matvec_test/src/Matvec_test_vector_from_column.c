@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_vector_from_column.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -52,8 +52,8 @@ void test_vector_from_column_1( void )
    CU_ASSERT( f_matvec_vector_item( v, 1 ) == 6.0 );
    CU_ASSERT( f_matvec_vector_item( v, 2 ) == 9.0 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( v );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &v );
 
    return;
 }
@@ -76,8 +76,8 @@ void test_vector_from_column_2( void )
    CU_ASSERT( d_matvec_vector_item( v, 1 ) == 6.0 );
    CU_ASSERT( d_matvec_vector_item( v, 2 ) == 9.0 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( v );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &v );
 
    return;
 }
@@ -102,8 +102,8 @@ void test_vector_from_column_3( void )
    CU_ASSERT( cf_matvec_vector_item( v, 1 ) == 6.0 + 6.0*I );
    CU_ASSERT( cf_matvec_vector_item( v, 2 ) == 9.0 + 9.0*I );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( v );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &v );
 
    return;
 }
@@ -127,8 +127,8 @@ void test_vector_from_column_4( void )
    CU_ASSERT( cd_matvec_vector_item( v, 1 ) == 6.0 + 6.0*I );
    CU_ASSERT( cd_matvec_vector_item( v, 2 ) == 9.0 + 9.0*I );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( v );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &v );
 
    return;
 }

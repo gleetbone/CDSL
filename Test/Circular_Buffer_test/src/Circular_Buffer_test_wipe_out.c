@@ -1,7 +1,7 @@
 /**
  @file Circular_Buffer_test_wipe_out.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Circular_Buffer_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Circular_Buffer_first_at.
+ Unit tests for Circular_Buffer_t
 
 */
 
@@ -48,7 +48,7 @@ void test_wipe_out_1( void )
 
    CU_ASSERT( i_circular_buffer_count( circular_buffer ) == 0 );
 
-   i_circular_buffer_dispose( circular_buffer );
+   i_circular_buffer_dispose( &circular_buffer );
 
    return;
 }
@@ -69,7 +69,7 @@ void test_wipe_out_2( void )
 
    CU_ASSERT( i_circular_buffer_count( circular_buffer ) == 0 );
 
-   i_circular_buffer_dispose( circular_buffer );
+   i_circular_buffer_dispose( &circular_buffer );
 
    return;
 }
@@ -92,7 +92,7 @@ void test_wipe_out_3( void )
 
    CU_ASSERT( i_circular_buffer_count( circular_buffer ) == 0 );
 
-   i_circular_buffer_dispose( circular_buffer );
+   i_circular_buffer_dispose( &circular_buffer );
 
    return;
 }

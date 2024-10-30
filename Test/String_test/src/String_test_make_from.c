@@ -1,7 +1,7 @@
 /**
  @file string_test_make_from.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -42,15 +42,15 @@ void test_make_from_1( void )
    
    string_t *string1 = NULL;
    
-   string1 = string_make_from( string );
+   string1 = string_clone( string );
    
    CU_ASSERT( string1 != NULL );
    CU_ASSERT( string_count( string1 ) == 4 );
    CU_ASSERT( string_capacity( string1 ) == 5 );
    CU_ASSERT( string_is_empty( string1 ) == 0 );
  
-   string_dispose_with_contents( string );
-   string_dispose_with_contents( string1 );
+   string_deep_dispose( &string );
+   string_deep_dispose( &string1 );
 
    return;
 }

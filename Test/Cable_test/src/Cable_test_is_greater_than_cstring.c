@@ -1,7 +1,7 @@
 /**
  @file Cable_test_is_greater_than_cstring.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -58,7 +58,7 @@ void test_is_greater_than_cstring_1( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -79,7 +79,7 @@ void test_is_greater_than_cstring_1a( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 0 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -100,7 +100,7 @@ void test_is_greater_than_cstring_2( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 0 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -121,7 +121,7 @@ void test_is_greater_than_cstring_3( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -142,7 +142,7 @@ void test_is_greater_than_cstring_4( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 0 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -163,7 +163,7 @@ void test_is_greater_than_cstring_5( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -184,7 +184,7 @@ void test_is_greater_than_cstring_6( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 0 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -205,7 +205,7 @@ void test_is_greater_than_cstring_7( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -226,7 +226,7 @@ void test_is_greater_than_cstring_8( void )
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_greater_than_cstring( cable, cable1 ) == 0 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

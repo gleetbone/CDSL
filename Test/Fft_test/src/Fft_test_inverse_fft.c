@@ -1,8 +1,8 @@
 /**
  @file Fft_test_inverse_fft.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Fft_make"
+ @version 2.0.0
+ @brief: "tests for Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Fft_make.
+ Unit tests for Fft_t
 
 */
 
@@ -59,8 +59,8 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_output( cffft ), v, 0.000001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
 
    // sinusoid 4
    cffft = cf_fft_make( 4 );
@@ -76,9 +76,9 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_input( cffft ), v1, 0.000001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   cf_matvec_dispose( v1 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   cf_matvec_dispose( &v1 );
 
    // sinusoid 8
    cffft = cf_fft_make( 8 );
@@ -94,9 +94,9 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_input( cffft ), v1, 0.000001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   cf_matvec_dispose( v1 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   cf_matvec_dispose( &v1 );
 
    // sinusoid 256
    cffft = cf_fft_make( 256 );
@@ -112,9 +112,9 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_input( cffft ), v1, 0.00001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   cf_matvec_dispose( v1 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   cf_matvec_dispose( &v1 );
 
    // sinusoid 256
    cffft = cf_fft_make( 256 );
@@ -130,9 +130,9 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_input( cffft ), v1, 0.00001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   cf_matvec_dispose( v1 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   cf_matvec_dispose( &v1 );
 
    // sinusoid 1024
    cffft = cf_fft_make( 1024 );
@@ -148,9 +148,9 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_input( cffft ), v1, 0.00001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   cf_matvec_dispose( v1 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   cf_matvec_dispose( &v1 );
 
    // sinusoid 1024
    cffft = cf_fft_make( 1024 );
@@ -166,9 +166,9 @@ void test_inverse_fft_1( void )
    CU_ASSERT( v1 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_fft_input( cffft ), v1, 0.00001 ) == 1 );
 
-   cf_fft_dispose_with_contents( cffft );
-   cf_matvec_dispose( v );
-   cf_matvec_dispose( v1 );
+   cf_fft_deep_dispose( &cffft );
+   cf_matvec_dispose( &v );
+   cf_matvec_dispose( &v1 );
 
    return;
 }
@@ -194,8 +194,8 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v, 0.000001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
 
 	   // sinusoid 4
 	   cdfft = cd_fft_make( 4 );
@@ -211,9 +211,9 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v1 != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v1, 0.000001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
-	   cd_matvec_dispose( v1 );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
+	   cd_matvec_dispose( &v1 );
 
 	   // sinusoid 8
 	   cdfft = cd_fft_make( 8 );
@@ -229,9 +229,9 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v1 != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v1, 0.000001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
-	   cd_matvec_dispose( v1 );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
+	   cd_matvec_dispose( &v1 );
 
 	   // sinusoid 256
 	   cdfft = cd_fft_make( 256 );
@@ -247,9 +247,9 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v1 != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v1, 0.00001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
-	   cd_matvec_dispose( v1 );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
+	   cd_matvec_dispose( &v1 );
 
 	   // sinusoid 256
 	   cdfft = cd_fft_make( 256 );
@@ -265,9 +265,9 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v1 != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v1, 0.00001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
-	   cd_matvec_dispose( v1 );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
+	   cd_matvec_dispose( &v1 );
 
 	   // sinusoid 1024
 	   cdfft = cd_fft_make( 1024 );
@@ -283,9 +283,9 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v1 != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v1, 0.00001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
-	   cd_matvec_dispose( v1 );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
+	   cd_matvec_dispose( &v1 );
 
 	   // sinusoid 1024
 	   cdfft = cd_fft_make( 1024 );
@@ -301,9 +301,9 @@ void test_inverse_fft_2( void )
 	   CU_ASSERT( v1 != NULL );
 	   CU_ASSERT( cd_matvec_is_approximately_equal( cd_fft_input( cdfft ), v1, 0.00001 ) == 1 );
 
-	   cd_fft_dispose_with_contents( cdfft );
-	   cd_matvec_dispose( v );
-	   cd_matvec_dispose( v1 );
+	   cd_fft_deep_dispose( &cdfft );
+	   cd_matvec_dispose( &v );
+	   cd_matvec_dispose( &v1 );
 
 	   return;
 }

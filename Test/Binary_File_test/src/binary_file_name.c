@@ -1,7 +1,7 @@
 /**
  @file binary_file_test_name.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for ifr_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for binary_file_t
 
 */
 
@@ -47,8 +47,8 @@ void test_name_1( void )
 
    CU_ASSERT( string_is_equal( binary_file_name( file ), name ) == 1  );
 
-   string_dispose_with_contents( name );
-   binary_file_dispose( file );
+   string_deep_dispose( &name );
+   binary_file_dispose( &file );
 
    return;
 }
@@ -65,7 +65,7 @@ void test_name_2( void )
 
    CU_ASSERT( strcmp( binary_file_name_cstring( file ), "file.bin" ) == 0 );
 
-   binary_file_dispose( file );
+   binary_file_dispose( &file );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file Matvec_test_inverse.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Matvec_make"
+ @version 2.0.0
+ @brief: "tests for Matvec_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Matvec_make.
+ Unit tests for Matvec_t
 
 */
 
@@ -52,9 +52,9 @@ void test_inverse_1( void )
    CU_ASSERT( fm2 != NULL );
    CU_ASSERT( f_matvec_is_approximately_equal( fm, fm2, 0.0001 ) == 1 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    fm1 = f_matvec_make_from_args( 2, 2, 4, 0.0, 2.0, 3.0, 4.0 );
    fm2 = f_matvec_make_from_args( 2, 2, 4, -0.66666666, 0.33333333, 0.5, 0.0 );
@@ -65,9 +65,9 @@ void test_inverse_1( void )
    CU_ASSERT( fm2 != NULL );
    CU_ASSERT( f_matvec_is_approximately_equal( fm, fm2, 0.0001 ) == 1 );
 
-   f_matvec_dispose( fm );
-   f_matvec_dispose( fm1 );
-   f_matvec_dispose( fm2 );
+   f_matvec_dispose( &fm );
+   f_matvec_dispose( &fm1 );
+   f_matvec_dispose( &fm2 );
 
    return;
 }
@@ -90,9 +90,9 @@ void test_inverse_2( void )
    CU_ASSERT( dm2 != NULL );
    CU_ASSERT( d_matvec_is_approximately_equal( dm, dm2, 0.0001 ) == 1 );
 
-   d_matvec_dispose( dm );
-   d_matvec_dispose( dm1 );
-   d_matvec_dispose( dm2 );
+   d_matvec_dispose( &dm );
+   d_matvec_dispose( &dm1 );
+   d_matvec_dispose( &dm2 );
 
    return;
 }
@@ -117,9 +117,9 @@ void test_inverse_3( void )
    CU_ASSERT( cfm2 != NULL );
    CU_ASSERT( cf_matvec_is_approximately_equal( cfm, cfm2, 0.0001 ) == 1 );
 
-   cf_matvec_dispose( cfm );
-   cf_matvec_dispose( cfm1 );
-   cf_matvec_dispose( cfm2 );
+   cf_matvec_dispose( &cfm );
+   cf_matvec_dispose( &cfm1 );
+   cf_matvec_dispose( &cfm2 );
 
    return;
 }
@@ -143,9 +143,9 @@ void test_inverse_4( void )
    CU_ASSERT( cdm2 != NULL );
    CU_ASSERT( cd_matvec_is_approximately_equal( cdm, cdm2, 0.0001 ) == 1 );
 
-   cd_matvec_dispose( cdm );
-   cd_matvec_dispose( cdm1 );
-   cd_matvec_dispose( cdm2 );
+   cd_matvec_dispose( &cdm );
+   cd_matvec_dispose( &cdm1 );
+   cd_matvec_dispose( &cdm2 );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file RBTree_test_print_utility.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for BSTree_make"
+ @version 2.0.0
+ @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for RBTree_t
 
 */
 

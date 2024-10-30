@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_height.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -42,7 +43,7 @@ void test_height_1( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 0 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -61,7 +62,7 @@ void test_height_2( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 1 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -82,7 +83,7 @@ void test_height_3( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 2 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -103,7 +104,7 @@ void test_height_4( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -129,7 +130,38 @@ void test_height_5( void )
    
    CU_ASSERT( i_bstree_height( bstree ) == 3 );
 
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_height_6
+   
+            4
+         2      6
+       1  
+*/
+
+void test_height_6( void )
+{
+   s_bstree_t *bstree = NULL;
+   
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   
+   bstree = s_bstree_make();
+   
+   s_bstree_put( bstree, s4 );
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s6 );
+   s_bstree_put( bstree, s1 );
+   
+   CU_ASSERT( s_bstree_height( bstree ) == 3 );
+
+   s_bstree_deep_dispose( &bstree );
 
    return;
 }
@@ -164,6 +196,9 @@ add_test_height( void )
 
    // test_height_5
    add_test_to_suite( p_suite, test_height_5, "test_height_5" );
+
+   // test_height_6
+   add_test_to_suite( p_suite, test_height_6, "test_height_6" );
 
    return CUE_SUCCESS;
    

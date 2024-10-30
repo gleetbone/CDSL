@@ -1,7 +1,7 @@
 /**
  @file Queue_test_prune_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Queue_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -48,7 +48,7 @@ void test_prune_and_dispose_1( void )
 
    CU_ASSERT( int_queue_count( queue ) == 0 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }
@@ -73,7 +73,7 @@ void test_prune_and_dispose_2( void )
 
    CU_ASSERT( int_queue_count( queue ) == 1 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }
@@ -100,7 +100,7 @@ void test_prune_and_dispose_3( void )
 
    CU_ASSERT( int_queue_count( queue ) == 1 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file configuration_test_make.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for messaging_make"
+ @version 2.0.0
+ @brief: "tests for configuration_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_make_dict.
+ Unit tests for configuration_t
 
 */
 
@@ -36,11 +36,11 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_make_1( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
    
    CU_ASSERT( configuration != NULL );
  
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }

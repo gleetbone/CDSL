@@ -1,7 +1,7 @@
 /**
  @file BSTree_test_item_at.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for BSTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_BSTree.h"
+#include "s_BSTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -46,7 +47,7 @@ void test_item_at_1( void )
 
    CU_ASSERT( i_bstree_item_at( bstree ) == 1 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -74,7 +75,7 @@ void test_item_at_2( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -102,7 +103,7 @@ void test_item_at_3( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -130,7 +131,7 @@ void test_item_at_4( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 3 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -166,7 +167,7 @@ void test_item_at_5( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 6 );
   
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -202,7 +203,7 @@ void test_item_at_6( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 6 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -238,7 +239,7 @@ void test_item_at_7( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 6 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
 
    return;
 }
@@ -274,7 +275,48 @@ void test_item_at_8( void )
    i_bstree_forth( bstree );
    CU_ASSERT( i_bstree_item_at( bstree ) == 7 );
  
-   i_bstree_dispose( bstree );
+   i_bstree_dispose( &bstree );
+
+   return;
+}
+
+/**
+   test_item_at_9
+   
+            4
+         2      6
+                  7   
+*/
+
+void test_item_at_9( void )
+{
+   s_bstree_t *bstree = NULL;
+   
+   string_t *s2 = string_make_from_cstring( "2" );
+   string_t *s4 = string_make_from_cstring( "4" );
+   string_t *s6 = string_make_from_cstring( "6" );
+   string_t *s7 = string_make_from_cstring( "7" );
+   
+   bstree = s_bstree_make();
+   
+   s_bstree_put( bstree, s4 );
+   s_bstree_put( bstree, s2 );
+   s_bstree_put( bstree, s6 );
+   s_bstree_put( bstree, s7 );
+   
+   s_bstree_start( bstree );
+   CU_ASSERT( s_bstree_item_at( bstree ) == s2 );
+
+   s_bstree_forth( bstree );
+   CU_ASSERT( s_bstree_item_at( bstree ) == s4 );
+
+   s_bstree_forth( bstree );
+   CU_ASSERT( s_bstree_item_at( bstree ) == s6 );
+
+   s_bstree_forth( bstree );
+   CU_ASSERT( s_bstree_item_at( bstree ) == s7 );
+ 
+   s_bstree_deep_dispose( &bstree );
 
    return;
 }
@@ -317,6 +359,9 @@ add_test_item_at( void )
 
    // test_item_at_8
    add_test_to_suite( p_suite, test_item_at_8, "test_item_at_8" );
+
+   // test_item_at_9
+   add_test_to_suite( p_suite, test_item_at_9, "test_item_at_9" );
 
    return CUE_SUCCESS;
    

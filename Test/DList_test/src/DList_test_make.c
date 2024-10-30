@@ -1,7 +1,7 @@
 /**
  @file DList_test_make.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for DList_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for DList_make.
+ Unit tests for DList_t.
 
 */
 
@@ -25,7 +25,8 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_DList.h"
+#include "i_DList.h"
+#include "s_DList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,15 +37,34 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_make_1( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
    
-   list = int_dlist_make();
+   list = i_dlist_make();
    
    CU_ASSERT( list != NULL );
-   CU_ASSERT( int_dlist_count( list ) == 0 );
-   CU_ASSERT( int_dlist_is_empty( list ) == 1 );
+   CU_ASSERT( i_dlist_count( list ) == 0 );
+   CU_ASSERT( i_dlist_is_empty( list ) == 1 );
  
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_make_2
+*/
+
+void test_make_2( void )
+{
+   s_dlist_t *list = NULL;
+   
+   list = s_dlist_make();
+   
+   CU_ASSERT( list != NULL );
+   CU_ASSERT( s_dlist_count( list ) == 0 );
+   CU_ASSERT( s_dlist_is_empty( list ) == 1 );
+ 
+   s_dlist_dispose( &list );
 
    return;
 }
@@ -66,6 +86,9 @@ add_test_make( void )
 
    // test_make_1
    add_test_to_suite( p_suite, test_make_1, "test_make_1" );
+
+   // test_make_2
+   add_test_to_suite( p_suite, test_make_2, "test_make_2" );
 
    return CUE_SUCCESS;
    

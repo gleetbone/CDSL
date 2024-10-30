@@ -1,7 +1,7 @@
 /**
  @file AVLTree_	.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AVLTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AVLTree_make.
+ Unit tests for AVLTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_AVLTree.h"
+#include "s_AVLTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -38,17 +39,19 @@ void test_as_array_1( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
    i_avltree_put( avltree, 1 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 1 );
    CU_ASSERT( array[0] == 1 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -60,6 +63,7 @@ void test_as_array_1( void )
 void test_as_array_2( void )
 {
    i_avltree_t *avltree = NULL;
+   int32_t count = 0;
    int32_t *array = NULL;
    
    avltree = i_avltree_make();
@@ -68,14 +72,15 @@ void test_as_array_2( void )
    i_avltree_put( avltree, 1 );
    i_avltree_put( avltree, 3 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 3 );
    CU_ASSERT( array[0] == 1 );
    CU_ASSERT( array[1] == 2 );
    CU_ASSERT( array[2] == 3 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -88,6 +93,7 @@ void test_as_array_3( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
@@ -95,14 +101,15 @@ void test_as_array_3( void )
    i_avltree_put( avltree, 2 );
    i_avltree_put( avltree, 1 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 3 );
    CU_ASSERT( array[0] == 1 );
    CU_ASSERT( array[1] == 2 );
    CU_ASSERT( array[2] == 3 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -115,6 +122,7 @@ void test_as_array_4( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
@@ -122,14 +130,15 @@ void test_as_array_4( void )
    i_avltree_put( avltree, 2 );
    i_avltree_put( avltree, 3 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 3 );
    CU_ASSERT( array[0] == 1 );
    CU_ASSERT( array[1] == 2 );
    CU_ASSERT( array[2] == 3 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -146,6 +155,7 @@ void test_as_array_5( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
@@ -154,15 +164,16 @@ void test_as_array_5( void )
    i_avltree_put( avltree, 6 );
    i_avltree_put( avltree, 1 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 4 );
    CU_ASSERT( array[0] == 1 );
    CU_ASSERT( array[1] == 2 );
    CU_ASSERT( array[2] == 4 );
    CU_ASSERT( array[3] == 6 );
   
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -179,6 +190,7 @@ void test_as_array_6( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
@@ -187,15 +199,16 @@ void test_as_array_6( void )
    i_avltree_put( avltree, 6 );
    i_avltree_put( avltree, 3 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 4 );
    CU_ASSERT( array[0] == 2 );
    CU_ASSERT( array[1] == 3 );
    CU_ASSERT( array[2] == 4 );
    CU_ASSERT( array[3] == 6 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -212,6 +225,7 @@ void test_as_array_7( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
@@ -220,15 +234,16 @@ void test_as_array_7( void )
    i_avltree_put( avltree, 6 );
    i_avltree_put( avltree, 5 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 4 );
    CU_ASSERT( array[0] == 2 );
    CU_ASSERT( array[1] == 4 );
    CU_ASSERT( array[2] == 5 );
    CU_ASSERT( array[3] == 6 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
 
    return;
 }
@@ -245,6 +260,7 @@ void test_as_array_8( void )
 {
    i_avltree_t *avltree = NULL;
    int32_t *array = NULL;
+   int32_t count = 0;
    
    avltree = i_avltree_make();
    
@@ -253,15 +269,46 @@ void test_as_array_8( void )
    i_avltree_put( avltree, 6 );
    i_avltree_put( avltree, 7 );
    
-   array = i_avltree_as_array( avltree );
+   array = i_avltree_as_array( avltree, &count );
    
+   CU_ASSERT( count == 4 );
    CU_ASSERT( array[0] == 2 );
    CU_ASSERT( array[1] == 4 );
    CU_ASSERT( array[2] == 6 );
    CU_ASSERT( array[3] == 7 );
  
    free( array );
-   i_avltree_dispose( avltree );
+   i_avltree_dispose( &avltree );
+
+   return;
+}
+
+/**
+   test_as_array_9
+*/
+
+void test_as_array_9( void )
+{
+   s_avltree_t *avltree = NULL;
+   string_t **array = NULL;
+   int32_t count = 0;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   avltree = s_avltree_make();
+   
+   s_avltree_put( avltree, s1 );
+   s_avltree_put( avltree, s2 );
+
+   array = s_avltree_as_array( avltree, &count );
+
+   CU_ASSERT( count == 2 );
+   CU_ASSERT( array[0] == s1 );
+   CU_ASSERT( array[1] == s2 );
+
+   free( array );
+   s_avltree_deep_dispose( &avltree );
 
    return;
 }
@@ -304,6 +351,9 @@ add_test_as_array( void )
 
    // test_as_array_8
    add_test_to_suite( p_suite, test_as_array_8, "test_as_array_8" );
+
+   // test_as_array_9
+   add_test_to_suite( p_suite, test_as_array_9, "test_as_array_9" );
 
    return CUE_SUCCESS;
    

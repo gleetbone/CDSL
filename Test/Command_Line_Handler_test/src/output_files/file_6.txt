@@ -1,0 +1,9 @@
+c arg one ar"g 
+c arg 
+c arg -o arg 
+Error - extra token -p found in command line.
+Error - extra token arg found in command line.
+c arg 
+Error - non-command token x found in command line.
+Error - no command found.
+Exiting program.

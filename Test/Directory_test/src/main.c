@@ -20,7 +20,28 @@ int
 add_test_make_cstring( void );
 
 int
+add_test_clone( void );
+
+int
+add_test_deep_clone( void );
+
+int
+add_test_copy( void );
+
+int
+add_test_deep_copy( void );
+
+int
+add_test_is_equal( void );
+
+int
+add_test_is_deep_equal( void );
+
+int
 add_test_dispose( void );
+
+int
+add_test_deep_dispose( void );
 
 int
 add_test_name( void );
@@ -148,7 +169,14 @@ int main(int argc, char *argv[] )
 
    add_test_make();
    add_test_make_cstring();
+   add_test_clone();
+   add_test_deep_clone();
+   add_test_copy();
+   add_test_deep_copy();
+   add_test_is_equal();
+   add_test_is_deep_equal();
    add_test_dispose();
+   add_test_deep_dispose();
    add_test_name();
    add_test_name_cstring();
    add_test_last_entry();

@@ -1,7 +1,7 @@
 /**
  @file Cable_test_to_lower.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -55,7 +55,7 @@ void test_to_lower_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "aBCD" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -76,7 +76,7 @@ void test_to_lower_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abCD" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -97,7 +97,7 @@ void test_to_lower_3( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "AbCD" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -118,7 +118,7 @@ void test_to_lower_4( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -139,7 +139,7 @@ void test_to_lower_5( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABCd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -160,7 +160,7 @@ void test_to_lower_6( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABCDeFGHIJ" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -181,7 +181,7 @@ void test_to_lower_7( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABCDefGHIJ" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -202,7 +202,7 @@ void test_to_lower_8( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABCDEfGHIJ" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -223,7 +223,7 @@ void test_to_lower_9( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABCDEFghIJ" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -244,7 +244,7 @@ void test_to_lower_10( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "ABCDEFGhIJ" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

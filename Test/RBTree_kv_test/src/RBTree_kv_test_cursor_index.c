@@ -1,7 +1,7 @@
 /**
  @file RBTree_kv_test_cursor_index.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for RBTree_kv_cursor_item_at"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for RBTree_kv_cursor_item_at.
+ Unit tests for RBTree_kv_t
 
 */
 
@@ -36,17 +36,17 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_cursor_index_1( void )
 {
-   ii_rbtree_kv_t *list = NULL;
+   ii_rbtree_kv_t *rbtree = NULL;
 
-   list = ii_rbtree_kv_make();
+   rbtree = ii_rbtree_kv_make();
    
-   ii_rbtree_kv_cursor_t *cursor = ii_rbtree_kv_cursor_make( list );
+   ii_rbtree_kv_cursor_t *cursor = ii_rbtree_kv_cursor_make( rbtree );
 
    CU_ASSERT( ii_rbtree_kv_cursor_off( cursor ) == 1 );
    CU_ASSERT( ii_rbtree_kv_cursor_index( cursor ) == -1 );
    
-   ii_rbtree_kv_put( list, 240, 24 );
-   ii_rbtree_kv_put( list, 130, 13 );
+   ii_rbtree_kv_put( rbtree, 240, 24 );
+   ii_rbtree_kv_put( rbtree, 130, 13 );
    
    ii_rbtree_kv_cursor_start( cursor );
    CU_ASSERT( ii_rbtree_kv_cursor_index( cursor ) == 0 );
@@ -59,8 +59,8 @@ void test_cursor_index_1( void )
 
    CU_ASSERT( ii_rbtree_kv_cursor_index( cursor ) == -1 );
 
-   ii_rbtree_kv_cursor_dispose( cursor );
-   ii_rbtree_kv_dispose( list );
+   ii_rbtree_kv_cursor_dispose( &cursor );
+   ii_rbtree_kv_dispose( &rbtree );
 
    return;
 }

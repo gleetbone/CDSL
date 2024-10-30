@@ -1,8 +1,8 @@
 /**
  @file RBTree_test_make.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for BSTree_make"
+ @version 2.0.0
+ @brief: "tests for RBTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for BSTree_make.
+ Unit tests for RBTree_t
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_RBTree.h"
+#include "s_RBTree.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -44,8 +45,8 @@ void test_make_1( void )
    CU_ASSERT( i_rbtree_count( rbtree ) == 0 );
    CU_ASSERT( i_rbtree_is_empty( rbtree ) == 1 );
  
-   i_rbtree_dispose( rbtree );
-   
+   i_rbtree_dispose( &rbtree );
+
    return;
 }
 
@@ -53,23 +54,18 @@ void test_make_1( void )
    test_make_2
 */
 
-void test_make_2( void )
+void test_make_3( void )
 {
    i_rbtree_t *rbtree = NULL;
-   i_rbtree_t *rbtree1 = NULL;
    
    rbtree = i_rbtree_make();
    i_rbtree_put( rbtree, 13 );
    
-   rbtree1 = i_rbtree_make_duplicate_from( rbtree );
-   
-   CU_ASSERT( rbtree1 != NULL );
-   CU_ASSERT( i_rbtree_count( rbtree1 ) == 1 );
-   CU_ASSERT( i_rbtree_has( rbtree1, 13 ) == 1 );
+   CU_ASSERT( i_rbtree_count( rbtree ) == 1 );
+   CU_ASSERT( i_rbtree_has( rbtree, 13 ) == 1 );
  
-   i_rbtree_dispose( rbtree );
-   i_rbtree_dispose( rbtree1 );
-   
+   i_rbtree_dispose( &rbtree );
+
    return;
 }
 
@@ -77,42 +73,19 @@ void test_make_2( void )
    test_make_3
 */
 
-void test_make_3( void )
+void test_make_2( void )
 {
-   i_rbtree_t *rbtree = NULL;
-   i_rbtree_t *rbtree1 = NULL;
+   s_rbtree_t *rbtree = NULL;
    
-   rbtree = i_rbtree_make();
-   i_rbtree_put( rbtree, 13 );
+   string_t *s1 = string_make_from_cstring( "1" );
    
-   rbtree1 = i_rbtree_make_from( rbtree );
+   rbtree = s_rbtree_make();
+   s_rbtree_put( rbtree, s1 );
    
-   CU_ASSERT( rbtree1 != NULL );
-   CU_ASSERT( i_rbtree_count( rbtree1 ) == 1 );
-   CU_ASSERT( i_rbtree_has( rbtree1, 13 ) == 1 );
+   CU_ASSERT( s_rbtree_count( rbtree ) == 1 );
+   CU_ASSERT( s_rbtree_has( rbtree, s1 ) == 1 );
  
-   i_rbtree_dispose( rbtree );
-   i_rbtree_dispose( rbtree1 );
-   
-   return;
-}
-
-/**
-   test_make_4
-*/
-
-void test_make_4( void )
-{
-   i_rbtree_t *rbtree = NULL;
-   int32_t array[3] = {13, 0, 0 };
-
-   rbtree = i_rbtree_make_from_array( array, 1 );
-
-   CU_ASSERT( rbtree != NULL );
-   CU_ASSERT( i_rbtree_count( rbtree ) == 1 );
-   CU_ASSERT( i_rbtree_has( rbtree, 13 ) == 1 );
-
-   i_rbtree_dispose( rbtree );
+   s_rbtree_deep_dispose( &rbtree );
 
    return;
 }
@@ -140,9 +113,6 @@ add_test_make( void )
 
    // test_make_3
    add_test_to_suite( p_suite, test_make_3, "test_make_3" );
-
-   // test_make_4
-   add_test_to_suite( p_suite, test_make_4, "test_make_4" );
 
    return CUE_SUCCESS;
    

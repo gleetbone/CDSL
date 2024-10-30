@@ -1,17 +1,17 @@
 /**
  @file Cable.h
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "Character strings implemented as a binary search tree of substrings"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Function declarations for the opaque cable_t type.
@@ -62,7 +62,7 @@ struct cable_struct;
 typedef struct cable_struct cable_t;
 
 
-/**
+/*
    Initialization
 */
 
@@ -102,7 +102,7 @@ cable_t *
 cable_make_from_cstring( char_t *str );
 
 
-/**
+/*
    Disposal
 */
 
@@ -114,10 +114,10 @@ cable_make_from_cstring( char_t *str );
    @param cable the C cable to dispose
 */
 void
-cable_dispose( cable_t *cable );
+cable_dispose( cable_t **cable );
 
 
-/**
+/*
    Access
 */
 
@@ -147,7 +147,7 @@ char_t *
 cable_as_cstring( cable_t *cable );
 
 
-/**
+/*
    Measurement
 */
 
@@ -163,7 +163,7 @@ int32_t
 cable_count( cable_t *cable );
 
 
-/**
+/*
    Status Report
 */
 
@@ -215,7 +215,7 @@ int32_t
 cable_hash_code( cable_t *cable );
 
 
-/**
+/*
    Comparison
 */
 
@@ -417,7 +417,7 @@ int32_t cable_substring_index( cable_t *cable, cable_t *substring );
 int32_t cable_substring_index_cstring( cable_t *cable, char_t *substring );
 
 
-/**
+/*
    Conversion
 */
 
@@ -463,7 +463,7 @@ cable_t *cable_as_lower( cable_t *cable, int32_t start_index, int32_t end_index 
 cable_t *cable_as_upper( cable_t *cable, int32_t start_index, int32_t end_index );
 
 
-/**
+/*
    Element Change
 */
 
@@ -702,7 +702,7 @@ void cable_to_lower( cable_t *cable, int32_t start_index, int32_t end_index );
 void cable_to_upper( cable_t *cable, int32_t start_index, int32_t end_index );
 
 
-/**
+/*
    Duplication
 */
 
@@ -730,7 +730,7 @@ cable_t *cable_substring( cable_t *cable, int32_t start_index, int32_t end_index
 cable_t *cable_copy( cable_t *cable );
 
 
-/**
+/*
    Removal
 */
 
@@ -808,7 +808,7 @@ void cable_remove_tail( cable_t *cable, int32_t count );
 void cable_wipe_out( cable_t *cable );
 
 
-/**
+/*
    Resize
 */
 

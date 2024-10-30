@@ -1,7 +1,7 @@
 /**
  @file P_Iterable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "P_Iterable protocol"
  
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
@@ -53,92 +53,6 @@
 #include <stddef.h>
 
 /**
-   p_iterable_dispose
-*/
-void
-P_Iterable_dispose( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   void (*dispose)( protocol_base_t * ) = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_DISPOSE );
-
-   CHECK( "P_ITERABLE_DISPOSE function not null", dispose != NULL );
-
-   dispose( p_iterable );
-
-   return;
-}
-
-/**
-   p_iterable_dispose_f
-*/
-iterable_dispose_f
-P_Iterable_dispose_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   void (*dispose)( protocol_base_t * ) = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_DISPOSE );
-
-   CHECK( "P_ITERABLE_DISPOSE function not null", dispose != NULL );
-
-   return dispose;
-}
-
-/**
-   p_iterable_dispose_with_contents
-*/
-void
-P_Iterable_dispose_with_contents( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   void (*dispose_with_contents)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_DISPOSE_WITH_CONTENTS );
-
-   CHECK( "P_ITERABLE_DISPOSE function not null", dispose_with_contents != NULL );
-
-   dispose_with_contents( p_iterable );
-
-   return;
-}
-
-/**
-   p_iterable_dispose_with_contents_f
-*/
-iterable_dispose_with_contents_f
-P_Iterable_dispose_with_contents_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   void (*dispose_with_contents)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_DISPOSE_WITH_CONTENTS );
-
-   CHECK( "P_ITERABLE_DISPOSE function not null", dispose_with_contents != NULL );
-   
-   return dispose_with_contents;
-}
-
-/**
    p_iterable_count
 */
 int32_t
@@ -149,37 +63,16 @@ P_Iterable_count( Prefix )
 {
    PRECONDITION( "p_iterable not null", p_iterable != NULL );
    PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
+   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE_TYPE ) == 1 );
 
    int32_t (*count)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_COUNT );
+      = (*p_iterable).get_function( P_ITERABLE_TYPE, P_ITERABLE_COUNT );
 
    CHECK( "P_ITERABLE_COUNT function not null", count != NULL );
 
    int32_t result = count( p_iterable );
 
    return result;
-}
-
-/**
-   p_iterable_count_f
-*/
-iterable_count_f
-P_Iterable_count_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   int32_t (*count)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_COUNT );
-
-   CHECK( "P_ITERABLE_COUNT function not null", count != NULL );
-
-   return count;
 }
 
 /**
@@ -193,37 +86,16 @@ P_Iterable_item( Prefix )
 {
    PRECONDITION( "p_iterable not null", p_iterable != NULL );
    PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
+   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE_TYPE ) == 1 );
 
    Type (*item)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_ITEM );
+      = (*p_iterable).get_function( P_ITERABLE_TYPE, P_ITERABLE_ITEM );
 
    CHECK( "P_ITERABLE_ITEM function not null", item != NULL );
 
    Type result = item( p_iterable );
 
    return result;
-}
-
-/**
-   p_iterable_item_f
-*/
-iterable_item_f
-P_Iterable_item_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   Type (*item)( protocol_base_t * index ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_ITEM );
-
-   CHECK( "P_ITERABLE_ITEM function not null", item != NULL );
-
-   return item;
 }
 
 /**
@@ -237,37 +109,16 @@ P_Iterable_off( Prefix )
 {
    PRECONDITION( "p_iterable not null", p_iterable != NULL );
    PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
+   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE_TYPE ) == 1 );
 
    int32_t (*off)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_OFF );
+      = (*p_iterable).get_function( P_ITERABLE_TYPE, P_ITERABLE_OFF );
 
    CHECK( "P_ITERABLE_OFF function not null", off != NULL );
 
    int32_t result = off( p_iterable );
 
    return result;
-}
-
-/**
-   p_iterable_off_f
-*/
-iterable_off_f
-P_Iterable_off_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   int32_t (*off)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_OFF );
-
-   CHECK( "P_ITERABLE_OFF function not null", off != NULL );
-
-   return off;
 }
 
 /**
@@ -281,37 +132,16 @@ P_Iterable_is_empty( Prefix )
 {
    PRECONDITION( "p_iterable not null", p_iterable != NULL );
    PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
+   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE_TYPE ) == 1 );
 
    int32_t (*is_empty)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_IS_EMPTY );
+      = (*p_iterable).get_function( P_ITERABLE_TYPE, P_ITERABLE_IS_EMPTY );
 
    CHECK( "P_ITERABLE_IS_EMPTY function not null", is_empty != NULL );
 
    int32_t result = is_empty( p_iterable );
 
    return result;
-}
-
-/**
-   p_iterable_is_empty_f
-*/
-iterable_is_empty_f
-P_Iterable_is_empty_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   int32_t (*is_empty)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_IS_EMPTY );
-
-   CHECK( "P_ITERABLE_IS_EMPTY function not null", is_empty != NULL );
-
-   return is_empty;
 }
 
 /**
@@ -325,37 +155,16 @@ P_Iterable_start( Prefix )
 {
    PRECONDITION( "p_iterable not null", p_iterable != NULL );
    PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
+   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE_TYPE ) == 1 );
 
    void (*start)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_START );
+      = (*p_iterable).get_function( P_ITERABLE_TYPE, P_ITERABLE_START );
 
    CHECK( "P_ITERABLE_START function not null", start != NULL );
 
    start( p_iterable );
 
    return;
-}
-
-/**
-   p_iterable_start_f
-*/
-iterable_start_f
-P_Iterable_start_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   void (*start)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_START );
-
-   CHECK( "P_ITERABLE_START function not null", start != NULL );
-
-   return start;
 }
 
 /**
@@ -369,37 +178,16 @@ P_Iterable_forth( Prefix )
 {
    PRECONDITION( "p_iterable not null", p_iterable != NULL );
    PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
+   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE_TYPE ) == 1 );
 
    void (*forth)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_FORTH );
+      = (*p_iterable).get_function( P_ITERABLE_TYPE, P_ITERABLE_FORTH );
 
    CHECK( "P_ITERABLE_FORTH function not null", forth != NULL );
 
    forth( p_iterable );
 
    return;
-}
-
-/**
-   p_iterable_forth_f
-*/
-iterable_forth_f
-P_Iterable_forth_f( Prefix )
-(
-   protocol_base_t *p_iterable
-)
-{
-   PRECONDITION( "p_iterable not null", p_iterable != NULL );
-   PRECONDITION( "p_iterable is object", protocol_base_is_valid_object( p_iterable ) == 1 );
-   PRECONDITION( "p_iterable supports protocol", protocol_base_supports_protocol( p_iterable, P_ITERABLE ) == 1 );
-
-   void (*forth)( protocol_base_t * ) 
-      = (*p_iterable).get_function( P_ITERABLE, P_ITERABLE_FORTH );
-
-   CHECK( "P_ITERABLE_FORTH function not null", forth != NULL );
-
-   return forth;
 }
 
 /* End of file */

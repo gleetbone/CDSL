@@ -12,18 +12,21 @@
  
  @section Description
 
- Defines to make a dlist into a int_dlist.
+ Defines to make a bstree into a i_bstree.
 
 */
 
-#ifndef INT_BSTREE_H_
-#define INT_BSTREE_H_
+#ifndef I_BSTREE_H_
+#define I_BSTREE_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
  
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
 
 #define Prefix i
 #define Type int32_t
@@ -31,13 +34,13 @@ extern "C" {
 #include "BSTree.h"
 
 #undef Prefix
-#undef Value
+#undef Type
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INT_BSTREE_H_ */
+#endif /* I_BSTREE_H_ */
 
 /* End of file */
 

@@ -1,7 +1,7 @@
 /**
  @file DList_test_prune_first_and_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for DList_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for DList_item_at.
+ Unit tests for DList_t.
 
 */
 
@@ -25,7 +25,7 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_DList.h"
+#include "i_DList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,17 +36,17 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_prune_first_and_dispose_1( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
+   list = i_dlist_make();
    
-   int_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 24 );
 
-   int_dlist_prune_first_and_dispose( list, 1 );
+   i_dlist_prune_first_and_dispose( list, 1 );
 
-   CU_ASSERT( int_dlist_count( list ) == 0 );
+   CU_ASSERT( i_dlist_count( list ) == 0 );
 
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }
@@ -57,22 +57,22 @@ void test_prune_first_and_dispose_1( void )
 
 void test_prune_first_and_dispose_2( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
+   list = i_dlist_make();
    
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
 
-   int_dlist_prune_first_and_dispose( list, 1 );
+   i_dlist_prune_first_and_dispose( list, 1 );
 
-   CU_ASSERT( int_dlist_count( list ) == 1 );
+   CU_ASSERT( i_dlist_count( list ) == 1 );
 
-   int_dlist_start( list );
+   i_dlist_start( list );
    
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }
@@ -83,18 +83,18 @@ void test_prune_first_and_dispose_2( void )
 
 void test_prune_first_and_dispose_3( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
+   list = i_dlist_make();
    
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
 
-   int_dlist_prune_first_and_dispose( list, 2 );
+   i_dlist_prune_first_and_dispose( list, 2 );
 
-   CU_ASSERT( int_dlist_count( list ) == 0 );
+   CU_ASSERT( i_dlist_count( list ) == 0 );
 
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }
@@ -105,26 +105,26 @@ void test_prune_first_and_dispose_3( void )
 
 void test_prune_first_and_dispose_4( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
-   int_dlist_put_last( list, 7 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
+   i_dlist_put_last( list, 7 );
 
-   int_dlist_prune_first_and_dispose( list, 1 );
+   i_dlist_prune_first_and_dispose( list, 1 );
    
-   int_dlist_start( list );
+   i_dlist_start( list );
    
-   CU_ASSERT( int_dlist_item_at( list ) == 13 );
+   CU_ASSERT( i_dlist_item_at( list ) == 13 );
 
-   int_dlist_forth( list );
+   i_dlist_forth( list );
 
-   CU_ASSERT( int_dlist_item_at( list ) == 7 );
+   CU_ASSERT( i_dlist_item_at( list ) == 7 );
 
-   CU_ASSERT( int_dlist_count( list ) == 2 );
+   CU_ASSERT( i_dlist_count( list ) == 2 );
 
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }
@@ -135,22 +135,22 @@ void test_prune_first_and_dispose_4( void )
 
 void test_prune_first_and_dispose_5( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
-   int_dlist_put_last( list, 7 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
+   i_dlist_put_last( list, 7 );
 
-   int_dlist_prune_first_and_dispose( list, 2 );
+   i_dlist_prune_first_and_dispose( list, 2 );
    
-   int_dlist_start( list );
+   i_dlist_start( list );
    
-   CU_ASSERT( int_dlist_item_at( list ) == 7 );
+   CU_ASSERT( i_dlist_item_at( list ) == 7 );
 
-   CU_ASSERT( int_dlist_count( list ) == 1 );
+   CU_ASSERT( i_dlist_count( list ) == 1 );
 
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }
@@ -161,18 +161,18 @@ void test_prune_first_and_dispose_5( void )
 
 void test_prune_first_and_dispose_6( void )
 {
-   int_dlist_t *list = NULL;
+   i_dlist_t *list = NULL;
 
-   list = int_dlist_make();
-   int_dlist_put_last( list, 24 );
-   int_dlist_put_last( list, 13 );
-   int_dlist_put_last( list, 7 );
+   list = i_dlist_make();
+   i_dlist_put_last( list, 24 );
+   i_dlist_put_last( list, 13 );
+   i_dlist_put_last( list, 7 );
 
-   int_dlist_prune_first_and_dispose( list, 3 );
+   i_dlist_prune_first_and_dispose( list, 3 );
    
-   CU_ASSERT( int_dlist_count( list ) == 0 );
+   CU_ASSERT( i_dlist_count( list ) == 0 );
 
-   int_dlist_dispose( list );
+   i_dlist_dispose( &list );
 
    return;
 }

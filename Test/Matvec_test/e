@@ -1,0 +1,202 @@
+==== Building Matvec_test (debug) ====
+f_Matvec.c
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘f_matvec_vector_cross’:
+../../../Matvec/Matvec.c:2920:35: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 2920 |    Matvec_deep_dispose( Prefix )( temp );
+      |                                   ^~~~
+      |                                   |
+      |                                   f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘f_matvec_invert’:
+../../../Matvec/Matvec.c:3593:35: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3593 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c:3594:35: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3594 |    Matvec_deep_dispose( Prefix )( b );
+      |                                   ^
+      |                                   |
+      |                                   f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘f_matvec_inverse’:
+../../../Matvec/Matvec.c:3726:35: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3726 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘f_matvec_determinant’:
+../../../Matvec/Matvec.c:3842:35: warning: passing argument 1 of ‘f_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3842 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   f_matvec_t * {aka struct f_matvec_struct *}
+In file included from ../src/f_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘f_matvec_t **’ {aka ‘struct f_matvec_struct **’} but argument is of type ‘f_matvec_t *’ {aka ‘struct f_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+cd_Matvec.c
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cd_matvec_vector_cross’:
+../../../Matvec/Matvec.c:2920:35: warning: passing argument 1 of ‘cd_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 2920 |    Matvec_deep_dispose( Prefix )( temp );
+      |                                   ^~~~
+      |                                   |
+      |                                   cd_matvec_t * {aka struct cd_matvec_struct *}
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cd_matvec_t **’ {aka ‘struct cd_matvec_struct **’} but argument is of type ‘cd_matvec_t *’ {aka ‘struct cd_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cd_matvec_invert’:
+../../../Matvec/Matvec.c:3593:35: warning: passing argument 1 of ‘cd_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3593 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   cd_matvec_t * {aka struct cd_matvec_struct *}
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cd_matvec_t **’ {aka ‘struct cd_matvec_struct **’} but argument is of type ‘cd_matvec_t *’ {aka ‘struct cd_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c:3594:35: warning: passing argument 1 of ‘cd_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3594 |    Matvec_deep_dispose( Prefix )( b );
+      |                                   ^
+      |                                   |
+      |                                   cd_matvec_t * {aka struct cd_matvec_struct *}
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cd_matvec_t **’ {aka ‘struct cd_matvec_struct **’} but argument is of type ‘cd_matvec_t *’ {aka ‘struct cd_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cd_matvec_inverse’:
+../../../Matvec/Matvec.c:3726:35: warning: passing argument 1 of ‘cd_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3726 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   cd_matvec_t * {aka struct cd_matvec_struct *}
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cd_matvec_t **’ {aka ‘struct cd_matvec_struct **’} but argument is of type ‘cd_matvec_t *’ {aka ‘struct cd_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cd_matvec_determinant’:
+../../../Matvec/Matvec.c:3842:35: warning: passing argument 1 of ‘cd_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3842 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   cd_matvec_t * {aka struct cd_matvec_struct *}
+In file included from ../src/cd_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cd_matvec_t **’ {aka ‘struct cd_matvec_struct **’} but argument is of type ‘cd_matvec_t *’ {aka ‘struct cd_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+d_Matvec.c
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘d_matvec_vector_cross’:
+../../../Matvec/Matvec.c:2920:35: warning: passing argument 1 of ‘d_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 2920 |    Matvec_deep_dispose( Prefix )( temp );
+      |                                   ^~~~
+      |                                   |
+      |                                   d_matvec_t * {aka struct d_matvec_struct *}
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘d_matvec_t **’ {aka ‘struct d_matvec_struct **’} but argument is of type ‘d_matvec_t *’ {aka ‘struct d_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘d_matvec_invert’:
+../../../Matvec/Matvec.c:3593:35: warning: passing argument 1 of ‘d_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3593 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   d_matvec_t * {aka struct d_matvec_struct *}
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘d_matvec_t **’ {aka ‘struct d_matvec_struct **’} but argument is of type ‘d_matvec_t *’ {aka ‘struct d_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c:3594:35: warning: passing argument 1 of ‘d_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3594 |    Matvec_deep_dispose( Prefix )( b );
+      |                                   ^
+      |                                   |
+      |                                   d_matvec_t * {aka struct d_matvec_struct *}
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘d_matvec_t **’ {aka ‘struct d_matvec_struct **’} but argument is of type ‘d_matvec_t *’ {aka ‘struct d_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘d_matvec_inverse’:
+../../../Matvec/Matvec.c:3726:35: warning: passing argument 1 of ‘d_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3726 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   d_matvec_t * {aka struct d_matvec_struct *}
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘d_matvec_t **’ {aka ‘struct d_matvec_struct **’} but argument is of type ‘d_matvec_t *’ {aka ‘struct d_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘d_matvec_determinant’:
+../../../Matvec/Matvec.c:3842:35: warning: passing argument 1 of ‘d_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3842 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   d_matvec_t * {aka struct d_matvec_struct *}
+In file included from ../src/d_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘d_matvec_t **’ {aka ‘struct d_matvec_struct **’} but argument is of type ‘d_matvec_t *’ {aka ‘struct d_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+cf_Matvec.c
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cf_matvec_vector_cross’:
+../../../Matvec/Matvec.c:2920:35: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 2920 |    Matvec_deep_dispose( Prefix )( temp );
+      |                                   ^~~~
+      |                                   |
+      |                                   cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cf_matvec_invert’:
+../../../Matvec/Matvec.c:3593:35: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3593 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c:3594:35: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3594 |    Matvec_deep_dispose( Prefix )( b );
+      |                                   ^
+      |                                   |
+      |                                   cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cf_matvec_inverse’:
+../../../Matvec/Matvec.c:3726:35: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3726 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c: In function ‘cf_matvec_determinant’:
+../../../Matvec/Matvec.c:3842:35: warning: passing argument 1 of ‘cf_matvec_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3842 |    Matvec_deep_dispose( Prefix )( a );
+      |                                   ^
+      |                                   |
+      |                                   cf_matvec_t * {aka struct cf_matvec_struct *}
+In file included from ../src/cf_Matvec.c:50:
+../../../Matvec/Matvec.c:437:56: note: expected ‘cf_matvec_t **’ {aka ‘struct cf_matvec_struct **’} but argument is of type ‘cf_matvec_t *’ {aka ‘struct cf_matvec_struct *’}
+  437 | Matvec_deep_dispose( Prefix )( Matvec_type( Prefix ) **current )
+Linking Matvec_test

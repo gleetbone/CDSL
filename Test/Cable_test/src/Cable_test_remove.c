@@ -1,7 +1,7 @@
 /**
  @file Cable_test_remove.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -56,7 +56,7 @@ void test_remove_1( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "bcd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -77,7 +77,7 @@ void test_remove_2( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "acd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -98,7 +98,7 @@ void test_remove_3( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abd" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -119,7 +119,7 @@ void test_remove_4( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abc" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -140,7 +140,7 @@ void test_remove_5( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdfghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -161,7 +161,7 @@ void test_remove_6( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdeghij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -182,7 +182,7 @@ void test_remove_7( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefhij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -203,7 +203,7 @@ void test_remove_8( void )
 
    CU_ASSERT( cable_is_equal_cstring( cable, "abcdefgij" ) == 1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -275,7 +275,7 @@ void test_remove_9( void )
       }
 
       j = 0;
-      while ( ( j < count/4 ) && ( cable_count( cable ) > 0 ) )
+      while ( ( j < count/2 ) && ( cable_count( cable ) > 0 ) )
       {
          start_index = rand() % ( cable_count( cable ) );
 
@@ -295,7 +295,7 @@ void test_remove_9( void )
       cable_wipe_out( cable );
    }
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

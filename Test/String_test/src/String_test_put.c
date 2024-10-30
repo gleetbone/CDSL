@@ -1,7 +1,7 @@
 /**
  @file string_test_put.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for string_make_from_cstring"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for string_make_from_cstring.
+ Unit tests for string_t
 
 */
 
@@ -46,7 +46,7 @@ void test_put_1( void )
    CU_ASSERT( string_item( string, 1 ) == 'b' );
    CU_ASSERT( string_item( string, 2 ) == 'c' );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -67,7 +67,7 @@ void test_put_2( void )
    CU_ASSERT( string_item( string, 1 ) == 'X' );
    CU_ASSERT( string_item( string, 2 ) == 'c' );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -88,7 +88,7 @@ void test_put_3( void )
    CU_ASSERT( string_item( string, 1 ) == 'b' );
    CU_ASSERT( string_item( string, 2 ) == 'X' );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }
@@ -110,7 +110,7 @@ void test_put_4( void )
    CU_ASSERT( string_item( string, 2 ) == 'c' );
    CU_ASSERT( string_item( string, 3 ) == 'X' );
  
-   string_dispose_with_contents( string );
+   string_deep_dispose( &string );
 
    return;
 }

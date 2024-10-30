@@ -1,7 +1,7 @@
 /**
  @file AList_test_as_array.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for AList_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for AList_item_at.
+ Unit tests for AList_t
 
 */
 
@@ -25,7 +25,8 @@ extern "C" {
 #include <string.h>
 #include "CUnit/Basic.h"
 
-#include "int_AList.h"
+#include "i_AList.h"
+#include "s_AList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -36,37 +37,41 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_as_array_1( void )
 {
-   int_alist_t *list = NULL;
+   i_alist_t *list = NULL;
    int32_t *array = NULL;
    int32_t count = 0;
 
-   list = int_alist_make();
-   int_alist_put_last( list, 24 );
+   list = i_alist_make();
+   i_alist_put_last( list, 24 );
 
-   array = int_alist_as_array( list, &count );
+   array = i_alist_as_array( list, &count );
 
    CU_ASSERT( count == 1 );
 
    CU_ASSERT( array[0] == 24 );
 
    free( array );
-   int_alist_dispose( list );
+   i_alist_dispose( &list );
 
    return;
 }
 
+/**
+   test_as_array_2
+*/
+
 void test_as_array_2( void )
 {
-   int_alist_t *list = NULL;
+   i_alist_t *list = NULL;
    int32_t *array = NULL;
    int32_t count = 0;
 
-   list = int_alist_make();
-   int_alist_put_last( list, 24 );
+   list = i_alist_make();
+   i_alist_put_last( list, 24 );
    
-   int_alist_put_last( list, 13 );
+   i_alist_put_last( list, 13 );
 
-   array = int_alist_as_array( list, &count );
+   array = i_alist_as_array( list, &count );
 
    CU_ASSERT( array[0] == 24 );
    CU_ASSERT( array[1] == 13 );
@@ -74,7 +79,36 @@ void test_as_array_2( void )
    CU_ASSERT( count == 2 );
 
    free( array );
-   int_alist_dispose( list );
+   i_alist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_as_array_3
+*/
+
+void test_as_array_3( void )
+{
+   s_alist_t *list = s_alist_make();
+   string_t **array = NULL;
+   int32_t count = 0;
+
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   
+   s_alist_put_last( list, s1 );
+   s_alist_put_last( list, s2 );
+
+   array = s_alist_as_array( list, &count );
+
+   CU_ASSERT( string_is_equal( array[0], s1 ) == 1 );
+   CU_ASSERT( string_is_equal( array[1], s2 ) == 1 );
+
+   CU_ASSERT( count == 2 );
+
+   free( array );
+   s_alist_deep_dispose( &list );
 
    return;
 }
@@ -99,6 +133,9 @@ add_test_as_array( void )
 
    // test_as_array_2
    add_test_to_suite( p_suite, test_as_array_2, "test_as_array_2" );
+
+   // test_as_array_3
+   add_test_to_suite( p_suite, test_as_array_3, "test_as_array_3" );
 
    return CUE_SUCCESS;
 

@@ -23,7 +23,11 @@
 extern "C" {
 #endif
 
+#define PROTOCOLS_ENABLED
+
 #include "base.h"
+#include "protocol.h"
+
 #include "d_Matvec.h"
 
 #define Prefix d

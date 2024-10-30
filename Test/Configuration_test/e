@@ -1,0 +1,22 @@
+==== Building Configuration_test (debug) ====
+configuration_test_superkey_has.c
+../src/configuration_test_superkey_has.c: In function ‘test_superkey_has_1’:
+../src/configuration_test_superkey_has.c:68:46: warning: passing argument 1 of ‘string_deep_dispose’ from incompatible pointer type [-Wincompatible-pointer-types]
+    string_deep_dispose( string_deep_dispose( s );
+                                              ^
+In file included from ../../../Configuration/Configuration.h:63:0,
+                 from ../src/configuration_test_superkey_has.c:28:
+../../../String/String.h:215:1: note: expected ‘string_t ** {aka struct string_struct **}’ but argument is of type ‘string_t * {aka struct string_struct *}’
+ string_deep_dispose( string_t **string );
+ ^
+../src/configuration_test_superkey_has.c:68:49: error: expected ‘)’ before ‘;’ token
+    string_deep_dispose( string_deep_dispose( s );
+                                                 ^
+../src/configuration_test_superkey_has.c:125:1: error: invalid use of void expression
+ }
+ ^
+../src/configuration_test_superkey_has.c:125:1: error: expected declaration or statement at end of input
+Configuration_test.make:153: recipe for target 'obj/Debug/configuration_test_superkey_has.o' failed
+make[1]: *** [obj/Debug/configuration_test_superkey_has.o] Error 1
+Makefile:16: recipe for target 'Configuration_test' failed
+make: *** [Configuration_test] Error 2

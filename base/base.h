@@ -1,17 +1,17 @@
 /**
  @file base.h
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "include file for basic primitive typedefs"
- 
+
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
- 
+
  Copyright 2018 Greg Lee
 
  Licensed under the Eiffel Forum License, Version 2 (EFL-2.0):
- 
+
  1. Permission is hereby granted to use, copy, modify and/or
     distribute this package, provided that:
        * copyright notices are retained unchanged,
@@ -20,7 +20,7 @@
  2. Permission is hereby also granted to distribute binary programs
     which depend on this package. If the binary program depends on a
     modified version of this package, you are encouraged to publicly
-    release the modified version of this package. 
+    release the modified version of this package.
 
  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT WARRANTY. ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,7 +28,7 @@
  DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE TO ANY PARTY FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
- 
+
  @section Description
 
  Defines for basic types.
@@ -41,10 +41,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
+
+/**
+   Function prototypes
+*/
+
+void core_dump_enable();
+
 // typedefs for basic types
 #include <stdint.h>
 #include <complex.h>
+
+#include "cdsl_types.h"
 
 typedef char char_t;
 
@@ -61,6 +69,7 @@ typedef complex double complex128_t;
 #define  int32_type_code      0x00000003
 #define  int64_type_code      0x00000004
 #define  uint8_type_code      0x00000011
+#define  octet_type_code      0x00000019
 #define  uint16_type_code     0x00000012
 #define  uint32_type_code     0x00000013
 #define  uint64_type_code     0x00000014
@@ -68,7 +77,24 @@ typedef complex double complex128_t;
 #define  float64_type_code    0x00000024
 #define  complex64_type_code  0x00000034
 #define  complex128_type_code 0x00000035
-#define  void_ptr_type_code   0x00000080
+
+#define  void_ptr_type_code         0x00000080
+#define  char_ptr_type_code         0x000000C0
+#define  int8_ptr_type_code         0x00000081
+#define  int16_ptr_type_code        0x00000082
+#define  int32_ptr_type_code        0x00000083
+#define  int64_ptr_type_code        0x00000084
+#define  uint8_ptr_type_code        0x00000091
+#define  octet_ptr_type_code        0x00000099
+#define  uint16_ptr_type_code       0x00000092
+#define  uint32_ptr_type_code       0x00000093
+#define  uint64_ptr_type_code       0x00000094
+#define  float32_ptr_type_code      0x000000A3
+#define  float64_ptr_type_code      0x000000A4
+#define  complex64_ptr_type_code    0x000000B4
+#define  complex128_ptr_type_code   0x000000B5
+
+#include "cdsl_types.h"
 
 /**
    Design by contract defaults
@@ -79,35 +105,7 @@ typedef complex double complex128_t;
 #define POST_GLOBAL DBC_YES
 #define INVARIANT_GLOBAL DBC_YES
 #define CHECK_GLOBAL DBC_YES
-
-
-/**
-   Protocol macros
-*/
-
-// default value is for PROTOCOLS_ENABLED macro to be undefined
-#define PROTOCOLS_ENABLED
-
-#ifdef PROTOCOLS_ENABLED
-
-#undef PROTOCOLS_DEFINITION
-#define PROTOCOLS_DEFINITION \
-   void * (*get_function)( int32_t protocol_id, int32_t function_id ); \
-   int32_t (*supports_protocol)( int32_t protocol_id );
-   
-#undef PROTOCOLS_INIT
-#define PROTOCOLS_INIT( x ) \
-   (*x).get_function = get_function; \
-   (*x).supports_protocol = supports_protocol;
-
-#else // PROTOCOLS_ENABLED
-      
-#define PROTOCOLS_DEFINITION
-
-#define PROTOCOLS_INIT( x )
-   
-#endif // PROTOCOLS_ENABLED
-
+#define LOOP_VARIANT_FILE DBC_YES
 
 /**
    Multithreading macros
@@ -119,23 +117,23 @@ typedef complex double complex128_t;
 // override by defining MULTITHREADED macro by file (#define MULTITHREADED)
 
 // default (empty) multithreading macros
-#define MULTITHREAD_INCLUDE
+#define MULTITHREAD_INCLUDE <stdint.h>
 #define MULTITHREAD_THREAD_DEFINITION( p )
 #define MULTITHREAD_THREAD_CREATE( arg1, arg2, arg3, arg4 )
 #define MULTITHREAD_THREAD_JOIN( arg )
 #define MULTITHREAD_MUTEX_DEFINITION( p )
-#define MULTITHREAD_MUTEX_INIT( p ) 
+#define MULTITHREAD_MUTEX_INIT( p )
 #define MULTITHREAD_MUTEX_DEFINITION_INIT( p )
-#define MULTITHREAD_MUTEX_DESTROY( p ) 
+#define MULTITHREAD_MUTEX_DESTROY( p )
 #define MULTITHREAD_COND_TYPE
 #define MULTITHREAD_COND_DEFINITION( p )
-#define MULTITHREAD_COND_INIT( p ) 
+#define MULTITHREAD_COND_INIT( p )
 #define MULTITHREAD_COND_DEFINITION_INIT( p )
-#define MULTITHREAD_COND_DESTROY( p ) 
-#define MULTITHREAD_COND_SIGNAL( p ) 
-#define MULTITHREAD_COND_WAIT( p, q ) 
-#define LOCK( p ) 
-#define UNLOCK( p )  
+#define MULTITHREAD_COND_DESTROY( p )
+#define MULTITHREAD_COND_SIGNAL( p )
+#define MULTITHREAD_COND_WAIT( p, q )
+#define LOCK( p )
+#define UNLOCK( p )
 
 // define multithreading macros for linux
 #ifdef __linux__
@@ -146,13 +144,13 @@ typedef complex double complex128_t;
 #define MULTITHREAD_INCLUDE <pthread.h>
 
 #undef MULTITHREAD_THREAD_DEFINITION
-#define MULTITHREAD_THREAD_DEFINITION( p ) pthread_mutex_t p
+#define MULTITHREAD_THREAD_DEFINITION( p ) pthread_t p
 
 #undef MULTITHREAD_THREAD_CREATE
 #define MULTITHREAD_THREAD_CREATE( arg1, arg2, arg3, arg4 ) pthread_create( arg1, arg2, arg3, arg4 )
 
 #undef MULTITHREAD_THREAD_JOIN
-#define MULTITHREAD_THREAD_JOIN( arg ) pthread_join( arg, NULL )
+#define MULTITHREAD_THREAD_JOIN( arg1, arg2 ) pthread_join( arg1, arg2 )
 
 #undef MULTITHREAD_MUTEX_DEFINITION
 #define MULTITHREAD_MUTEX_DEFINITION( p ) pthread_mutex_t p
@@ -206,7 +204,7 @@ typedef complex double complex128_t;
 */
 
 // comment out the following lines to disable garbage collection
-#ifndef GC_ENABLED 
+#ifndef GC_ENABLED
 #define GC_ENABLED 1
 #endif
 
@@ -235,7 +233,7 @@ typedef complex double complex128_t;
 #include <stdlib.h>
 #include <pthread.h>
 
-// rename basic memory allocation routines to call appropriate 
+// rename basic memory allocation routines to call appropriate
 // garbage collection routines
 #ifdef GC_DEBUG
 
@@ -255,7 +253,7 @@ typedef complex double complex128_t;
 
 #else /* GC_ENABLED */
 
-// define basic GC calls as empty strings 
+// define basic GC calls as empty strings
 #define GC_INIT()
 #define GC_set_find_leak( arg )
 

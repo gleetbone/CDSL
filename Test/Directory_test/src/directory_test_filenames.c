@@ -1,8 +1,8 @@
 /**
  @file directory_test_filenames.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for ifr_make_from_cstring"
+ @version 2.0.0
+ @brief: "tests for directory_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for ifr_make_from_cstring.
+ Unit tests for directory_t
 
 */
 
@@ -56,7 +56,7 @@ void test_filenames_1( void )
    s = array[i];
    while( s != NULL )
    {
-      string_dispose_with_contents( s );
+      string_deep_dispose ( &s );
       i = i + 1;
       s = array[i];
    }
@@ -64,8 +64,8 @@ void test_filenames_1( void )
 
    CU_ASSERT( i == 3 );
 
-   string_dispose_with_contents( name );
-   directory_dispose( dir );
+   string_deep_dispose ( &name );
+   directory_dispose( &dir );
 
    return;
 }

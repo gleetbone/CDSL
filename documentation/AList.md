@@ -6,7 +6,7 @@ This data structure is a lot like Sequence with the difference that you can use 
 
 ### Protocols Supported
 
-- P_Clonable
+- P_Basic
 - P_Indexable
 - P_Iterable
 - P_DIterable

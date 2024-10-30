@@ -1,7 +1,7 @@
 /**
  @file Cable_test_as_upper.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -58,15 +58,15 @@ void test_as_upper_1( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "A" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_as_upper( cable, 2, 3 );
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "CD" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -90,39 +90,39 @@ void test_as_upper_2( void )
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "A" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_as_upper( cable, 2, 3 );
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "CD" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_as_upper( cable, 3, 4 );
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "DE" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_as_upper( cable, 4, 7 );
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "EFGH" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_as_upper( cable, 7, 8 );
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "HI" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
    cable1 = cable_as_upper( cable, 8, 9 );
 
    CU_ASSERT( cable1 != NULL );
    CU_ASSERT( cable_is_equal_cstring( cable1, "IJ" ) == 1 );
-   cable_dispose( cable1 );
+   cable_dispose( &cable1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

@@ -1,8 +1,8 @@
 /**
  @file LSearcher_test_all.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for LSearcher_make"
+ @version 2.0.0
+ @brief: "tests for LSearcher_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for LSearcher_make.
+ Unit tests for LSearcher_t
 
 */
 
@@ -28,6 +28,7 @@ extern "C" {
 #include "i_LSearcher.h"
 #include "i_Searcher.h"
 #include "i_Sequence.h"
+#include "p_Basic.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -48,12 +49,12 @@ void test_all_1( void )
 
    i_sequence_put( seq, 1, 0 );
    
-   result = ( i_searcher_search_f( pb_searcher ) )( pb_searcher, pb_seq, 1 );
+   result = i_searcher_search( pb_searcher, pb_seq, 1 );
 
    CU_ASSERT( result == 0 );
 
-   i_sequence_dispose( seq );
-   ( i_searcher_dispose_f( pb_searcher ) )( pb_searcher );
+   i_sequence_dispose( &seq );
+   p_basic_dispose( &pb_searcher );
  
    return;
 }
@@ -79,8 +80,8 @@ void test_all_2( void )
 
    CU_ASSERT( result == 1 );
 
-   i_sequence_dispose( seq );
-   i_searcher_dispose( pb_searcher );
+   i_sequence_dispose( &seq );
+   p_basic_dispose( &pb_searcher );
 
    return;
 }
@@ -107,8 +108,8 @@ void test_all_3( void )
 
    CU_ASSERT( result == 1 );
 
-   i_sequence_dispose( seq );
-   i_searcher_dispose( pb_searcher );
+   i_sequence_dispose( &seq );
+   p_basic_dispose( &pb_searcher );
 
    return;
 }
@@ -138,8 +139,8 @@ void test_all_4( void )
 
    CU_ASSERT( result == 1 );
 
-   i_sequence_dispose( seq );
-   i_searcher_dispose( pb_searcher );
+   i_sequence_dispose( &seq );
+   p_basic_dispose( &pb_searcher );
 
    return;
 }

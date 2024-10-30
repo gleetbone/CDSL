@@ -1,0 +1,2689 @@
+#+FILETAGS: :CDSL:
+
+* TODO add in new structures, unit tests
+   [2019-01-29 Tue 01:28]   
+     - tree
+       - BTree
+       - Heap
+       - Heap_KV
+       - Trie
+     - string
+       - String_utf8
+       - Cable_utf8
+
+
+* TODO add container unit tests with non primitive contained types (string)
+   [2019-01-29 Tue 01:28]   
+
+* TODO add (wrapper for) Judy arrays, unit tests
+   [2019-01-29 Tue 01:50]   
+
+* TODO add cryptography classes?
+   [2019-01-29 Tue 02:25]   
+     - hashes
+     - checksums  
+     - base64 encoding 
+     - sha1
+
+* TODO make .type ._type in classes to avoid some name conflicts
+
+Fri Jul 05 00:48:11 PDT 2019 @366 /Internet Time/
+   error in string replace functions
+   when replacement string is longer than original string, need to ensure that
+      resulting main string is still zero terminated
+   set last character in buffer to zero after replacement operation when
+      replacement string is longer than original string
+      3 functions affected (original, _cstring1, _cstring2)
+   same error will (probably) exist in String_utf8
+   add to test replace suite
+      
+[2019-08-09 Fri 16:37]
+   struct elements type and item_type renamed to _type and _item_type
+   put all *_TYPE definition macros in a single include file
+      #define ALIST_TYPE 0xA5000100
+   
+      
+   AList
+      P_Clonable
+      P_Indexable
+      P_Iterable
+      P_DIterable
+      
+   SList
+      P_Clonable
+      P_Indexable
+      P_Iterable
+   
+   DList
+      P_Clonable
+      P_Indexable
+      P_Iterable
+      P_DIterable
+      
+   BSTree
+      P_Clonable
+      P_Iterable
+      P_DIterable
+
+   BSTree_kv
+      P_Clonable
+      P_Iterable_kv
+      P_DIterable_kv
+
+   AVLTree
+      P_Clonable
+      P_Iterable
+      P_DIterable
+
+   AVLTree_kv
+      P_Clonable
+      P_Iterable_kv
+      P_DIterable_kv
+
+   RBTree
+      P_Clonable
+      P_Iterable
+      P_DIterable
+
+   RBTree_kv
+      P_Clonable
+      P_Iterable_kv
+      P_DIterable_kv
+
+   HSet
+      P_Clonable
+      P_Iterable
+
+   HTable
+      P_Clonable
+      P_Iterable_kv
+
+   Sequence
+      P_Clonable
+      P_Indexable
+
+      
+   *P_Clonable
+      0x5A000100
+   *P_Indexable
+      0x5A000200
+   *P_Iterable
+      0x5A000300
+   *P_Iterable_kv
+      0x5A000301
+   *P_DIterable
+      0x5A000302
+   *P_DIterable_kv
+      0x5A000303
+   *P_Searcher
+      0x5A000400
+   *P_Sorter
+      0x5A000401
+   
+   *AList
+      0xA5000100
+   *SList
+      0xA5000101
+   *DList
+      0xA5000102
+   
+   *BSTree
+      0xA5000200
+   *BSTree_kv
+      0xA5000201
+   *RBTree
+      0xA5000202
+   *RBTree_kv
+      0xA5000203
+   *AVLTree
+      0xA5000204
+   *AVLTree_kv
+      0xA5000205
+   *BTree
+      0xA5000210
+   
+   *HSet
+      0xA5000300
+   *HTable
+      0xA5000301
+   
+   *Sequence
+      0xA5000400
+   
+   *String
+      0xA5000500
+   *Cable
+      0xA5000501
+   
+   *DGraph
+      0xA5000600
+   *DGraph edge
+      0xA5000601
+   *DGraph vertex
+      0xA5000602
+   *UGraph
+      0xA5000610
+   *DGraph edge
+      0xA5000611
+   *DGraph vertex
+      0xA5000612
+   
+   *Configuration
+      0xA5000700
+   *Binary_File
+      0xA5000701
+   *Directory
+      0xA5000702
+   *Input_File_Reader
+      0xA5000703
+   *Raw_Buffer
+      0xA5000704
+   
+   *Circular_Buffer
+      0xA5000800
+   *Deque
+      0xA5000801
+   *PQueue
+      0xA5000802
+   *Queue
+      0xA5000803
+   *Stack
+      0xA5000804
+   
+   *BSorter
+      0xA5000900
+   *HSorter
+      0xA5000901
+   *ISorter
+      0xA5000902
+   *MSorter
+      0xA5000903
+   *QSorter
+      0xA5000904
+   *SelSorter
+      0xA5000905
+   *SSorter
+      0xA5000906
+   
+   *BSearcher
+      0xA5000A00
+   *LSearcher
+      0xA5000A01
+   
+   *Matvec
+      0xA5000B00
+   *Quaternion
+      0xA5000B01
+   *Rng_Isaac
+      0xA5000B02
+   *Rng_Isaac_gaussian
+      0xA5000B03
+   *Fft
+      0xA5000B04
+   *Svd
+      0xA5000B05
+   
+   soa_node
+      0xA5001010
+   soa_pdict_info
+      0xA5001020
+      
+   *inprogress struct elements type and item_type renamed to _type and _item_type
+   put all *_TYPE definition macros in a single include file
+      #define ALIST_TYPE 0xA5000100
+   add ids, protocols for BTree, Heap, Heap_KV, String_utf8, Cable_utf8   
+   *make short batch files to premake, build data structure unit tests
+   *batch file to run unit tests, code coverage, valgrind
+   work through all tests to do *_item and batch files
+   
+   add functions dispose, deep_dispose, is_equal, is_deep_equal, 
+      copy, deep_copy, clone, deep_clone
+   clone() is instead clone(), deep_clone()
+   make() is more like make_default
+   IS_EQUALABLE, COPYABLE, CLONEABLE, etc. into P_BASIC or somesuch
+   clone and deep_clone already exist in data structures that implement
+      P_CLONABLE, also dispose and deep_dispose
+      -> is_equal, is_deep_equal, "make_default"
+   can get rid of protocol functions that return a function pointer "_f"s
+      see BSearcher.get_function() - P_Indexable.ph is included in BSearcher.c
+   
+   note that sessions jedit plugin should be run from exactly one window
+   sessions plugin is not multi view aware and can erase saved file sets
+
+   *in Eiffel, does DS_BILINKED_LIST copy put the same ITERABLEs in the copy-to
+   or are new ITERABLEs made with the same value contents?
+      Eiffel makes new ITERABLEs with same value content for copy and twin
+   
+[2019-08-10 Sat 12:54]
+   *go through data structures and copy/set up batch files, build and test from
+      batch files
+   convert makes into make, clone, deep_clone
+   convert dispose_with_contents to deep_dispose
+   add is_equal, is_deep_equal, copy, deep_copy 
+   *P_CLONABLE to P_BASIC
+   add ids, protocols for BTree, Heap, Heap_kv, String_utf8, Cable_utf8
+   *remove protocol "*_f" functions
+   "_with_contents" to "deep_"?
+   
+   -> work through data structures and redo make>clone, deep_clone, is_equal, copy
+      rename "_with_contents" to "deep_"
+      start with AList - will have to redo MICINAC
+   -> add ids, protocols for BTree, Heap, Heap_kv, String_utf8, Cable_utf8
+      
+[2019-08-11 Sun 12:41]
+   -> work through data structures and redo make>clone, deep_clone, is_equal, copy
+      rename "_with_contents" to "deep_"
+      start with AList - will have to redo MICINAC
+      update MI with changes to AList, create AList equivalent for MI
+         Basic/Any
+         Hashable
+         Numeric
+         Comparable
+         Indexable
+            add remove
+         Iterable
+         Iterable_kv
+         DIterable
+         DIterable_kv
+         Searchable
+         Extendible ?
+            if make difference bewtween put and force
+         Container ?
+           has, count, wipe_out, is_empty
+         List ?
+            append, remove, prune, keep
+         Cursor
+         DCursor
+         Searcher
+         Sorter
+      
+   -> add ids, protocols for BTree, Heap, Heap_kv, String_utf8, Cable_utf8
+      
+[2019-08-12 Mon 16:11]
+   rename make_from -> clone, deep_clone -> deep_clone
+   add is_equal, is_deep_equal
+   add copy, deep_copy
+   rename _with_contents -> deep_
+   
+   *AList and AList_test updated
+   
+   -> do these next: sequence htable hset
+   
+[2019-08-13 Tue 14:39]
+   rename make_from -> clone, deep_clone -> deep_clone
+   add is_equal, is_deep_equal
+   add copy, deep_copy
+   rename _with_contents -> deep_
+   
+   -> do these next: sequence htable hset
+
+   add tests for is_equal, is_deep_equal, copy, deep_copy
+   add tests with values of Strings, check valgrind
+   
+[2019-08-15 Thu 00:45]   
+   rename make_from -> clone, deep_clone -> deep_clone
+   add is_equal, is_deep_equal
+   add copy, deep_copy
+   rename _with_contents -> deep_
+   
+   -> do these next: *sequence *htable *hset
+
+   rebuild MI code generator
+   
+   add tests for is_equal, is_deep_equal, copy, deep_copy
+   add tests with values of Strings, check valgrind
+   
+[2019-08-17 Sat 23:11]
+   fixing up Code_generator
+      update a_AList and similar types with new macros for dispose, clone, and is_equal
+      update data types fo clone, copy, is_equal, dispose
+      
+   *update String
+   *update Directory
+   
+[2019-08-18 Sun 22:35]
+   issue with calling type functions from within type functions
+   for CDSL, don't do it - make a separate static function that doesn't contain
+      INVARIANTs (or PRECONDITIONs)
+   for MI, will need a per-instance struct variable initalized to 0 and 
+      incremented each time a function is entered - only if this variable is
+      0 would INVARIANTs be called
+      
+[2019-08-21 Wed 03:07]
+   add skip list data structure
+   don't forget Judy arrays
+            
+[2019-08-26 Mon 02:01]
+   add skip list data structure
+   continue cleanup and update of CDSL to new standard
+      clone, is_equal, copy, dispose and deep variants
+      BASIC protocol
+      rename macros for clone, equal, dispose
+   for CDSL container classes, additional tests with String as contained types 
+   updated
+      AList
+      HSet
+      HTable
+      Sequence
+      String
+      Directory
+      
+[2019-08-26 Mon 22:30]
+   AList
+      *need tests for is_equal, copy
+      AList at 100% gcov, no valgrind issues
+      add tests for s_AList
+         *append, valgrind OK
+
+[2019-08-28 Wed 15:57]
+   AList
+      add tests for s_AList
+         *through test_count (alphabetical)
+         *through test_cursor_forth
+         
+[2019-09-03 Tue 17:03]
+   set up git for C_data_structures
+   all container class to and from array(s)
+
+[2019-09-06 Fri 01:16]
+   add postconditions to AList
+   
+[2019-09-13 Fri 02:05]
+   hash functions FNV-1a, spookyhash, cityhash, smallhash, superfasthash
+   data structure: bloom filter
+   
+[2019-09-23 Mon 15:26]
+   AList
+      add tests for s_AList
+         *through test_put_last
+      finished reworking unit tests
+   -> HSet
+         *through test_count
+         
+[2019-09-24 Tue 16:40]
+   *initialized git
+   *put data structure types into include file
+   add postconditions to AList
+   HSet - add to unit tests
+   
+[2019-09-26 Thu 03:05]
+   adding postconditions to AList
+   need someting like eiffel "old" for postconditions, can also use for 
+      loop variants, rescue/retry?
+      
+[2019-09-27 Fri 01:51]
+   new features for list containers:
+      has
+      search_forth
+      search_back
+      occurrences
+      swap
+   also applies to trees, hash sets/tables, sequence, graphs, deques   
+   
+[2019-09-28 Sat 13:30]
+   add sorted() query to sorters
+   Xallow putting sorter into AList like Eiffel containers
+      have to put sort functions in #ifdef PROTOCOLS_ENABLED wrapper
+   *add new features to AList
+      has, search_back, search_forth, occurrences, swap
+   *continue adding postconditions to AList
+   new unit tests for new features
+      all compiles, did unit tests for has 
+      
+[2019-09-30 Mon 01:25]
+   *all unit tests written, run, 100% Gcov, no valgrind issues
+   *add sorted query to P_Sorter
+   -> back to HSet
+      add s_hset to unit tests
+         *through test_cursor_index
+         need new unit tests for copy, deep_copy, is_deep_equal
+      *add postconditions
+      *compiles and runs without error
+      
+[2019-10-02 Wed 01:09]
+   *postconidition_vairable_define needs eiself to define when not enabled
+   add has, search*. occurrences to iterable, indexable?
+   add replace, replace_and_dispose, remove, remove_and_dispose, swap to indexable?
+   new P_LIST protocol? P_DLIST, P_ARRAY, 
+   -> next up is HTable
+      make ss_***.c and .h files
+      
+[2019-10-05 Sat 18:22]
+   *add postconditions
+   *new unit tests for copy, is_equal, clone, etc.
+   *add to unit tests for string type ss_htable
+   *complete - 100% gcov and no valgrind issues
+   -> next is Sequence
+   
+[2019-10-06 Sun 19:27]
+   *Sequence passes with 100% gcov and no valgrind issues
+   --> next ?? alphabetical
+      add postconiditions
+      add features to lists: has, search_*, occurrences, swap
+      add unit tests for new features
+      add to unit tests for container classes (of string)
+      ->>
+         String
+         Directory
+         SList
+         DList
+         ...
+
+[2019-10-29 Tue 18:00]
+   Following ideas put forward by Pieter Hintjens in Scalable C, following changes:
+   
+   dispose functions will now take a pointer to the object (pointer) being 
+   disposed and set the object pointer to NULL
+   
+   need versioning for classes
+   
+   "this" pointer to be named current
+   
+//  MYPROJ version macros for compile-time API detection
+#define MYPROJ_VERSION_MAJOR 1
+#define MYPROJ_VERSION_MINOR 0
+#define MYPROJ_VERSION_PATCH 0
+
+#define MYPROJ_MAKE_VERSION(major, minor, patch) \
+    ((major) * 10000 + (minor) * 100 + (patch))
+#define MYPROJ_VERSION \
+    MYPROJ_MAKE_VERSION(MYPROJ_VERSION_MAJOR, \
+                        MYPROJ_VERSION_MINOR, \
+                        MYPROJ_VERSION_PATCH)
+   
+   update
+      AList
+      HSet
+      HTable
+      Sequence
+      
+   git add .
+   git commit
+   
+[2019-11-01 Fri 00:49]
+   *AList 
+      dispose functions updated for **current
+      unit tests updated for dispose functions
+      class version included
+      updated to have "current" for "this"
+      update git
+   -> HSet
+      *postconditions
+      *new dispose
+      *unit tests
+      *"current" update
+      *update git
+   HTable
+   Sequence
+   
+   when container classes call DISPOSE on a value or key, need to pass pointer
+   to that value or key
+   or make DISPOSE macro functions take address-of 
+   *in HSet, sometimes node_t variable is named item - change to node
+   
+[2019-11-02 Sat 02:18]
+   *do String, change dispose functions, current
+      add protocols for basic, iterable, indexable?
+      
+   sed -i 's/dispose( s/dispose( \&s/g' *.c
+
+   *updated AList, HSet for String changes
+   
+[2019-11-02 Sat 23:01]
+   *updated AList, HSet, HTable, String, Sequence
+   
+   DList
+      *remove #define *_TYPE, is in cdsl_types.h now
+      has
+      search_forth
+      search_back
+      occurrences
+      swap
+      dispose(**)
+      postconditions
+      "current"
+      cloneable -> basic
+      *class versioning
+      clone, deep_clone
+      is_equal, is_deep_equal
+      copy, deep_copy
+      make_from_array, as_array
+      unit tests, add string items
+      change node_t *item to *node
+      
+[2019-11-04 Mon 03:18]
+   DList
+      *remove #define *_TYPE, is in cdsl_types.h now
+      *has
+      *search_forth
+      *search_back
+      *occurrences
+      *swap
+      *dispose(**)
+      *postconditions
+      *"current"
+      *cloneable -> basic
+      *class versioning
+      *clone, deep_clone
+      *is_equal, is_deep_equal
+      *copy, deep_copy
+      *make_from_array, as_array
+      unit tests, add string items
+      *change node_t *item to *node
+      
+[2019-11-05 Tue 02:51]      
+   DList
+      unit tests, add string items
+         *new functions
+            clone, copy, is_equal, has, search, occurrences, swap
+         add s_DList tests
+         all pass
+         no valgrind issues
+         gcov 100%
+         
+[2019-11-06 Wed 01:39]
+      unit tests, add string items, ensure unit test comment headers OK
+         -> add s_DList tests
+            did through test_append_right
+         all pass
+         no valgrind issues
+         gcov 100%
+
+[2019-11-13 Wed 20:03]
+      unit tests
+         add string unit tests
+         ensure unit test comment headers OK
+         #include "s_DList.h"
+      
+         all pass
+         no valgrind issues
+         gcov 100%
+
+      through test_is_last   
+   
+line: 23
+http://www.google.com 
+#include "base.h"
+file:/home/leegr3/e#L3
+file:/home/leegr3/e#L=2
+                
+<?xml version="1.0"?>
+<!DOCTYPE HYPERLINKSOURCES SYSTEM "hyperlinks.dtd">
+<HYPERLINKSOURCES>
+<HYPERLINKSOURCE NAME="Go to the Line" ID="12" >
+  <HYPERLINK>
+    <REGEX>line:(\d+)</REGEX>
+    <CODE>
+      lineNumber = Integer.parseInt(_1) - 1;
+      textArea.setCaretPosition(textArea.getLineStartOffset(lineNumber));
+    </CODE>
+    <TOOLTIP>"Go to line " + _1</TOOLTIP>
+  </HYPERLINK>
+</HYPERLINKSOURCE>
+</HYPERLINKSOURCES>
+
+<!ELEMENT HYPERLINKSOURCES ( HYPERLINKSOURCE+ ) >
+<!ELEMENT HYPERLINKSOURCE ( HYPERLINK+ ) >
+<!ATTLIST HYPERLINKSOURCE
+	NAME ID #REQUIRED
+ >
+<!ELEMENT HYPERLINK ( REGEX, CODE, TOOLTIP ) >
+
+<!ELEMENT REGEX ( #PCDATA ) >
+<!ELEMENT CODE ( #PCDATA ) >
+<!ELEMENT TOOLTIP ( #PCDATA ) >
+
+   -> to get calendar functionality
+         write program to agglomerate *.org files
+         create text to display events by day/week with links to original file
+         modify hyperlink plugin to honor #Lxx fragments in file: protocol
+         same kind of thing for contacts
+
+   textArea.setCaretPosition( buffer.getLineStartOffset( 3 ) + 1)      
+   
+[2019-11-19 Tue 02:08]
+         unit tests
+         add string unit tests
+         ensure unit test comment headers OK
+         #include "s_DList.h"
+      
+         all pass
+         no valgrind issues
+         gcov 100%
+
+      through test_cursor_start   
+
+[2019-11-21 Thu 00:40]
+         unit tests
+         add string unit tests
+         ensure unit test comment headers OK
+         #include "s_DList.h"
+      
+         all pass
+         no valgrind issues
+         gcov 100%
+
+      through test_p_iterable   
+
+[2019-11-23 Sat 02:05]
+         unit tests
+         add string unit tests
+         ensure unit test comment headers OK
+         #include "s_DList.h"
+      
+         all pass
+         no valgrind issues
+         gcov 100%
+
+      DList completed
+      
+      -> SList
+      remove #define *_TYPE, is in cdsl_types.h now
+         new functions
+            has
+            search_forth
+            search_back
+            occurrences
+            swap
+            dispose(**)
+            postconditions
+            "current"
+            cloneable -> basic
+            class versioning
+            clone, deep_clone
+            is_equal, is_deep_equal
+            copy, deep_copy
+            make_from_array, as_array
+            unit tests, add string items
+            change node_t *item to *node
+         
+
+[2019-11-25 Mon 01:41]
+   *Macro function definitions at start of SList.h
+   *SList_test compiles
+   *dispose and deep_dispose argument pointer fixed
+   *"item" instead of "node" in SList.c
+   list -> current   
+         unit tests
+         add string unit tests
+         ensure unit test comment headers OK
+         #include "s_SList.h"
+      
+         all pass
+         no valgrind issues
+         gcov 100%
+
+      -> SList
+      remove #define *_TYPE, is in cdsl_types.h now
+         new functions
+            *has
+            *search_forth
+            *occurrences
+            *swap
+            *dispose(**)
+            *postconditions
+            *"current"
+            *cloneable -> basic
+            *class versioning
+            *clone, deep_clone
+            *is_equal, is_deep_equal
+            *copy, deep_copy
+            *make_from_array, as_array
+            unit tests, add string items
+   
+   SList
+      did test_append
+      
+[2019-11-26 Tue 16:02]
+   through test_cursor_start
+   
+[2019-11-28 Thu 01:48]
+   SList complete
+      all pass
+      no valgrind issues
+      gcov 100%
+   
+   skip list
+   Judy array
+   
+   next up are trees
+   
+   BSTree
+      Macro function definitions at start of BSTree.h
+      dispose and deep_dispose argument pointer fixed
+         unit tests
+         add string unit tests
+         ensure unit test comment headers OK
+         #include "s_BSTree.h"
+      
+         all pass
+         no valgrind issues
+         gcov 100%
+   
+         remove #define *_TYPE, is in cdsl_types.h now
+            new functions
+               has
+               search_back
+               search_forth
+               occurrences
+               swap
+               dispose(**)
+               postconditions
+               "current"
+               cloneable -> basic
+               class versioning
+               clone, deep_clone
+               is_equal, is_deep_equal
+               copy, deep_copy
+               make_from_array, as_array
+               unit tests, add string items
+      
+      BSTree
+         add P_Indexable
+   
+[2019-11-28 Thu 21:40]
+   sed -i 's/bstree_dispose( /bstree_dispose( \&/g' *.c
+   Xadd P_Indexable
+   add remove_at, cursor_remove_at, remove_first, remove_last
+   remove items between v1 and v2? remove_range
+   is_first, is_last
+   search_back, search_forth
+   for BSTree_kv
+      replace, swap (values for keys)
+   add "is_balanced" flag in struct, like hash_code in String
+
+   BSTree
+      *Macro function definitions at start of BSTree.h
+      *dispose and deep_dispose argument pointer fixed
+      unit tests
+      add string unit tests
+      ensure unit test comment headers OK
+      #include "s_BSTree.h"
+      
+      all pass
+      no valgrind issues
+      gcov 100%
+
+      *remove #define *_TYPE, is in cdsl_types.h now
+      new functions
+         *has
+         *search_back
+         *search_forth
+         *occurrences
+         Xswap for _kv version
+         *dispose(**)
+         *postconditions
+         *"current"
+         *cloneable -> basic
+         *class versioning
+         *clone, deep_clone
+         *is_equal, is_deep_equal
+         *copy, deep_copy
+         *make_from_array, as_array
+         *remove_at, cursor_remove_at
+         *remove_first, remove_last
+         X remove_range?
+         *first, last
+         *is_first, is_last
+         *"is_balanced' flag in struct
+         unit tests, add string items
+      
+[2019-11-29 Fri 16:45]
+   *what happens to cursors when an item is removed?
+   new unit tests for new features
+   
+[2019-11-30 Sat 15:42]
+   *add to invariant - all cursors off or point to item in tree
+   add cursor_search_forth, back, etc.
+      *BSTree
+      also add to AList, DList, SList
+   through test_search_forth_eq_fn
+
+[2019-12-02 Mon 01:37]
+   all BSTree unit tests pass, 100% gcov, no valgrind issues
+   -> cursor_search_* for AList, DList, and SList
+   
+[2019-12-02 Mon 11:54]
+   *separate function to swap nodes in BSTree
+   *redo remove() with this function
+   
+   
+   PRECONDITION( "cursor not null", cursor != NULL );
+   PRECONDITION( "cursor not off", (*cursor).index != -1 );
+   PRECONDITION( "equality_test_func OK ", equality_test_func != NULL );
+   LOCK( (*cursor).mutex );
+   LOCK( (*(*cursor).bstree).mutex );
+   INVARIANT( (*cursor).bstree );
+   POSTCONDITION_VARIABLE_DEFINE( int32_t count_pc = (*(*cursor).bstree).count; );
+
+   POSTCONDITION( "current count unchanged", count_pc == (*(*cursor).bstree).count );
+   INVARIANT( (*cursor).bstree );
+   UNLOCK( (*(*cursor).bstree).mutex );
+   UNLOCK( (*cursor).mutex );
+   
+   updated AList
+   -> DList, SList
+   
+[2019-12-11 Wed 00:18]
+   *updated DList cursor search functions and unit tests
+   *updated SList cursor search functions and unit tests
+   
+   -> add string unit tests to BSTree
+   *set cursor to node_for_value ?
+      if not found, cursor set to node with value closest to value and less than value
+       did for internal cursor, do for specified cursor  
+       
+[2019-12-28 Sat 01:52]
+   add string_is_less_than_or_equal, string_is_greater_than_or_equal?
+   through BSTree test_has_eq_fn
+   
+[2019-12-29 Sun 01:40]
+   finished updating s_ unit tests for BSTree
+   -> BSTree_kv
+      add search features
+      add s_* unit tests
+      
+[2019-12-29 Sun 21:17]
+   *added String is_less_than_or_equal, is_greater_than_or_equal, compare
+   *missing unit tests for 100% gcov on String
+      deep_clone,
+      is_equal,
+      is_deep_equal,
+      string_copy,
+      deep_copy, 
+      cases for less_than, greater_than, compare
+      to_lower_by_index,
+      to_upper_by_index
+   String at 100% gcov, no valgrind issues   
+   
+[2019-12-30 Mon 16:58]
+   in BSTree_kv
+   *fixed up Clonable -> Basic
+   *fixed up dispose argument **
+   *add is_equal, is_deep_equal, copy, deep_copy, clone, deep_clone
+   X? has_value/node_for_key
+   *change bstree to current
+   
+[2019-12-31 Tue 18:45]
+   add postconditions
+   add
+         has, has_value
+         search_back, search_back_value
+         search_forth, search_forth_value
+         occurrences, occurrences_value
+         remove_at, cursor_remove_at
+         remove_first, remove_last
+         first, last
+         is_first, is_last
+   
+   add in new features as in BSTree
+   add unit tests
+   add s_ unit tests
+   
+[2020-01-01 Wed 18:35]
+   reworked BSTree_kv with new features
+   need to update BSTree_kv.h
+   added missing feature to BSTree
+      add unit test, recheck valgrind and gcov
+      
+[2020-01-11 Sat 16:32]
+  redo precondition with key and item type
+  
+[2020-01-14 Tue 01:38]
+   through test_cursor_search_forth
+   
+[2020-01-22 Wed 18:04]
+   finished BSTree_kv testing (with ii), 100% gcov, no valgrind issues. 
+   -> ss testing
+   
+[2020-01-28 Tue 01:23]
+   finished BSTree_kv unit testing
+   
+   RBTree
+      *Macro function definitions at start of RBTree.h
+      *dispose and deep_dispose argument pointer fixed
+      unit tests
+      add string unit tests
+      ensure unit test comment headers OK
+      #include "s_RBTree.h"
+      
+      all pass
+      no valgrind issues
+      gcov 100%
+
+      remove #define *_TYPE, is in cdsl_types.h now
+      new functions
+         has
+         search_back
+         search_forth
+         occurrences
+         swap for _kv version
+         dispose(**)
+         postconditions
+         "current"
+         cloneable -> basic
+         class versioning
+         clone, deep_clone
+         is_equal, is_deep_equal
+         copy, deep_copy
+         make_from_array, as_array
+         remove_at, cursor_remove_at
+         remove_first, remove_last
+          remove_range?
+         first, last
+         is_first, is_last
+         "is_balanced' flag in struct
+         unit tests, add string items
+   
+         
+   BSTree_make
+   BSTree_make_from_array
+   BSTree_clone
+   BSTree_deep_clone
+   BSTree_is_equal
+   BSTree_is_deep_equal
+   BSTree_copy
+   BSTree_deep_copy
+   BSTree_cursor_make
+   BSTree_dispose
+   BSTree_deep_dispose
+   BSTree_cursor_dispose
+   BSTree_cursor_item_at
+   BSTree_item_at
+   BSTree_item
+   BSTree_first
+   BSTree_last
+   BSTree_as_array
+   BSTree_count
+   BSTree_height
+   BSTree_off
+   BSTree_is_first
+   BSTree_is_last
+   BSTree_cursor_off
+   BSTree_cursor_is_first
+   BSTree_cursor_is_last
+   BSTree_cursor_search_forth
+   BSTree_cursor_search_forth_eq_fn
+   BSTree_cursor_search_back
+   BSTree_cursor_search_back_eq_fn
+   BSTree_is_empty
+   BSTree_has
+   BSTree_has_eq_fn
+   BSTree_occurrences
+   BSTree_occurrences_eq_fn
+   BSTree_search_forth
+   BSTree_search_forth_eq_fn
+   BSTree_search_back
+   BSTree_search_back_eq_fn
+   BSTree_cursor_back
+   BSTree_cursor_forth
+   BSTree_cursor_go
+   BSTree_cursor_go_to_value
+   BSTree_cursor_start
+   BSTree_cursor_finish
+   BSTree_cursor_index
+   BSTree_cursor_remove_at
+   BSTree_cursor_remove_at_and_dispose
+   BSTree_back
+   BSTree_forth
+   BSTree_go
+   BSTree_go_to_value
+   BSTree_start
+   BSTree_finish
+   BSTree_index
+   BSTree_put
+   BSTree_remove
+   BSTree_remove_and_dispose
+   BSTree_remove_value
+   BSTree_remove_value_and_dispose
+   BSTree_remove_at
+   BSTree_remove_at_and_dispose
+   BSTree_remove_first
+   BSTree_remove_first_and_dispose
+   BSTree_remove_last
+   BSTree_remove_last_and_dispose
+   BSTree_wipe_out
+   BSTree_wipe_out_and_dispose
+   BSTree_balance
+         
+         
+   RBTree_make
+   RBTree_make_duplicate_from
+   RBTree_make_from
+   RBTree_make_from_array
+   RBTree_cursor_make
+   RBTree_dispose
+   RBTree_dispose_with_contents
+   RBTree_cursor_dispose
+   RBTree_as_array
+   RBTree_cursor_item_at
+   RBTree_item_at
+   RBTree_item_at_index
+   RBTree_count
+   RBTree_height
+   RBTree_off
+   RBTree_cursor_off
+   RBTree_is_empty
+   RBTree_has
+   RBTree_cursor_forth
+   RBTree_cursor_back
+   RBTree_cursor_go
+   RBTree_cursor_start
+   RBTree_cursor_finish
+   RBTree_cursor_index
+   RBTree_forth
+   RBTree_back
+   RBTree_go
+   RBTree_start
+   RBTree_finish
+   RBTree_index
+   RBTree_put
+   RBTree_remove
+   RBTree_remove_and_dispose
+   RBTree_wipe_out
+   RBTree_wipe_out_and_dispose
+   RBTree_as_string
+
+   rework (RBTree) remove() to take node as argument
+   
+[2020-02-02 Sun 20:43]
+   "basic" methods first - make, clone, copy, dispose
+   
+[2020-02-05 Wed 01:56]
+   RBTree done
+   -> RBTree_kv
+   
+[2020-02-05 Wed 23:36]
+   on RBTree_kv, through _last up to _count
+   
+[2020-02-08 Sat 01:00]
+   check documentaion in all *.h files regarding required macro definitions
+   RBTree_kv compiles, passes existing unit tests
+   add unit test to check out new methods, add string tests
+   
+[2020-02-14 Fri 16:24]
+   comment at start of all main.c test programs
+   completed RBTree_kv unit tests
+   -> AVLTree
+   update v batch file to
+      valgrind --leak-check=full ./${PWD##*/}
+   all container classes - to_array has second parameter *count
+   up to copying (new) test files from BSTree into AVLTree
+      will have to add code to AVLTree.c
+     
+[2020-02-16 Sun 03:04]
+   finished AVLTree_kv
+   finished upgrading binary search trees
+   what next?
+      schedule program to read EMACS-style agenda items?
+         agenda
+            reads files in directory and subdirectorys
+            makes ordered list of items
+            presents list in date/time order
+         contacts
+            reads files in directory and subdirectorys
+            makes ordered list of contacts
+            presents list in alphabetical order
+         to do
+            reads files in directory and subdirectorys
+            makes list of tasks
+            presents list ?
+         query "database" by keyword/tag/date
+            server process queried by TCP/HTTP-REST?
+      rest of tree classes?
+      greatly expanded sequence class?
+   
+[2020-02-16 Sun 17:09]
+   org-mode viewer
+   no network link, long running program with text user interface
+   reads org files
+   can request agenda, tasks, contacts, etc. by date, keyword, etc.
+   output is file to be read by text editor
+   or can bring org file up in editor (config value to start editor)
+   
+   emacs -nw
+   
+   read files
+   parse file content
+   put parsed data into container
+      find items
+         starts with asterisk
+         ends with
+            end of file
+            another asterisk, if fo and previous line is blank, ignore blank line
+      extract tags
+      extract dates
+         active <>
+         inactive[]
+   
+   config contains
+      editor open file command, available are %FILENAME% and %LINE% number
+      list of to do states - TODO DONE, etc
+   
+   read file 
+   if #+FILETAGS: is on first line, parse rest of line for tags - add all 
+      found tags to each item in that file
+   parse rest of file 
+      when asterisk is in column 1 accumulate lines until next asterisk in 
+         column 1 or end of file
+      eliminate any blank line at end of lines 
+      create new item
+      count number of asterisks as level
+      text after asterisk(s) and before colon is name/title of item
+         if that text starts with DONE, TODO, then remove DONE/TODO
+         from name/title and set to_do flag to true, save to_do state, 
+         add todo tag
+      parse lines for tags, save tags
+      parse lines for date, save date, if active date found, set has_date 
+         to true 
+      non title, non tag, non date lines are text of item 
+      save file and line, generate unique ID  
+      
+   as created, put items into linked list
+   also put TODOs into seprate linked list
+   also put items with has_date = true into binary search tree 
+      with date as key, so sorted by date
+      two more bsts with start and end date as key (if has end date) so can 
+      determine 
+      if a date is in date range 
+      
+   actions:
+      (re-initialize and) read orf files under default or specified directory
+      generate agenda text file
+         for all dates present
+         starting at specified date
+         within specified date range
+         by tag (AND and OR?)
+      generate TODO text file
+         all
+         starting at date
+         in date range
+         by tag (AND and OR?)
+      generate contact text file
+         all
+         by tag (AND and OR?)
+         by name match (?)
+      generate notes text files
+      tell editor to open org file at particular item
+        option to open at end of specified item (for notes especially)
+      
+   queries:
+      agenda for today, this week, this month, this year
+         requested day, week, month, year
+      open TODOs
+      by tag : and, or ?
+      open file in editor by unique id
+   output:
+      agenda.txt formatted as in EMACS
+      todo.txt
+      contact.txt
+      
+   need an "item" class
+      title
+      level (# of asterisks)
+      date
+         includes day of week, time
+         include DEADLINE, SCHEDULED keywords for date or date range
+      end_date
+      date_is_active
+      is_date_range
+      is_todo
+      todo_status
+      list of tags
+      text
+      
+   date or date-time class?
+      wraps C date and time 
+     
+   date-time duration class?
+     uses date-time class
+     
+   function to parse org-mode item text to org_mode_item
+   parse tag text slug to list of tags
+   parse date-time string to date_time 
+      
+[2020-02-19 Wed 14:50]
+   add utility classes
+      DATE_TIME
+         year, month, day, hour, minute, second, fractional_seconds
+      DATE_TIME_DURATION
+         optional fixed start date/time
+      DATE_TIME_CODE
+         yyyy, MM, dd, hh, mm, ss, fff
+      DATE_TIME_PARSER_FORMATTER
+         made with a DATE_TIME_CODE
+         parse
+            convert raw string to date_time and has parts available (year, month, etc)
+         correspond
+            checks raw string to see if it satisfies format of date_time_code
+            -  error checks raw string without triggering contract violation
+         create_string (generate) 
+            from DATE_TIME according to date_time_code
+         is_repeating
+         repeat_interval
+         
+   ORG_MODE_ITEM
+   ORG_MODE_ITEM_PARSER
+      parse
+      correspond
+      
+   add fuzzy string match method? levenshtein distance?   
+   
+   -> working on DATE_TIME
+   
+[2020-02-21 Fri 02:48]
+   DATE_TIME complete
+   -> DATE_TIME_DURATION ?
+   
+[2020-02-23 Sun 00:43]
+   coding done
+   testing
+      set up
+      1 BC - 1 AD jump
+      leap year
+      days in Feb, leap year
+      each month, leap year
+      
+[2020-02-24 Mon 00:20]
+
+/**
+   increment_day_of_year
+*/
+void
+increment_day_of_year( date_time_t *dt )
+{
+   if ( is_leap_year( (*dt).year ) == 1 )
+   {
+      if ( (*dt).day_of_year == DAYS_IN_LEAP_YEAR )
+      {
+         increment_year( dt );
+         (*dt).day_of_year = 1;
+         month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+      }
+      else
+      {
+         (*dt).day_of_year = (*dt).day_of_year + 1;
+         month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+      }
+   }
+   else
+   {
+      if ( (*dt).day_of_year == DAYS_IN_YEAR )
+      {
+         increment_year( dt );
+         (*dt).day_of_year = 1;
+         month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+      }
+      else
+      {
+         (*dt).day_of_year = (*dt).day_of_year + 1;
+         month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+      }
+   }
+   
+   return;
+}
+
+/**
+   decrement_day_of_year
+*/
+void
+decrement_day_of_year( date_time_t *dt )
+{
+   
+   if  ( (*dt).day_of_year == 1 )
+   {
+      (*dt).year = (*dt).year - 1;
+      
+      if ( is_leap_year( (*dt).year ) == 1 )
+      {
+         (*dt).day_of_year = DAYS_IN_LEAP_YEAR;
+         month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+      }
+      else
+      {
+         (*dt).day_of_year = DAYS_IN_YEAR;
+         month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+      }
+   }
+   else
+   {
+      (*dt).day_of_year = (*dt).day_of_year - 1;
+      month_day_from_day_of_year( (*dt).year, (*dt).day_of_year, &(*dt).month, &(*dt).day );
+   }
+      
+   return;
+}
+
+[2020-02-24 Mon 02:28]
+   added unit tests for Date_Time
+   -> detailed tests for is_less_than, etc - cases for all date_time fields
+   replace month numbers with macros - JAN_MONTH, FEB_MONTH, etc.
+   
+[2020-02-25 Tue 03:28]
+   Date_Time and Date_Time_Duration unit tests, 100% gcov, no valgrind issues
+   -> Date_Time_Formatter_Parser ?
+   
+[2020-02-28 Fri 01:42]
+   *add three character month abbreviations
+   set century for 2 digit years?
+   
+[2020-02-29 Sat 01:14]
+   Date_Time_Formatter_Parser feature complete
+   
+static
+int32_t
+day_abbrev_to_int( string_t *s )
+{
+   int32_t result = 0;
+   
+   string_to_lower( s );
+   
+   if ( string_is_equal_cstring( s, "sun" ) == 1 )
+   {
+      result = 1;
+   }
+   else if ( string_is_equal_cstring( s, "mon" ) == 1 )
+   {
+      result = 2;
+   }
+   else if ( string_is_equal_cstring( s, "tue" ) == 1 )
+   {
+      result = 3;
+   }
+   else if ( string_is_equal_cstring( s, "wed" ) == 1 )
+   {
+      result = 4;
+   }
+   else if ( string_is_equal_cstring( s, "thu" ) == 1 )
+   {
+      result = 5;
+   }
+   else if ( string_is_equal_cstring( s, "fri" ) == 1 )
+   {
+      result = 6;
+   }
+   else if ( string_is_equal_cstring( s, "sat" ) == 1 )
+   {
+      result = 7;
+   }
+   
+   return result;
+}
+
+static
+int32_t
+format_field_is_equal( format_field_t *current, format_field_t *other )
+{
+   int32_t result = 1;
+   
+   if ( (*current).code != (*other).code )
+   {
+      result = 0;
+   }
+   
+   if ( (*current).position != (*other).position )
+   {
+      result = 0;
+   }
+   
+   return result;
+}
+
+[2020-03-01 Sun 03:07]
+   finished date_time_formatter_parser
+   -> date_time_duration_formatter_parser
+   how to specify duration
+      weeks?, days, hours, minutes, seconds, milliseconds
+      not days of week, months, years
+      
+   2010-01-01 13:45:30.123 +10d12h30m15.123s   
+   2019-04-01 Mon 19:00-23:00
+   2019-04-01 Mon 19:00+4:00
+   <2019-05-03 Fri >--<2019-05-04 Sat >
+
+[2020-03-02 Mon 00:10]   
+   make start end
+      <2019-05-03 Fri >--<2019-05-04 Sat >
+   make start duration time
+      2019-04-01 Mon 19:00-23:00
+      2019-04-01 Mon 19:00+4:00
+   make start duration 
+      2010-01-01 13:45:30.123 +10d12h30m15.123s   
+   make duration
+      120d12h30m15.123s   
+   
+  duration format
+     time
+        HH:MI:SS.MIL
+     definite
+        *YY MM DD HH MI SS MIL
+        *YY DOY HH MI SS MIL
+        *MM DD HH MI SS MIL
+        *DD HH MI SS MIL
+        *HH MI SS MIL
+        *MI SS MIL
+        *SS MIL
+        *MIL
+     indefinite
+        *DD HH MI SS MIL
+        
+   conform or correspond-like function to evaluate format strings?     
+   
+[2020-03-03 Tue 02:41]
+   end_is_time_only
+   
+[2020-03-06 Fri 01:27]
+   split up corresponds() into four subroutines
+   some way to re-use code for duration in start-duration and duration only?
+   
+[2020-03-18 Wed 13:56]   
+[2020-03-19 Thu 01:40]
+   through corresponds on first pass through unit tests
+   format, parse remaining
+   
+[2020-03-20 Fri 12:07]
+   date time duration formatter parser done, no valgrind issues, 100% gcov
+   
+[2020-03-21 Sat 14:39]
+   Started on Org_Mode_Item
+   
+[2020-03-22 Sun 02:37]
+   Finished Org_Mode_Item
+   string_dispose_wrapper - needs unit test
+   
+   next:
+      formatter_parser - take output from Input_File_Reader - lines
+      
+      user program to read files, write summarys/reports
+         also pass on inherited tags, properties, etc.
+      put Org_Mode_Items into lists for sorting
+         agenda - event items sorted by start date
+         todo - todos not complete, sort by date if any
+         contacts - alphabetical sort by name
+         note - sort by ? date, title, ?
+      also filter items 
+         by tag (and, or tags)  
+         by start date, range
+         by todo status
+      create output files/reports
+         agendas
+         todos
+         contacts
+         notes
+      from info in config, be able to tell text editor to open source file of item   
+      
+      possible parser:
+      https://www.geeksforgeeks.org/solve-the-logical-expression-given-by-string/
+      
+[2020-03-22 Sun 15:42]
+   make query evaluator
+   refurbish Stack class
+   
+[2020-03-23 Mon 11:13]0
+   https://www.geeksforgeeks.org/expression-evaluation/
+   
+   1. While there are still tokens to be read in,
+      1.1 Get the next token.
+      1.2 If the token is:
+          1.2.1 A number: push it onto the value stack.
+          1.2.2 A variable: get its value, and push onto the value stack.
+          1.2.3 A left parenthesis: push it onto the operator stack.
+          1.2.4 A right parenthesis:
+            1 While the thing on top of the operator stack is not a 
+              left parenthesis,
+                1 Pop the operator from the operator stack.
+                2 Pop the value stack twice, getting two operands.
+                3 Apply the operator to the operands, in the correct order.
+                4 Push the result onto the value stack.
+            2 Pop the left parenthesis from the operator stack, and discard it.
+          1.2.5 An operator (call it thisOp):
+            1 While the operator stack is not empty, and the top thing on the
+              operator stack has the same or greater precedence as thisOp,
+              1 Pop the operator from the operator stack.
+              2 Pop the value stack twice, getting two operands.
+              3 Apply the operator to the operands, in the correct order.
+              4 Push the result onto the value stack.
+            2 Push thisOp onto the operator stack.
+   2. While the operator stack is not empty,
+       1 Pop the operator from the operator stack.
+       2 Pop the value stack twice, getting two operands.
+       3 Apply the operator to the operands, in the correct order.
+       4 Push the result onto the value stack.
+   3. At this point the operator stack should be empty, and the value
+      stack should have only one value in it, which is the final result.
+   
+      
+[2020-03-24 Tue 10:23]
+   additional info in last_error with reconstituded query string from tokens
+   and indicator of location of error ?
+   string_char_count
+   
+
+[2020-03-25 Wed 02:20]
+   *string_dispose_wrapper
+   *string_char_count
+   *date_time_duration_overlap or intersection
+   *provide duration intersection function for org_mode_item so don't have to extract duration
+   repeating events in org_mode_item
+      <2007-05-16 Wed 12:30 +1w> d days, w weeks, m months, y years
+      new fields for repeater count and duration ?
+      
+[2020-03-26 Thu 02:21]
+   working on updating unit tests for Org_Mode_Item.c after adding repeat fields.
+   Need to update every unit test with three new parameters, add units tests
+   for setters and getters.
+   
+[2020-03-26 Thu 14:31]
+   Org_Mode_Item.c and its unit tests complete, no valgrind issues, 100% gcov.
+   -> Org_Mode_Item_Formatter_Parser
+      started
+         what's in configuration?
+            base path to org files
+            output file directory path
+            list of todo status words
+         update Configuration.c
+      parse line by line
+         level, title, tags
+         properties
+         date
+         text
+         
+      add to Org_Mode_Item
+         add to tags, properties
+         remove tags, properties
+         has tag, property
+         value of property
+            
+[2020-03-27 Fri 16:27]
+   org_mode_item
+      has_tag
+      add_tag
+      remove_tag
+      
+      has_key
+      value for key
+      add_key_value
+      remove_key
+   DONE
+   
+   add following line to premake4.lua after files {
+   "../../base/*.c", 
+   
+   add following lines as first in main.c or elsewhere so it's executed before the crash
+      // enable core dump on failure
+      dbc_enable_core_dump();
+
+   // look for and store FILETAGS before first org mode item
+   // loop through input
+   // look for asterisk in column 1 to start/end an org_mode_item, last one ends with EOF
+   // extract level, todo keyword, title, tags from line 1
+   // look for and extract duration k (date_tag) and duration if present including repeater from line 2
+   // line 3 and onwards to end is text
+   // event has event tag, contact has contact tag, todo has todo keyword, rest are notes
+   // (calling program) after end of file, put parent's tags to be inherited into child org mode items
+   
+[2020-03-28 Sat 17:16]
+   *string remove leading and trailing whitespace
+   full unit tests for String_utilities.c
+   
+   
+      i_start = string_index_cstring( line, ":" );
+      i_end = string_index_in_bounds_cstring( line, ";", i_start + 1, string_count( s ) ) - 1;
+      if ( ( i_end >= i_start ) && ( i_start >= 0 ) )
+      {
+         // get valid key
+         s = string_substring( line, i_start, i_end  );
+         string_remove_leading_whitespace( s );
+         string_remove_trailing_whitespace( s );
+         
+         if ( ( string_item( s, 0 ) == ':' ) && ( string_item( s, string_count(s ) - 1 ) == ':' ) )
+         {
+            string_remove_head( s, 1 );
+            string_remove_tail( s, 1 );
+         }
+         
+   
+         i_start = string_index( line, ":" ) + 1;
+         i_end = string_index_in_bounds( line, i_start + 1, string_count( s ) ) - 1;
+         if ( i_end >= i_start )
+         {
+            s = string_substring( line, i_start, i_end  );
+            string_remove_leading_whitespace( s );
+            string_remove_trailing_whitespace( s );
+         }
+         else
+         {
+            s = 
+         }
+         
+   // extract date if present, properties if present, text otherwise
+   // look for and extract duration keyword (date_tag) and duration if present including repeater from line 2
+   // line 3 and onwards ( or line 2 if no duration ) to end is text
+   // line 3 ( or 2 ) may start properties definitions - extract them
+   // event has active date, contact has contact tag, todo has todo keyword, rest are notes
+         
+[2020-03-29 Sun 01:22]
+   make Org_Mode_Item_Formatter_Parser test directory, compiles no errors, make passes
+   -> do boilerplate unit tests, then parse
+   remove org_mode_item_formatter_parser_put_omi ? yes
+   
+Mon Mar 30 19:26:16 PDT 2020 @143 /Internet Time/
+   *rework date_time_duration_formatter_parser corresponds for start end time only
+   *count separators in start date, separator, and duration format string
+   *corresponds must see same number of separators
+   *get index of last separator and continue
+   
+   *date range >--<
+   *date_keyword
+   *properties after date
+   *multiple levels
+   *no title
+   
+   parse and rest of Org_Mode_Item_Formatter_Parser pass, no valgrind issues, 100% gcov
+   -> format
+   
+[2020-04-01 Wed 00:58]
+   format complete
+   Org_Mode_Item_Formatter_Parser complete, no valgrind issues
+   -> Org_Mode_File_Reader
+      read/parse single file
+      get FILETAGS property
+      get and parse org mode items, add higher level tags
+      refurbish and use Input_File_Reader? add line_number feature?
+      hold parsed items in what? hash set/table, list?
+      
+      agenda
+         by week/day
+         Monday  29 Mar 2020 W13?
+            time filename:line_number: title :tags:
+            10:00-11:00 SOAR:3: SOAR :event:SOAR:
+            10:00       education: Start school :event:college:         
+            
+      todo
+      filename:line_number: TODO  title :tags:
+      
+      issue with tags from higher levels - separate with colon, double colon?
+      
+      contact
+         title filename:line_number: tags
+         
+      note
+         filename:line_number: title tags
+         
+      commands
+         q -- quit application               
+         l filename  -- reload file
+         r -- reload all
+         e filename:line_number -- tell editor to open filename at line_number
+         
+         a -- write agenda summary report for current week to default filename
+            
+         t -- write todo summary list (not including DONE) to default filename
+         
+         c -- write contact summary list to default filename
+         
+         n -- write note summary list to default filename
+         
+         any -- write summary list of all items to default filename (would likely
+                be using filters)
+         
+      filters
+         -tag tag_expression -- only include items for which tag_expression is true
+         -date date_specifier/date_duration specifier -- only include items (events) that 
+                                                      intersect date or date_duration
+                                                      make syntax for +/- week, month, etc.
+         -d current day
+         -w current week (agenda default)
+         -m current month
+         -d N current day and N-1 more
+         -w N current week and N-1 more
+         -m N current month and N-1 more
+            N is number of time units, if omitted N is 1
+         -p key - only include items that have property key                                             
+         -p key:value - only include items that have property key:value (value may be in quotes) 
+         
+      other
+         -o filename -- specify different output filename, relative or absolute path
+                        could be stdout
+         
+      data from config file
+         todo_keywords
+         org base path, fully specified
+         default output path, fully specified
+         default output filenames (to be put into default output path, overwriting)
+            agenda   -- agenda.txt
+            todos    -- todo.txt
+            contacts -- contacts.txt
+            notes    -- notes.txt
+            any      -- any.txt
+         template for edit to open file at line
+            jedit %filename_with_path% +line:%file_line% -reuseview
+         
+            
+   -> Org_Mode_File_Reader
+      read/parse single file
+      get FILETAGS property
+      get and parse org mode items, add higher level tags
+      refurbish and use Input_File_Reader? add line_number feature?
+      hold parsed items in what? hash set/table, list?
+      has default location for config file, can be specified on command line when started
+      
+
+      command line command processor class? look at cli
+      Org_Mode_Report_Generator
+         reads org files
+         generates reports from command line commands
+         
+[2020-04-03 Fri 00:20]
+   refurbished Input_File_Reader
+   incororate into Org_Mode_File_Reader
+   
+[2020-04-03 Fri 23:21]
+   completed Org_Mode_File_Reader, no valgrind issues, 100% gcov coverage
+   
+   redo Query.evaluate, .value_from to take protocol so can use Org_Mode_Item_has_tag( omi, tag )
+   
+   *add make_now to Date_Time
+   
+   command line processor
+      getline() read input line
+      tokenize input line honoring multiword tokens inside quote marks
+      find command and argument if any
+         single character 'q' or long form "quit"
+      find option and argument if any   
+      if valid command, call function for option with its argument and options/arguments
+      
+   started defining command_line_handler.h and p_command.h   
+   
+[2020-04-05 Sun 00:49]
+   need experiment to study holding protocol pointer inside container class
+   
+   put, replace, has, search, occurrences
+   
+   issue with protocols
+   when protocol is specialized to a type s_AList, for example
+   in fact no error is thrown when a integer value is used as a value
+   have to modify supports_protocol() to only accept specialized protocol type code
+   protocol types occupy top 24 bits, top 8 bits are "5A", so 16 bits for base
+   protocol, type codes 5A00XXXX are reserved for system protocols
+   botton 8 bits are user defined specializations on base protocol
+   also holds for key-value protocols
+   use macro in case statement in supports_protocol() to use specialied protocol
+   type code
+   enable type checking on value when it's a protocol_base_t for container and
+   other classes
+   -> a AList of INT_MATH_OPERATOR, not just a list of P_MATH_OPERATOR that could be
+   INT_MATH_OPERATOR or DOUBLE_MATH_OPERATOR for example
+   max of 256 specializations of base protocol, should be OK
+   max of 256 system defined protocols, should be OK
+   max of 65536-256 user defined protocols, should be OK 
+   define qualified protocol type in i_Indexable,c or similar
+   #define I_INDEXABLE P_INDEXABLE | 0x01
+   
+[2020-04-05 Sun 20:11]
+   have definition of protocol_arg_ok macro
+      add to preconditions in put, etc
+   use user_defined_types.h and specialize protocol type
+   
+   redefine P_MATH_OPERATION in I_Math_Operation.c
+   
+[2020-04-06 Mon 01:43]
+   container classes replace P_BASIC with P_BASIC_TYPE and other protocols
+   container class add precondition line
+      PRECONDITION( "value type ok", protocol_arg_ok( Type_Code, value ) );
+      for each "Type" argument to check prototype arguments
+      won't be triggered for non prototype "Type"s 
+
+   #ifndef defaults for P_BASIC_TYPE and other protocols
+   make a  user_defined_types.h file for user projects. include in i_Math_Operation.h
+   i_Math_Operation.c and the like require a #define for P_MATH_OPERATION_TYPE
+   
+   need to define type codes for new prototypes and classes, not a specialization
+   of an existing class ( such as s_AList )
+   
+   grep -lr --include='*.h' P_BASIC_TYPE .
+   
+   new experiment - class Double_It parameterized on type, implements P_MATH_OPERATION
+   
+   rule - all protocol classes MUST support P_Basic - clone, copy, is_equal, dispose
+   and their deep variants
+   
+   can remove dispose and deep_dispose from other protocols
+   
+[2020-04-07 Tue 01:54]
+   worked out protocol changes, implemented in Protocol_Experiment_test
+   back to Command_Line_Handler and define commands that implement P_COMMAND protocol
+   put into list of commands
+   will need to update DList, maybe others
+   
+[2020-04-07 Tue 16:33]
+   P_CLH_OPTION - protocol? put functionality of filter in the option class,
+   need to get at data, output file name
+   
+[2020-04-12 Sun 21:05]
+   boilerplate eight - same as P_BASIC
+      clone, deep_clone
+      copy, deep_copy
+      is_equal, is_deep_equal
+      dispose, deep_dispose
+      
+   container classes use value_clone in clone, value_deep_clone in deep_clone, etc
+   
+   -> command_line_handler
+      P_CLH_COMMAND
+      P_CLH_OPTION 
+      P_CLH_FILTER - local to command_line_handler for org_mode
+      
+   test clh, make project   
+   org_mode_item - change _tags()to give direct access to internal hset, not
+      make a clone
+      
+[2020-04-13 Mon 02:42]
+   CLH test compiled, make passes
+   may need to rename macros like Prefix, Type, and Value used in *.h files
+   with unique names to avoid redefinition issues with including multiple types
+   one inside another( lists that contain protocols, etc. )
+   see P_CLH_Command
+   
+   add handling for quit, help, usage, and version into Command_Line_Handler,
+      no need for quit command, etc.
+      
+[2020-04-14 Tue 01:38]
+   this didn't work more than once:
+   
+static int old_stdin = 0;
+static int old_stdout = 0;
+
+static
+void
+redirect( char_t *filename )
+{
+   char_t in_filename[129];
+   char_t out_filename[129];
+   
+   in_filename[0] = 0;
+   out_filename[0] = 0;
+
+   strcat( in_filename, "src/input_files/" );
+   strcat( in_filename, filename );
+   
+   strcat( out_filename, "src/output_files/" );
+   strcat( out_filename, filename );
+   
+   // redirect stdin
+   old_stdin = dup( STDIN_FILENO );
+   freopen( in_filename, "r", stdin ); 
+
+   // redirect stdout
+   old_stdout = dup( STDOUT_FILENO );
+   freopen( out_filename, "w", stdout ); 
+
+   return;
+}
+
+static
+void
+restore( void )
+{
+   // restore stdout
+   fflush( stdout );  
+   fclose( stdout );
+   stdout = fdopen( old_stdout, "w" );  
+
+   // restore stdin
+   fflush( stdin );  
+   fclose( stdin );
+   stdin = fdopen( old_stdin, "r" );  
+
+   return;
+}
+
+   solution was to use fprintf and specify FILE * at command_line_handler_make
+   that way can specify use of stdin/stdout or file, don't have to use freopen
+   
+[2020-04-14 Tue 17:52]
+
+   to dump stack trace from core dump:
+      gdb -batch -ex bt Command_Line_Handler_test core
+
+   -> org mode report (view?) generator executable
+   
+      commands
+      
+         *q -- quit application               
+         X  use r instead // l filename  -- reload file
+         r -- reload all
+         r filename -- reload filename
+         
+         e filename:line_number -- tell editor to open filename at line_number
+         
+         *a -- write agenda summary report for current week to default filename
+            
+         *t -- write todo summary list (not including DONE) to default filename
+         
+         *c -- write contact summary list to default filename
+         
+         *n -- write note summary list to default filename
+         
+         *any -- write summary list of all items to default filename (would likely
+                be using filters)
+         
+      options/filters
+         -tag tag_expression -- only include items for which tag_expression is true
+         -date date_specifier/date_duration specifier -- only include items (events) that 
+                                                      intersect date or date_duration
+                                                      make syntax for +/- week, month, etc.
+         -todo status_expression -- only include if todo status satisfies status expression
+                                    all status except DONE (default)
+         -d current day
+         -w current week (agenda default)
+         -m current month
+         -d N current day and N-1 more
+         -w N current week and N-1 more
+         -m N current month and N-1 more
+            N is number of time units, if omitted N is 1
+         -p key - only include items that have property key                                             
+         -p key:value - only include items that have property key:value (value may be in quotes) 
+         
+      other
+         -o filename -- specify different output filename, relative or absolute path
+                        could be stdout
+      
+      data from config file
+         todo_keywords
+         org base path, fully specified
+         default output path, fully specified
+         default output filenames (to be put into default output path, overwriting)
+            agenda   -- agenda.txt
+            todos    -- todo.txt
+            contacts -- contacts.txt
+            notes    -- notes.txt
+            any      -- any.txt
+         template for editor to open file at line
+            jedit %filename_with_path% +line:%file_line% -reuseview
+                        
+   -> todo_command
+         needs access to main org_mode_item htable, 
+         output file base directory,
+         default output file name
+         
+   javascript - which languages transate to js?
+   
+   made Todo_Command and started unit tests
+   issue - collect all types like s_HSet in a single place? now have multiple 
+   definitions and am having to include them all in makefile
+   C_data_structure/Common directory?
+   
+[2020-04-16 Thu 01:44]
+   commands
+      contact_command
+      note_command
+      any_command
+      agenda_command - default duration of current week
+      edit_command
+      reload_command
+      
+   options/filters
+      tag_option
+      date_option
+      todo_option
+      day_option
+      week_option
+      month_option
+      property_option
+      output_file_option
+      
+[2020-04-16 Thu 14:53]
+   polynomial fit https://www.bragitoff.com/2018/06/polynomial-fitting-c-program/
+   mmv Todo\* Contact\#1
+   grep -RIl 'search' | xargs sed -i 's/search/replace/g'
+
+   commands
+      *contact_command
+      *note_command
+      *any_command
+      agenda_command - default duration of current week?
+      todo_command
+      edit_command
+      reload_command
+      
+   options/filters
+      tag_option
+      date_option
+      todo_option
+      day_option
+      week_option
+      month_option
+      property_option
+      output_file_option
+   
+   agenda format
+   day-of-week dd-MMM-yyyy
+      filename: time-in-hours title  :tags:
+      
+   agenda command execute
+      get event omis
+      if no date filter, filter by current week
+      for each day, find events that occur, insert sort them
+      
+   have to account for repeating events   
+   add date to output_agenda_item
+   
+   add method to OMI - does omi overlap DTD, yes or no ; with repeater
+   expiration date for repeated events?
+   
+Sat Apr 18 03:31:36 PDT 2020 @480 /Internet Time/
+   working on agenda command test execute (test 2)
+   weekly repeating events starting two weeks apart not ending up on same day
+   
+[2020-04-19 Sun 01:02]
+   *test for filter interface in agenda command execute
+   r and *e commands
+   
+   add parsing and formatting of repeat date EXPIRES date
+   redo unit tests for INPUT_FILE_READER, DLIST
+   working on Reload_Command
+      redo _execute
+      make list of path_file_names in static function
+      use as_alist as stack
+         start at input_base_directory
+         
+         recurse to 
+            read files, put *.org files into file list
+            read and go through directories
+         
+      then call Org_Mode_File_Reader on each path+file, collect output hash tables   
+   
+   bash command to remove lines in *.c files containing "template"
+   find . -name "*.c" -type f | xargs sed -i -e '/template/d'
+   
+[2020-04-20 Mon 18:28]
+   *got directory crawl working for Reload_Command
+   *add parsing and formatting of repeat date EXPIRES date
+   *incorporate into Reload_Command
+   
+   gdb in browser gdbgui - start in directory of executable
+   
+   find . -name "*.c" -type f | xargs sed -i 's/search/replace/g'
+find . -name "*.c" -type f | xargs sed -i 's/   string_t \*input_base_directory = NULL;/   sho_htable_t \*htable = NULL;\n   string_t \*input_base_directory = NULL;/g'   
+sed -i 's/   string_t \*input_base_directory = NULL;/   sho_htable_t \*htable = NULL;\n   string_t \*input_base_directory = NULL;/g' Reload_Command_test_is_equal.c
+find . -name "*.c" -type f | xargs sed -i 's/            input_base_directory/            xyz/g'   
+find . -name "*.c" -type f | xargs sed -i 's/   string_deep_dispose( &input_base_directory );/   sho_htable_deep_dispose( &htable );\n   string_deep_dispose( &input_base_directory );/g'   
+find . -name "*.c" -type f | xargs sed -i 's/sho_htable_deep_dispose(    string_deep_dispose( &input_base_directory );htable );/sho_htable_deep_dispose( htable );/g'   
+find . -name "*.c" -type f | xargs sed -i 's/   sho_htable_deep_dispose( htable );/   sho_htable_deep_dispose( &htable );/g'   
+
+[2020-04-21 Tue 00:20]
+   Reload_Command done
+   -> filters      
+      *tag_option
+      *date_option
+      *todo_option
+      *day_option
+      *week_option
+      *month_option
+      *property_option
+      output_file_option
+   command line parameter to set different base_directory
+   
+   to modify query for use in tag option, use macros to define type of "hset"
+   and substitution for value_function ( hset_has() )
+   only in query value_from, execute and query_execute
+   
+   add to org_mode_item has_property_key_value? so don't have to split up 
+   and separate key:value arguments for option
+   
+[2020-04-21 Tue 17:40]
+   did week and month
+   *-> date option
+   tag option
+      *redo query to be generic, supply function to check for "hset" membership
+   *todo_option   
+      *add function has_todo_status tp org_mode_item
+   *property option   
+      *add function has_property_key_value to org_mode_item
+   *output option
+      *new protocol for output file option
+      *class for output option
+      *modify 5 commands to get output file from option if present
+      
+[2020-04-22 Wed 18:47]
+   *Output_File_Option
+   *update Configuration
+   main routine
+   -> called from main(), provide fp for input and output, stdin and stdout
+      or file pointers
+      
+   sloccount SLOC counter
+   
+   *wrote omvg_main.c, did not compile or set up unit tests
+   
+[2020-05-03 Sun 04:07]
+   alphabetical order for contacts?
+   
+[2020-05-09 Sat 18:12]
+   completed omvg application, all omvg_main unit tests pass 100% gcov, no valgrind issues
+   
+[2020-08-06 Thu 05:01]
+   PEG class/module?
+   
+   
+[2020-11-09 Mon 17:28]
+off of trading coding for a while, finish CDSL 2.0
+
+// Protocols
+
+/*
+#define P_BASIC_TYPE             0x5A000100
+#define P_INDEXABLE_TYPE         0x5A000200
+#define P_ITERABLE_TYPE          0x5A000300
+#define P_ITERABLE_KV_TYPE       0x5A000301
+#define P_DITERABLE_TYPE         0x5A000302
+#define P_DITERABLE_KV_TYPE      0x5A000303
+#define P_SEARCHER_TYPE          0x5A000400
+#define P_SORTER_TYPE            0x5A000401
+*/
+
+// Lists
+
+#define ALIST_TYPE               0xA5000100
+#define SLIST_TYPE               0xA5000101
+#define DLIST_TYPE               0xA5000102
+   
+// Trees
+
+#define BSTREE_TYPE              0xA5000200
+#define BSTREE_KV_TYPE           0xA5000201
+#define RBTREE_TYPE              0xA5000202
+#define RBTREE_KV_TYPE           0xA5000203
+#define AVLTREE_TYPE             0xA5000204
+#define AVLTREE_KV_TYPE          0xA5000205
+#define BTREE_TYPE               0xA5000210
+#define TRIE_TYPE                0xA5000220
+#define HEAP_TYPE                0xA5000230
+#define HEAP_KV_TYPE             0xA5000231
+   
+// Hash Set, Table
+
+#define HSET_TYPE                0xA5000300
+#define HTABLE_TYPE              0xA5000301
+   
+// Sequence
+
+#define SEQUENCE_TYPE            0xA5000400
+#define CIRCULAR_ARRAY_TYPE      0xA5000401
+   
+// Strings
+
+#define STRING_TYPE              0xA5000500
+#define STRING_UTF8_TYPE         0xA5000501
+#define CABLE_TYPE               0xA5000510
+#define CABLE_UTF8_TYPE          0xA5000511
+   
+// Graphs
+
+#define DGRAPH_TYPE              0xA5000600
+#define DGRAPH_EDGE_TYPE         0xA5000601
+#define DGRAPH_VERTEX_TYPE       0xA5000602
+#define UGRAPH_TYPE              0xA5000610
+#define UGRAPH_EDGE_TYPE         0xA5000611
+#define UGRAPH_VERTEX_TYPE       0xA5000612
+   
+// Miscellaneous
+
+#define CONFIGURATION_TYPE       0xA5000700
+#define BINARY_FILE_TYPE         0xA5000701
+#define DIRECTORY_TYPE           0xA5000702
+#define INPUT_FILE_READER_TYPE   0xA5000703
+#define RAW_BUFFER_TYPE          0xA5000704
+#define TUPLE_TYPE               0xA5000705
+#define AGENT_TYPE               0xA5000704
+   
+// Deques
+
+#define CIRCULAR_BUFFER_TYPE     0xA5000800
+#define DEQUE_TYPE               0xA5000801
+#define PQUEUE_TYPE              0xA5000802
+#define QUEUE_TYPE               0xA5000803
+#define STACK_TYPE               0xA5000804
+   
+// Sorters
+
+#define BSORTER_TYPE             0xA5000900
+#define HSORTER_TYPE             0xA5000901
+#define ISORTER_TYPE             0xA5000902
+#define MSORTER_TYPE             0xA5000903
+#define QSORTER_TYPE             0xA5000904
+#define SELSORTER_TYPE           0xA5000905
+#define SSORTER_TYPE             0xA5000906
+   
+// Searchers
+
+#define BSEARCHER_TYPE           0xA5000A00
+#define LSEARCHER_TYPE           0xA5000A01
+
+// Math
+#define MATVEC_TYPE              0xA5000B00
+#define QUATERNION_TYPE          0xA5000B01
+#define RNG_ISAAC_TYPE           0xA5000B02
+#define RNG_ISAAC_GAUSSIAN_TYPE  0xA5000B03
+#define FFT_TYPE                 0xA5000B04
+#define SVD_TYPE                 0xA5000B05
+
+// Date
+#define DATE_TIME_TYPE           0xA5000C00
+#define DATE_TIME_DURATION_TYPE  0xA5000C01
+#define DATE_TIME_FORMATTER_PARSER_TYPE   0xA5000C02
+#define DATE_TIME_DURATION_FORMATTER_PARSER_TYPE   0xA5000C03
+#define TEMPORENC_TYPE           0xA5000C04
+
+[2021-02-17 Wed 02:26]
+crypto
+     - hashes
+     - checksums  
+     - base64 encoding 
+     - sha1
+Judy arrays
+skip lists
+
+make checklist for CDSL version "2" classes
+   boilerplate eight
+   dispose( ** )
+   gcov
+   valgrind
+   container class tests for string elements
+   
+[2021-02-17 Wed 18:34]
+   BSearcher updated
+   
+[2021-02-19 Fri 00:53]
+   BSorter updated
+   updated BTree_kv.h and *.h
+      need to add VALUE_DEEP_EQUAL_FUNCTION, KEY_DEEP_EQUAL_FUNCTION
+      need to update tests
+        renamed make_from to clone
+        dispose now is **
+        add string-string variant tests
+           for each feature that adds/deletes/modifies/copies container class items
+        
+[2021-02-19 Fri 11:32]
+   perfect hash
+   tuple
+   BTree, max children set to 4 fails in put
+   
+[2021-03-04 Thu 03:36]
+   BTree working for integer keys and values, all tests pass, 100% gcov, no
+   valgrind issues.
+   -> need to add tests for string keys and values
+   
+[2021-03-06 Sat 02:24]
+   BTree for integer and string keys and values, all tests pass, 100% gcov,
+   no valgrind issues
+   took some doing though
+   
+   -> BSTree(_kv) update, fixup
+      ? do probabilistic testing to exercise the class? - YES
+      
+[2021-03-07 Sun 03:00]
+   boilerplate eight
+   dispose( ** )
+   gcov
+   valgrind
+   container class tests for string elements
+   stress tests
+   
+[2021-03-10 Wed 02:42]
+   BSTree and BSTree_kv updated, tested, all pass with 100% gcov and no valgrind issues
+   
+[2021-05-05 Wed 15:45]
+   revisit other code mettrics like cyclomatic complexity
+   
+[2021-05-22 Sat 02:13]
+   use splint as enhanced code checker?
+   
+[2021-06-02 Wed 18:33]
+   modify Input_File_Reader to work on a string instead of a file?
+   
+[2021-06-09 Wed 05:00]
+   S" /home/leegr3/dfwforth/examples/ansi/hanoi.frt" included
+   
+[2022-03-08 Tue 02:26]
+   fast inverse square root algo
+   
+float Q_rsqrt( floag number (
+{
+   long il
+   float x2, y;
+   const float threehalf = 1.5F;
+
+   x2 = number * 0.5F;
+   y = number;
+   i = *( long * ) &y;
+   i = 0x5f3759df - ( i >> 1 );
+   y = *( float * ) &i;
+   y = y * ( threehalfs - ( x2 * y * y ) );
+//   y = y * ( threehalfs - ( x2 * y * y ) );  // second approximation iteratiion, if needed
+
+   return y;
+}
+   
+[2022-03-08 Tue 12:03]
+   program to create boilerplate for CDSL basic eight? MICINAC?
+   
+[2023-07-06 Thu 03:50]
+   multiple dispatch 
+   preprocess to get index into array of function pointers by class ID
+   instead of matrix of class ID - method id - function pointers
+   include index in class structure so dispatch is function_pointer[index]
+   can check to see if class ID, methid ID matches - error
+   
+[2023-07-09 Sun 01:48]
+   -> all is_equal and is_deep_equal and copy, deep_copy 
+   must be modified so that
+   identical pointers always return 
+   without locking mutexes or doing work
+   is_equal, is_deep_equal returns true
+   lock mutex after testing for pointer equality (and setting result for equals)
+   
+   larger question:
+     should ALL methods lock the object? like jvm?
+     including running invariants?
+     
+[2023-07-10 Mon 04:13]
+   possible to create recursive mutex:
+   
+   pthread_mutex_t Mutex;
+   pthread_mutexattr_t Attr;
+   
+   pthread_mutexattr_init(&Attr);
+   pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
+   pthread_mutex_init(&Mutex, &Attr);   
+
+   but
+   do not set mutexes to recursive
+   programming style is to not call methods from other methods
+      if common subroutihne/function is needed, make and use a local static function
+      method function body (including invariants) inside lock/unlock pair
+   is_equal, deep_equal lock current, check invariant, but then compare current and other
+      pointers - if equal, then unlock and return true
+   copy and deep_copy lock current and check invariant, then compare current and other
+      pointers - if equal, unlock and return
+   if precondition requires access to mutable data field of current, current must be locked first   
+   
+   tasks:
+      every class
+         ( current == other ) testing in is_equal, is_deep_equal, copy, deep_copy
+      all methods
+         method body inside lock/unlock pair
+         preconditions inside lock/unlock pair if mutable current field accessed
+           and precondition follows invariant
+           
+   -> through AList, AVLTree, AVLTree_kv. Binary_File, BSearcher, BSorter, BSTree,
+      
+         
+   
+   add LOCK and UNOCK to P_Basic? would require recursive mutexes
+   need for searches and sorts 0 lock data structure from external change\
+      while accessing item() and replace()
+   
+      
+[2024-07-28 Sun 16:12]
+
+* add LOOP_VARIANT assertion macros
+review protocol definitions - remove dispose and similar functions from all but P_BASIC
+
+
+--> checklist for rework
+
+review/correct file comments for correct type name, not a copy of another class
+including test code
+
+review/correct protocol code
+
+add dispose/deep dispose with `**p`
+
+insert CHECKs for all allocations
+
+DbC assertion macros not present in *.c file
+
+eliminate doxygen comments in `*.h` for function grouping and other notes
+
+add parameter/return value doxygen comments for static functions in `*.c` file
+
+all parameters and return values with basic types use "int32_t"
+
+no definition of macro for _TYPE in *.c file
+
+protocol types end with _TYPE
+
+add unit tests for container classes with string data items
+
+verify invariant #define
+
+autoformat with astyle and sed
+
+rerun and verify all unit tests
+
+100% gcov coverage
+
+no errors with valgrind
+
+ensure documentmentation markdown file is present and up to date in /documentation
+
+<--
+
+when all classes reworked, run doxygen to generate documentation
+
+also add tests for P_Basic to those container classes lacking them
+make sure macro function defininitions like DEEP_EQUAL are correct and consnstent
+
+astyle --style=allman -s3 -S -p -D *.c
+
+sed -i -e  's/( \*\(_*[a-z]*[A-Z]*[0-9]*\) )/(*\1)/g' *.c
+sed -i -e  's/( \*\*\(_*[a-z]*[A-Z]*[0-9]*\) )/(**\1)/g' *.c
+
+
+[2024-07-29 Mon 02:30]
+
+ulimit -c unlimited
+
+sudo  sysctl -w kernel.core_pattern=core
+
+gdb -ex bt -batch ./test_test ./core.101443
+
+
+[2024-07-29 Mon 19:19]
+
+find -type f -exec sed -i.bak 's/int_Alist/i_Alist/g' {} \;
+sed -i 's/int_AList/i_AList/g' *.c
+sed -i 's/int_alist/i_alist/g' *.c
+
+[2024-08-05 Mon 04:50]
+   _item functions tests next
+   
+[2024-08-10 Sat 02:06]
+   DGraph
+      make
+      put vertex
+      put edge
+      remove vertex  with or without value
+      remove edge with or without value
+      get vertex
+      get vertex neighbors from and to
+      get edge value and from to
+      set vertex value
+      set edge value with or without from and to
+      
+      copy set target to contents of other 
+      deep copy set target to deep clone of other
+      clone set target to same contents as other
+      deep clone set target to deep clone of other, new vertices and edges, same
+         connectedness, deep clone of value 
+         -- will have to keep translation of current vertices to other vertices
+         
+      equal same vertices, same values
+      deep_equal vertices in same order per connectedness, corresponding edges,
+         same values
+         
+       use simple arrays for id-address tables vertices, edges
+          0 is a valid index, negative indices are invalid
+            
+       in DGraph_struct vertices and edges are arrays - count, not_filled, capacity
+         index is vertex or edge id, array content is pointer to vertex or edge
+         functions - get next id, set address for id, auto increase capacity
+         
+       in DGraph_vertex_struct neighbors is a set implemented in an array
+          array contents are vertex ids, count capacity, auto increase capacity  
+          functions are put id, remove id - remove will 
+          
+[2024-08-11 Sun 00:52]
+
+   what operations for DGraph?
+      make, dispose, deep_dispose, deep_copy, deep_clone 
+      add, remove, read vertices and edges
+      read and write vertex and edge values
+      are two vertices neighbors?
+      are two vertices connected? search by depth or breadth
+         is_visited local parameter array of integers, not in cursor
+
+[2024-08-12 Mon 01:49]
+   redoing DGraph one function at a time, did make, dispose, and deep_dispose
+   -> add vertex, edge  remove vertex, edge  remove and dispose vertex and edge
+   flesh out invariant          
+      
+[2024-08-12 Mon 14:54]
+   cursor movements
+   make and dispose cursors 
+   has vertex or edge value
+   find id with vertex or edge value
+      
+[2024-08-13 Tue 00:50]
+   Xsearch or has - vertex id, edge id, vertex value, edge value   
+   Xcount of vertices, edges
+   
+   Xget_edge_from_to
+   Xvertices, edges wipe_out
+   X_and_dispose versions of remove vertex and edge, wipe_out
+   Xis_equal, Xcopy, Xclone and Xdeep variants
+   
+[2024-08-17 Sat 19:02]
+   connected vertices breadth first, depth first
+      
+   index_first
+   index_last
+   index_put_first
+   index_put_last
+   index_remove
+   index_remove_first
+   index_remove_last
+   index_has
+
+
+[2024-08-20 Tue 02:13]
+      this code will be used in UGRAPH find_connected_vertices_breadth_first
+      
+/*      
+      for( i=0; i<(*v).nfcount; i++ )
+      {
+         id = (*v).neighbors_from[i];
+         if ( index_has( is_visited, ivcount, ivcapacity, id ) == 0 )
+         {
+            index_put_last( &is_visited, ivcount, ivcapacity, id );
+            index_put_last( &queue, qcount, qcapacity, id );
+         }
+      }
+*/      
+
+   this code willbe used in UGRAPH find_connected_vertices_depth_first
+   
+      for( i=0; i<(*v).ntcount; i++ )
+      {
+         id = (*v).neighbors_from[i];
+         if ( index_has( is_visited, ivcount, ivcapacity, id ) == 0 )
+         {
+            // if not visited, recurse into it
+            find_connected_vertices_depth_first
+            (
+               current, 
+               id,
+               is_visited, 
+               ivcount, 
+               ivcapacity 
+            );
+         }
+      }
+      
+[2024-08-20 Tue 05:25]
+   DGraph passes all tests
+   
+[2024-08-31 Sat 01:19]
+   UGraph passes all tests
+   
+[2024-09-07 Sat 16:45]
+   replace_at_index
+         
+[2024-09-25 Wed 04:05]
+   next is test_put_wchar   
+   
+[2024-10-03 Thu 00:47]
+   next up - circular array
+   
+   
+[2024-10-12 Sat 17:07]
+   _make
+   _clone
+   _deep_clone
+   _is_equal
+   _is_deep_equal
+   _copy
+   _deep_copy
+   _dispose
+   _deep_dispose
+
+[2024-10-14 Mon 04:39]
+   Decque add the basic eight
+   
+[2024-10-15 Tue 03:59]
+   directory dispose is ok in *.c but tests not updated      
+   
+[2024-10-16 Wed 03:35]
+   next up is heap
+   old style names for deep dispose
+   needs s_Heap for testing
+   
+[2024-10-17 Thu 03:36]
+   Heap
+   code up clone, copy. is_equal and deeps
+   function comments for local static functions
+      
+[2024-10-26 Sat 03:04]
+   Trie not working - after "b" key inserted, inserting 'a' key fails
+      
+[2024-10-27 Sun 01:06]
+   Deque
+   Queue
+   Stack
+   
+   cloc ./ --exclude-dir=Test
+   
+C                             2447         192259         106622         378807
+C/C++ Header                   186          13766          24549          10826
+   
+C                               73          31180          23450          95675
+C/C++ Header                    79          11834          23056           8926
+   
+
+[2024-10-27 Sun 20:27]
+
+   delete *~ backup files
+   ensure *.md file present and formatted correctly
+   rerun all test code
+      ./m
+      ./bc
+      ./b
+      ./RUN
+      ./g FILENAME.c
+      ./v
+   review test code for correct comments at top of file - name of class
+   
+      

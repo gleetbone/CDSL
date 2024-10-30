@@ -1,0 +1,23 @@
+==== Building Svd_test (debug) ====
+Creating obj/Debug
+main.c
+Svd_test_reconstructed_input.c
+f_Matvec.c
+cd_Matvec.c
+d_Matvec.c
+Svd_test_input.c
+Svd_test_dispose.c
+f_Svd.c
+Svd_test_deep_dispose.c
+Svd_test_set_singular_value_threshold.c
+cd_Svd.c
+cf_Svd.c
+Svd_test_make.c
+cf_Matvec.c
+Svd_test_svd.c
+Svd_test_set_input.c
+Svd_test_inverse.c
+Svd_test_set_rotation_error.c
+d_Svd.c
+Protocol_Base.c
+Linking Svd_test

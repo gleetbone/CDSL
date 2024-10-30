@@ -1,8 +1,8 @@
 /**
- @file Fft_test_dispose_with_contents.c
+ @file Fft_test_deep_dispose.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Fft_make"
+ @version 2.0.0
+ @brief: "tests for Fft_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Fft_make.
+ Unit tests for Fft_t
 
 */
 
@@ -37,10 +37,10 @@ int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 /**
-   test_dispose_with_contents_1
+   test_deep_dispose_1
 */
 
-void test_dispose_with_contents_1( void )
+void test_deep_dispose_1( void )
 {
    cf_fft_t *cffft = NULL;
 
@@ -48,16 +48,16 @@ void test_dispose_with_contents_1( void )
 
    CU_ASSERT( cffft != NULL );
 
-   cf_fft_dispose_with_contents( cffft );
+   cf_fft_deep_dispose( &cffft );
 
    return;
 }
 
 /**
-   test_dispose_with_contents_2
+   test_deep_dispose_2
 */
 
-void test_dispose_with_contents_2( void )
+void test_deep_dispose_2( void )
 {
    cd_fft_t *cdfft = NULL;
 
@@ -65,18 +65,18 @@ void test_dispose_with_contents_2( void )
 
    CU_ASSERT( cdfft != NULL );
 
-   cd_fft_dispose_with_contents( cdfft );
+   cd_fft_deep_dispose( &cdfft );
 
    return;
 }
 
 int
-add_test_dispose_with_contents( void )
+add_test_deep_dispose( void )
 {
    CU_pSuite p_suite = NULL;
 
    // add a suite for these tests to the registry
-   p_suite = CU_add_suite("suite_test_dispose_with_contents", NULL, NULL);
+   p_suite = CU_add_suite("suite_test_deep_dispose", NULL, NULL);
    if (NULL == p_suite)
    {
       CU_cleanup_registry();
@@ -85,11 +85,11 @@ add_test_dispose_with_contents( void )
 
    // add the tests to the suite
 
-   // test_dispose_with_contents_1
-   add_test_to_suite( p_suite, test_dispose_with_contents_1, "test_dispose_with_contents_1" );
+   // test_deep_dispose_1
+   add_test_to_suite( p_suite, test_deep_dispose_1, "test_deep_dispose_1" );
 
-   // test_dispose_with_contents_2
-   add_test_to_suite( p_suite, test_dispose_with_contents_2, "test_dispose_with_contents_2" );
+   // test_deep_dispose_2
+   add_test_to_suite( p_suite, test_deep_dispose_2, "test_deep_dispose_2" );
 
    return CUE_SUCCESS;
 

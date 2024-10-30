@@ -1,7 +1,7 @@
 /**
  @file Svd_test_inverse.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Svd_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -64,10 +64,10 @@ void test_inverse_1( void )
 
    CU_ASSERT( f_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( m1 );
-   f_matvec_dispose( m2 );
-   f_matvec_dispose( one );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &m1 );
+   f_matvec_dispose( &m2 );
+   f_matvec_dispose( &one );
 
 
    fsvd = f_svd_make();
@@ -84,10 +84,10 @@ void test_inverse_1( void )
 
    CU_ASSERT( f_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( m1 );
-   f_matvec_dispose( m2 );
-   f_matvec_dispose( one );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &m1 );
+   f_matvec_dispose( &m2 );
+   f_matvec_dispose( &one );
 
 
    fsvd = f_svd_make();
@@ -105,10 +105,10 @@ void test_inverse_1( void )
 
    CU_ASSERT( f_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( m1 );
-   f_matvec_dispose( m2 );
-   f_matvec_dispose( one );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &m1 );
+   f_matvec_dispose( &m2 );
+   f_matvec_dispose( &one );
 
    fsvd = f_svd_make();
    m = f_matvec_make_from_args( 2, 2, 4, 1.0, 0.0, 0.0, 0.00000000000001 );
@@ -125,10 +125,10 @@ void test_inverse_1( void )
 
    CU_ASSERT( f_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( m1 );
-   f_matvec_dispose( m2 );
-   f_matvec_dispose( one );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &m1 );
+   f_matvec_dispose( &m2 );
+   f_matvec_dispose( &one );
 
    fsvd = f_svd_make();
    m = f_matvec_make_from_args( 2, 3, 6, 1.0, 0.0, 0.0000000000002, 0.0, 0.0, 0.0000000000003 );
@@ -146,10 +146,10 @@ void test_inverse_1( void )
 
    CU_ASSERT( f_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( m1 );
-   f_matvec_dispose( m2 );
-   f_matvec_dispose( one );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &m1 );
+   f_matvec_dispose( &m2 );
+   f_matvec_dispose( &one );
 
    return;
 }
@@ -179,10 +179,10 @@ void test_inverse_2( void )
 
    CU_ASSERT( d_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( m1 );
-   d_matvec_dispose( m2 );
-   d_matvec_dispose( one );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &m1 );
+   d_matvec_dispose( &m2 );
+   d_matvec_dispose( &one );
 
 
    dsvd = d_svd_make();
@@ -199,10 +199,10 @@ void test_inverse_2( void )
 
    CU_ASSERT( d_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( m1 );
-   d_matvec_dispose( m2 );
-   d_matvec_dispose( one );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &m1 );
+   d_matvec_dispose( &m2 );
+   d_matvec_dispose( &one );
 
 
    dsvd = d_svd_make();
@@ -219,10 +219,10 @@ void test_inverse_2( void )
 
    CU_ASSERT( d_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( m1 );
-   d_matvec_dispose( m2 );
-   d_matvec_dispose( one );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &m1 );
+   d_matvec_dispose( &m2 );
+   d_matvec_dispose( &one );
 
    dsvd = d_svd_make();
    m = d_matvec_make_from_args( 2, 2, 4, 1.0, 0.0, 0.0, 0.0000000000001 );
@@ -239,10 +239,10 @@ void test_inverse_2( void )
 
    CU_ASSERT( d_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( m1 );
-   d_matvec_dispose( m2 );
-   d_matvec_dispose( one );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &m1 );
+   d_matvec_dispose( &m2 );
+   d_matvec_dispose( &one );
 
    dsvd = d_svd_make();
    m = d_matvec_make_from_args( 2, 3, 6, 1.0, 0.0, 0.0000000000002, 0.0, 0.0000000000003, 0.0 );
@@ -259,10 +259,10 @@ void test_inverse_2( void )
 
    CU_ASSERT( d_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( m1 );
-   d_matvec_dispose( m2 );
-   d_matvec_dispose( one );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &m1 );
+   d_matvec_dispose( &m2 );
+   d_matvec_dispose( &one );
 
 
    return;
@@ -295,10 +295,10 @@ void test_inverse_3( void )
 
    CU_ASSERT( cf_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( m1 );
-   cf_matvec_dispose( m2 );
-   cf_matvec_dispose( one );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &m1 );
+   cf_matvec_dispose( &m2 );
+   cf_matvec_dispose( &one );
 
 
    cfsvd = cf_svd_make();
@@ -315,10 +315,10 @@ void test_inverse_3( void )
 
    CU_ASSERT( cf_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( m1 );
-   cf_matvec_dispose( m2 );
-   cf_matvec_dispose( one );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &m1 );
+   cf_matvec_dispose( &m2 );
+   cf_matvec_dispose( &one );
 
 
    cfsvd = cf_svd_make();
@@ -335,10 +335,10 @@ void test_inverse_3( void )
 
    CU_ASSERT( cf_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( m1 );
-   cf_matvec_dispose( m2 );
-   cf_matvec_dispose( one );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &m1 );
+   cf_matvec_dispose( &m2 );
+   cf_matvec_dispose( &one );
 
    cfsvd = cf_svd_make();
    m = cf_matvec_make_from_args( 2, 2, 4, 1.0 + 0.0*I, 0.0 + 0.0*I, 0.0 + 0.0*I, 0.0000000000001 + 0.0*I );
@@ -355,10 +355,10 @@ void test_inverse_3( void )
 
    CU_ASSERT( cf_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( m1 );
-   cf_matvec_dispose( m2 );
-   cf_matvec_dispose( one );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &m1 );
+   cf_matvec_dispose( &m2 );
+   cf_matvec_dispose( &one );
 
 
    cfsvd = cf_svd_make();
@@ -376,10 +376,10 @@ void test_inverse_3( void )
 
    CU_ASSERT( cf_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( m1 );
-   cf_matvec_dispose( m2 );
-   cf_matvec_dispose( one );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &m1 );
+   cf_matvec_dispose( &m2 );
+   cf_matvec_dispose( &one );
 
    return;
 }
@@ -410,10 +410,10 @@ void test_inverse_4( void )
 
    CU_ASSERT( cd_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( m1 );
-   cd_matvec_dispose( m2 );
-   cd_matvec_dispose( one );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &m1 );
+   cd_matvec_dispose( &m2 );
+   cd_matvec_dispose( &one );
 
 
    cdsvd = cd_svd_make();
@@ -430,10 +430,10 @@ void test_inverse_4( void )
 
    CU_ASSERT( cd_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( m1 );
-   cd_matvec_dispose( m2 );
-   cd_matvec_dispose( one );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &m1 );
+   cd_matvec_dispose( &m2 );
+   cd_matvec_dispose( &one );
 
 
    cdsvd = cd_svd_make();
@@ -450,10 +450,10 @@ void test_inverse_4( void )
 
    CU_ASSERT( cd_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( m1 );
-   cd_matvec_dispose( m2 );
-   cd_matvec_dispose( one );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &m1 );
+   cd_matvec_dispose( &m2 );
+   cd_matvec_dispose( &one );
 
 
    cdsvd = cd_svd_make();
@@ -471,10 +471,10 @@ void test_inverse_4( void )
 
    CU_ASSERT( cd_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( m1 );
-   cd_matvec_dispose( m2 );
-   cd_matvec_dispose( one );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &m1 );
+   cd_matvec_dispose( &m2 );
+   cd_matvec_dispose( &one );
 
 
    cdsvd = cd_svd_make();
@@ -492,10 +492,10 @@ void test_inverse_4( void )
 
    CU_ASSERT( cd_matvec_is_approximately_equal( m2, one, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( m1 );
-   cd_matvec_dispose( m2 );
-   cd_matvec_dispose( one );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &m1 );
+   cd_matvec_dispose( &m2 );
+   cd_matvec_dispose( &one );
 
    return;
 }

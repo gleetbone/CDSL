@@ -1,7 +1,7 @@
 /**
  @file HSet_test_p_iterable.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HSet P_Iterable"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HSet_make.
+ Unit tests for HSet_t
 
 */
 
@@ -26,8 +26,10 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "i_HSet.h"
+#include "s_HSet.h"
 #include "Protocol_Base.h"
 #include "i_Iterable.h"
+#include "s_Iterable.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -38,18 +40,16 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_p_iterable_1( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
    
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
    
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   CU_ASSERT( i_iterable_dispose_f( pb_list ) == i_hset_dispose );
-
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
  
    return;
 }
@@ -60,18 +60,16 @@ void test_p_iterable_1( void )
 
 void test_p_iterable_2( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   CU_ASSERT( i_iterable_dispose_with_contents_f( pb_list ) == i_hset_dispose_with_contents );
-
-   i_iterable_dispose_with_contents( pb_list );
+   i_hset_deep_dispose( &hset );
 
    return;
 }
@@ -82,21 +80,20 @@ void test_p_iterable_2( void )
 
 void test_p_iterable_3( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   i_hset_put( list, 24 );
+   i_hset_put( hset, 24 );
 
-   CU_ASSERT( i_iterable_count_f( pb_list ) == i_hset_count );
-   CU_ASSERT( i_iterable_count( pb_list ) == 1 );
+   CU_ASSERT( i_iterable_count( pb_hset ) == 1 );
 
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -107,22 +104,21 @@ void test_p_iterable_3( void )
 
 void test_p_iterable_4( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   i_hset_put( list, 24 );
-   i_hset_start( list );
+   i_hset_put( hset, 24 );
+   i_hset_start( hset );
 
-   CU_ASSERT( i_iterable_item_f( pb_list ) == i_hset_item_at );
-   CU_ASSERT( i_iterable_item( pb_list) == 24 );
+   CU_ASSERT( i_iterable_item( pb_hset) == 24 );
 
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -133,21 +129,20 @@ void test_p_iterable_4( void )
 
 void test_p_iterable_5( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   i_hset_put( list, 24 );
+   i_hset_put( hset, 24 );
 
-   CU_ASSERT( i_iterable_off_f( pb_list ) == i_hset_off );
-   CU_ASSERT( i_iterable_off( pb_list ) == 1 );
+   CU_ASSERT( i_iterable_off( pb_hset ) == 1 );
 
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -158,19 +153,18 @@ void test_p_iterable_5( void )
 
 void test_p_iterable_6( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   CU_ASSERT( i_iterable_is_empty_f( pb_list ) == i_hset_is_empty );
-   CU_ASSERT( i_iterable_is_empty( pb_list ) == 1 );
+   CU_ASSERT( i_iterable_is_empty( pb_hset ) == 1 );
 
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -181,22 +175,21 @@ void test_p_iterable_6( void )
 
 void test_p_iterable_7( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   i_hset_put( list, 24 );
-   i_iterable_start( pb_list );
+   i_hset_put( hset, 24 );
+   i_iterable_start( pb_hset );
 
-   CU_ASSERT( i_iterable_item_f( pb_list ) == i_hset_item_at );
-   CU_ASSERT( i_iterable_item( pb_list) == 24 );
+   CU_ASSERT( i_iterable_item( pb_hset) == 24 );
 
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
 
    return;
 }
@@ -207,25 +200,55 @@ void test_p_iterable_7( void )
 
 void test_p_iterable_8( void )
 {
-   i_hset_t *list = NULL;
-   protocol_base_t *pb_list = NULL;
+   i_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
 
-   list = i_hset_make();
-   pb_list = ( protocol_base_t * ) list;
+   hset = i_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
 
-   CU_ASSERT( list != NULL );
-   CU_ASSERT( pb_list != NULL );
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
 
-   i_hset_put( list, 24 );
-   i_hset_put( list, 13 );
+   i_hset_put( hset, 24 );
+   i_hset_put( hset, 13 );
 
-   i_hset_start( list );
-   i_iterable_forth( pb_list );
+   i_hset_start( hset );
+   i_iterable_forth( pb_hset );
 
-   CU_ASSERT( i_iterable_forth_f( pb_list ) == i_hset_forth );
-   CU_ASSERT( i_iterable_item( pb_list) == 13 );
+   CU_ASSERT( i_iterable_item( pb_hset) == 13 );
 
-   i_iterable_dispose( pb_list );
+   i_hset_dispose( &hset );
+
+   return;
+}
+
+/**
+   test_p_iterable_9
+*/
+
+void test_p_iterable_9( void )
+{
+   s_hset_t *hset = NULL;
+   protocol_base_t *pb_hset = NULL;
+
+   hset = s_hset_make();
+   pb_hset = ( protocol_base_t * ) hset;
+
+   string_t *s1 = string_make_from_cstring( "a" ); 
+   string_t *s2 = string_make_from_cstring( "b" ); 
+   
+   CU_ASSERT( hset != NULL );
+   CU_ASSERT( pb_hset != NULL );
+
+   s_hset_put( hset, s1 );
+   s_hset_put( hset, s2 );
+
+   s_hset_start( hset );
+   s_iterable_forth( pb_hset );
+
+   CU_ASSERT( s_iterable_item( pb_hset) == s2 );
+
+   s_hset_deep_dispose( &hset );
 
    return;
 }
@@ -268,6 +291,9 @@ add_test_p_iterable( void )
 
    // test_p_iterable_8
    add_test_to_suite( p_suite, test_p_iterable_8, "test_p_iterable_8" );
+
+   // test_p_iterable_9
+   add_test_to_suite( p_suite, test_p_iterable_9, "test_p_iterable_9" );
 
    return CUE_SUCCESS;
    

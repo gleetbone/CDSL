@@ -1,7 +1,7 @@
 /**
  @file Sequence_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Sequence_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Sequence_make.
+ Unit tests for Sequence_t
 
 */
 
@@ -45,7 +45,7 @@ void test_dispose_1( void )
    CU_ASSERT( int_sequence_capacity( sequence ) == 1 );
    CU_ASSERT( int_sequence_is_empty( sequence ) == 1 );
  
-   int_sequence_dispose( sequence );
+   int_sequence_dispose( &sequence );
    
    return;
 }

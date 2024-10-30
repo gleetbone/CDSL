@@ -1,8 +1,8 @@
 /**
- @file soa_configuration_test_put.c
+ @file configuration_test_put.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for messaging_make"
+ @version 2.0.0
+ @brief: "tests for configuration_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for soa_node_make_dict.
+ Unit tests for configuration_t
 
 */
 
@@ -36,20 +36,20 @@ add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
 
 void test_put_1( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
    string_t *key = string_make_from_cstring( "fruit" );
    string_t *value = string_make_from_cstring( "apple" );
    
-   soa_configuration_put( configuration, key, value );
-   int32_t flag = soa_configuration_has( configuration, key );
+   configuration_put( configuration, key, value );
+   int32_t flag = configuration_has( configuration, key );
    
    CU_ASSERT( flag == 1 );
    
-   string_t *s = soa_configuration_item( configuration, key );
+   string_t *s = configuration_item( configuration, key );
  
    CU_ASSERT( string_is_equal_cstring( s, "apple" ) );
 
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }
@@ -60,18 +60,18 @@ void test_put_1( void )
 
 void test_put_2( void )
 {
-   soa_configuration_t *configuration = soa_configuration_make();
+   configuration_t *configuration = configuration_make();
    
-   soa_configuration_put_cstring( configuration, "fruit", "apple" );
-   int32_t flag = soa_configuration_has_cstring( configuration, "fruit" );
+   configuration_put_cstring( configuration, "fruit", "apple" );
+   int32_t flag = configuration_has_cstring( configuration, "fruit" );
    
    CU_ASSERT( flag == 1 );
    
-   string_t *s = soa_configuration_item_cstring( configuration, "fruit" );
+   string_t *s = configuration_item_cstring( configuration, "fruit" );
  
    CU_ASSERT( string_is_equal_cstring( s, "apple" ) );
    
-   soa_configuration_dispose( configuration );
+   configuration_deep_dispose( &configuration );
 
    return;
 }

@@ -1,7 +1,7 @@
 /**
  @file Svd_test_reconstructed_input.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Svd_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -68,11 +68,11 @@ void test_reconstructed_input_1( void )
    CU_ASSERT( f_matvec_is_approximately_equal( f_svd_singular_values( fsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( lsv );
-   f_matvec_dispose( rsv );
-   f_matvec_dispose( sv );
-   f_matvec_dispose( rm );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &lsv );
+   f_matvec_dispose( &rsv );
+   f_matvec_dispose( &sv );
+   f_matvec_dispose( &rm );
 
 
    fsvd = f_svd_make();
@@ -92,11 +92,11 @@ void test_reconstructed_input_1( void )
    CU_ASSERT( f_matvec_is_approximately_equal( f_svd_singular_values( fsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( lsv );
-   f_matvec_dispose( rsv );
-   f_matvec_dispose( sv );
-   f_matvec_dispose( rm );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &lsv );
+   f_matvec_dispose( &rsv );
+   f_matvec_dispose( &sv );
+   f_matvec_dispose( &rm );
 
 
 
@@ -117,11 +117,11 @@ void test_reconstructed_input_1( void )
    CU_ASSERT( f_matvec_is_approximately_equal( f_svd_singular_values( fsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( lsv );
-   f_matvec_dispose( rsv );
-   f_matvec_dispose( sv );
-   f_matvec_dispose( rm );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &lsv );
+   f_matvec_dispose( &rsv );
+   f_matvec_dispose( &sv );
+   f_matvec_dispose( &rm );
 
    fsvd = f_svd_make();
    m = f_matvec_make_from_args( 3, 2, 6, 2.0, 0.0, 0.5, 1.0, 1.0, 0.0 );
@@ -140,11 +140,11 @@ void test_reconstructed_input_1( void )
    CU_ASSERT( f_matvec_is_approximately_equal( f_svd_singular_values( fsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( lsv );
-   f_matvec_dispose( rsv );
-   f_matvec_dispose( sv );
-   f_matvec_dispose( rm );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &lsv );
+   f_matvec_dispose( &rsv );
+   f_matvec_dispose( &sv );
+   f_matvec_dispose( &rm );
 
 
    fsvd = f_svd_make();
@@ -164,11 +164,11 @@ void test_reconstructed_input_1( void )
    CU_ASSERT( f_matvec_is_approximately_equal( f_svd_singular_values( fsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( f_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   f_svd_dispose_with_contents( fsvd );
-   f_matvec_dispose( lsv );
-   f_matvec_dispose( rsv );
-   f_matvec_dispose( sv );
-   f_matvec_dispose( rm );
+   f_svd_deep_dispose( &fsvd );
+   f_matvec_dispose( &lsv );
+   f_matvec_dispose( &rsv );
+   f_matvec_dispose( &sv );
+   f_matvec_dispose( &rm );
 
    return;
 }
@@ -202,11 +202,11 @@ void test_reconstructed_input_2( void )
    CU_ASSERT( d_matvec_is_approximately_equal( d_svd_singular_values( dsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( lsv );
-   d_matvec_dispose( rsv );
-   d_matvec_dispose( sv );
-   d_matvec_dispose( rm );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &lsv );
+   d_matvec_dispose( &rsv );
+   d_matvec_dispose( &sv );
+   d_matvec_dispose( &rm );
 
    
    dsvd = d_svd_make();
@@ -226,11 +226,11 @@ void test_reconstructed_input_2( void )
    CU_ASSERT( d_matvec_is_approximately_equal( d_svd_singular_values( dsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( lsv );
-   d_matvec_dispose( rsv );
-   d_matvec_dispose( sv );
-   d_matvec_dispose( rm );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &lsv );
+   d_matvec_dispose( &rsv );
+   d_matvec_dispose( &sv );
+   d_matvec_dispose( &rm );
 
    
    dsvd = d_svd_make();
@@ -250,11 +250,11 @@ void test_reconstructed_input_2( void )
    CU_ASSERT( d_matvec_is_approximately_equal( d_svd_singular_values( dsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( lsv );
-   d_matvec_dispose( rsv );
-   d_matvec_dispose( sv );
-   d_matvec_dispose( rm );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &lsv );
+   d_matvec_dispose( &rsv );
+   d_matvec_dispose( &sv );
+   d_matvec_dispose( &rm );
 
    dsvd = d_svd_make();
    m = d_matvec_make_from_args( 3, 2, 6, 2.0, 0.0, 0.5, 1.0, 1.0, 0.0 );
@@ -273,11 +273,11 @@ void test_reconstructed_input_2( void )
    CU_ASSERT( d_matvec_is_approximately_equal( d_svd_singular_values( dsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( lsv );
-   d_matvec_dispose( rsv );
-   d_matvec_dispose( sv );
-   d_matvec_dispose( rm );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &lsv );
+   d_matvec_dispose( &rsv );
+   d_matvec_dispose( &sv );
+   d_matvec_dispose( &rm );
 
 
    dsvd = d_svd_make();
@@ -297,11 +297,11 @@ void test_reconstructed_input_2( void )
    CU_ASSERT( d_matvec_is_approximately_equal( d_svd_singular_values( dsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( d_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   d_svd_dispose_with_contents( dsvd );
-   d_matvec_dispose( lsv );
-   d_matvec_dispose( rsv );
-   d_matvec_dispose( sv );
-   d_matvec_dispose( rm );
+   d_svd_deep_dispose( &dsvd );
+   d_matvec_dispose( &lsv );
+   d_matvec_dispose( &rsv );
+   d_matvec_dispose( &sv );
+   d_matvec_dispose( &rm );
 
    return;
 }
@@ -337,11 +337,11 @@ void test_reconstructed_input_3( void )
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_svd_singular_values( cfsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( lsv );
-   cf_matvec_dispose( rsv );
-   cf_matvec_dispose( sv );
-   cf_matvec_dispose( rm );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &lsv );
+   cf_matvec_dispose( &rsv );
+   cf_matvec_dispose( &sv );
+   cf_matvec_dispose( &rm );
 
    
    cfsvd = cf_svd_make();
@@ -361,11 +361,11 @@ void test_reconstructed_input_3( void )
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_svd_singular_values( cfsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( lsv );
-   cf_matvec_dispose( rsv );
-   cf_matvec_dispose( sv );
-   cf_matvec_dispose( rm );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &lsv );
+   cf_matvec_dispose( &rsv );
+   cf_matvec_dispose( &sv );
+   cf_matvec_dispose( &rm );
 
    
    cfsvd = cf_svd_make();
@@ -385,11 +385,11 @@ void test_reconstructed_input_3( void )
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_svd_singular_values( cfsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( lsv );
-   cf_matvec_dispose( rsv );
-   cf_matvec_dispose( sv );
-   cf_matvec_dispose( rm );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &lsv );
+   cf_matvec_dispose( &rsv );
+   cf_matvec_dispose( &sv );
+   cf_matvec_dispose( &rm );
 
    cfsvd = cf_svd_make();
    m = cf_matvec_make_from_args( 3, 2, 6, 2.1 + 0.0*I, 1.3 + 0.0*I, -0.5 + 0.0*I, -2.9 + 0.0*I, 0.8 + 0.0*I, -1.3 + 0.0*I );
@@ -415,11 +415,11 @@ void test_reconstructed_input_3( void )
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_svd_singular_values( cfsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( lsv );
-   cf_matvec_dispose( rsv );
-   cf_matvec_dispose( sv );
-   cf_matvec_dispose( rm );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &lsv );
+   cf_matvec_dispose( &rsv );
+   cf_matvec_dispose( &sv );
+   cf_matvec_dispose( &rm );
 
 
    cfsvd = cf_svd_make();
@@ -439,11 +439,11 @@ void test_reconstructed_input_3( void )
    CU_ASSERT( cf_matvec_is_approximately_equal( cf_svd_singular_values( cfsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cf_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cf_svd_dispose_with_contents( cfsvd );
-   cf_matvec_dispose( lsv );
-   cf_matvec_dispose( rsv );
-   cf_matvec_dispose( sv );
-   cf_matvec_dispose( rm );
+   cf_svd_deep_dispose( &cfsvd );
+   cf_matvec_dispose( &lsv );
+   cf_matvec_dispose( &rsv );
+   cf_matvec_dispose( &sv );
+   cf_matvec_dispose( &rm );
 
    return;
 }
@@ -478,11 +478,11 @@ void test_reconstructed_input_4( void )
    CU_ASSERT( cd_matvec_is_approximately_equal( cd_svd_singular_values( cdsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( lsv );
-   cd_matvec_dispose( rsv );
-   cd_matvec_dispose( sv );
-   cd_matvec_dispose( rm );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &lsv );
+   cd_matvec_dispose( &rsv );
+   cd_matvec_dispose( &sv );
+   cd_matvec_dispose( &rm );
 
    
    cdsvd = cd_svd_make();
@@ -502,11 +502,11 @@ void test_reconstructed_input_4( void )
    CU_ASSERT( cd_matvec_is_approximately_equal( cd_svd_singular_values( cdsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( lsv );
-   cd_matvec_dispose( rsv );
-   cd_matvec_dispose( sv );
-   cd_matvec_dispose( rm );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &lsv );
+   cd_matvec_dispose( &rsv );
+   cd_matvec_dispose( &sv );
+   cd_matvec_dispose( &rm );
 
    
    cdsvd = cd_svd_make();
@@ -526,11 +526,11 @@ void test_reconstructed_input_4( void )
    CU_ASSERT( cd_matvec_is_approximately_equal( cd_svd_singular_values( cdsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( lsv );
-   cd_matvec_dispose( rsv );
-   cd_matvec_dispose( sv );
-   cd_matvec_dispose( rm );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &lsv );
+   cd_matvec_dispose( &rsv );
+   cd_matvec_dispose( &sv );
+   cd_matvec_dispose( &rm );
 
    cdsvd = cd_svd_make();
    m = cd_matvec_make_from_args( 3, 2, 6, 2.1 + 0.0*I, 1.3 + 0.0*I, -0.5 + 0.0*I, -2.9 + 0.0*I, 0.8 + 0.0*I, -1.3 + 0.0*I );
@@ -556,11 +556,11 @@ void test_reconstructed_input_4( void )
    CU_ASSERT( cd_matvec_is_approximately_equal( cd_svd_singular_values( cdsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( lsv );
-   cd_matvec_dispose( rsv );
-   cd_matvec_dispose( sv );
-   cd_matvec_dispose( rm );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &lsv );
+   cd_matvec_dispose( &rsv );
+   cd_matvec_dispose( &sv );
+   cd_matvec_dispose( &rm );
 
 
    cdsvd = cd_svd_make();
@@ -580,11 +580,11 @@ void test_reconstructed_input_4( void )
    CU_ASSERT( cd_matvec_is_approximately_equal( cd_svd_singular_values( cdsvd ), sv, 0.000001 ) == 1 );
    CU_ASSERT( cd_matvec_is_approximately_equal( rm, m, 0.000001 ) == 1 );
 
-   cd_svd_dispose_with_contents( cdsvd );
-   cd_matvec_dispose( lsv );
-   cd_matvec_dispose( rsv );
-   cd_matvec_dispose( sv );
-   cd_matvec_dispose( rm );
+   cd_svd_deep_dispose( &cdsvd );
+   cd_matvec_dispose( &lsv );
+   cd_matvec_dispose( &rsv );
+   cd_matvec_dispose( &sv );
+   cd_matvec_dispose( &rm );
 
    return;
 }

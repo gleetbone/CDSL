@@ -20,7 +20,7 @@ int
 add_test_dispose( void );
 
 int
-add_test_dispose_with_contents( void );
+add_test_deep_dispose( void );
 
 int
 add_test_set_rotation_error( void );
@@ -87,7 +87,7 @@ int main()
 
    add_test_make();
    add_test_dispose();
-   add_test_dispose_with_contents();
+   add_test_deep_dispose();
    add_test_set_rotation_error();
    add_test_set_singular_value_threshold();
    add_test_set_input();

@@ -1,7 +1,7 @@
 /**
  @file Cable_test_substring_index_cstring.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for BSTree_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -59,7 +59,7 @@ void test_substring_index_cstring_1( void )
    CU_ASSERT( cable_substring_index_cstring( cable, "bd" ) == -1 );
    CU_ASSERT( cable_substring_index_cstring( cable, "A" ) == -1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }
@@ -90,7 +90,7 @@ void test_substring_index_cstring_2( void )
    CU_ASSERT( cable_substring_index_cstring( cable, "bd" ) == -1 );
    CU_ASSERT( cable_substring_index_cstring( cable, "A" ) == -1 );
 
-   cable_dispose( cable );
+   cable_dispose( &cable );
 
    return;
 }

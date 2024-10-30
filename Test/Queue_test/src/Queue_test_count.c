@@ -1,7 +1,7 @@
 /**
  @file Queue_test_count.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for Queue_put"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -46,7 +46,7 @@ void test_count_1( void )
 
    CU_ASSERT( int_queue_count( queue ) == 1 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }
@@ -77,7 +77,7 @@ void test_count_2( void )
 
    CU_ASSERT( int_queue_count( queue ) == 0 );
 
-   int_queue_dispose( queue );
+   int_queue_dispose( &queue );
 
    return;
 }

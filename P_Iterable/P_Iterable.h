@@ -1,7 +1,7 @@
 /**
  @file P_Iterable.h
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "P_Iterable protocol"
  
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
@@ -60,66 +60,6 @@
 */
 
 /**
-   p_iterable_dispose
-
-   dispose of p_iterable
-
-   @param p_iterable the pointer to the p_iterable
-*/
-#define P_Iterable_dispose( arg ) PRIMITIVE_CAT( arg, _iterable_dispose )
-void 
-P_Iterable_dispose( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
-   p_iterable_dispose_f
-
-   returns function to dispose of p_iterable
-
-   @param p_iterable the pointer to the p_iterable
-   @return the function
-*/
-typedef void (*iterable_dispose_f)( protocol_base_t *p_iterable );
-#define P_Iterable_dispose_f( arg ) PRIMITIVE_CAT( arg, _iterable_dispose_f )
-iterable_dispose_f
-P_Iterable_dispose_f( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
-   p_iterable_dispose_with_contents
-
-   dispose of p_iterable and its contained elements
-
-   @param p_iterable the pointer to the p_iterable
-*/
-#define P_Iterable_dispose_with_contents( arg ) PRIMITIVE_CAT( arg, _iterable_dispose_with_contents )
-void
-P_Iterable_dispose_with_contents( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
-   p_iterable_dispose_with_contents_f
-
-   returns function to dispose of p_iterable and its contained elements
-
-   @param p_iterable the pointer to the p_iterable
-   @return the function
-*/
-typedef void (*iterable_dispose_with_contents_f)( protocol_base_t *p_iterable );
-#define P_Iterable_dispose_with_contents_f( arg ) PRIMITIVE_CAT( arg, _iterable_dispose_with_contents_f )
-iterable_dispose_with_contents_f
-P_Iterable_dispose_with_contents_f( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
    p_iterable_count
 
    returns number of elements in the p_iterable
@@ -130,22 +70,6 @@ P_Iterable_dispose_with_contents_f( Prefix )
 #define P_Iterable_count( arg ) PRIMITIVE_CAT( arg, _iterable_count )
 int32_t
 P_Iterable_count( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
-   p_iterable_count_f
-
-   returns function to return number of elements in the p_iterable
-
-   @param p_iterable the pointer to the iterable struct
-   @return the function
-*/
-typedef int32_t (*iterable_count_f)( protocol_base_t *p_iterable );
-#define P_Iterable_count_f( arg ) PRIMITIVE_CAT( arg, _iterable_count_f )
-iterable_count_f
-P_Iterable_count_f( Prefix )
 (
    protocol_base_t *p_iterable
 );
@@ -166,22 +90,6 @@ P_Iterable_item( Prefix )
 );
 
 /**
-   p_iterable_item_f
-
-   returns function to return current value in the p_iterable
-
-   @param p_iterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef Type (*iterable_item_f)( protocol_base_t *p_iterable );
-#define P_Iterable_item_f( arg ) PRIMITIVE_CAT( arg, _iterable_item_f )
-iterable_item_f
-P_Iterable_item_f( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
    p_iterable_off
 
    returns 1 if cursor in the p_iterable is off, 0 otherwise
@@ -192,22 +100,6 @@ P_Iterable_item_f( Prefix )
 #define P_Iterable_off( arg ) PRIMITIVE_CAT( arg, _iterable_off )
 int32_t
 P_Iterable_off( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
-   p_iterable_off_f
-
-   returns function to return whether cursor in the p_iterable is off
-
-   @param p_iterable the pointer to the iterable struct
-   @return the function
-*/
-typedef int32_t (*iterable_off_f)( protocol_base_t *p_iterable );
-#define P_Iterable_off_f( arg ) PRIMITIVE_CAT( arg, _iterable_off_f )
-iterable_off_f
-P_Iterable_off_f( Prefix )
 (
    protocol_base_t *p_iterable
 );
@@ -228,22 +120,6 @@ P_Iterable_is_empty( Prefix )
 );
 
 /**
-   p_iterable_is_empty_f
-
-   returns function to return whether the p_iterable is empty
-
-   @param p_iterable the pointer to the iterable struct
-   @return the function
-*/
-typedef int32_t (*iterable_is_empty_f)( protocol_base_t *p_iterable );
-#define P_Iterable_is_empty_f( arg ) PRIMITIVE_CAT( arg, _iterable_is_empty_f )
-iterable_is_empty_f
-P_Iterable_is_empty_f( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
    p_iterable_start
 
    puts cursor in p_iterable at first item
@@ -258,22 +134,6 @@ P_Iterable_start( Prefix )
 );
 
 /**
-   p_iterable_start_f
-
-   returns function to put cursor in p_iterable at first item
-
-   @param p_iterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef void (*iterable_start_f)( protocol_base_t *p_iterable );
-#define P_Iterable_start_f( arg ) PRIMITIVE_CAT( arg, _iterable_start_f )
-iterable_start_f
-P_Iterable_start_f( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
    p_iterable_forth
 
    puts cursor in p_iterable at next item, if any
@@ -283,22 +143,6 @@ P_Iterable_start_f( Prefix )
 #define P_Iterable_forth( arg ) PRIMITIVE_CAT( arg, _iterable_forth )
 void
 P_Iterable_forth( Prefix )
-(
-   protocol_base_t *p_iterable
-);
-
-/**
-   p_iterable_forth_f
-
-   returns function to put cursor in p_iterable at next item
-
-   @param p_iterable the pointer to the protocol base struct
-   @return the function
-*/
-typedef void (*iterable_forth_f)( protocol_base_t *p_iterable );
-#define P_Iterable_forth_f( arg ) PRIMITIVE_CAT( arg, _iterable_forth_f )
-iterable_forth_f
-P_Iterable_forth_f( Prefix )
 (
    protocol_base_t *p_iterable
 );

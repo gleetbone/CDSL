@@ -1,7 +1,7 @@
 /**
  @file HTable_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for HTable_make"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for HTable_make.
+ Unit tests for HTable_t
 
 */
 
@@ -44,7 +44,7 @@ void test_dispose_1( void )
 
    CU_ASSERT( htable != NULL );
    
-   ii_htable_dispose( htable );
+   ii_htable_dispose( &htable );
  
    return;
 }

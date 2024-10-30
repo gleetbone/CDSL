@@ -1,7 +1,7 @@
 /**
  @file f_Matvec.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "implementation file for matrices of floats"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -36,10 +36,6 @@ extern "C" {
 #define DUPLICATE_FUNCTION( arg ) ( arg )
 #define SET_FROM( arg1, arg2 ) ( ( arg1 = arg2 ) )
 #define DISPOSE_FUNCTION( arg )
-
-#define PRE_FILE DBC_YES
-#define POST_FILE DBC_YES
-#define INVARIANT_FILE DBC_YES
 
 #define Prefix f
 #define Type float

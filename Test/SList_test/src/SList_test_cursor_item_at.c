@@ -1,7 +1,7 @@
 /**
  @file SList_test_cursor_item_at.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_cursor_item_at"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_cursor_item_at.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -49,7 +50,7 @@ void test_cursor_item_at_1( void )
 
    CU_ASSERT( int_slist_cursor_item_at( cursor ) == 24 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -78,7 +79,40 @@ void test_cursor_item_at_2( void )
 
    CU_ASSERT( int_slist_cursor_item_at( cursor ) == 13 );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_cursor_item_at_3
+*/
+
+void test_cursor_item_at_3( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   list = s_slist_make();
+   
+   s_slist_put_last( list, s1 );
+   s_slist_put_last( list, s2 );
+
+   s_slist_cursor_t *cursor = s_slist_cursor_make( list );
+
+   CU_ASSERT( cursor != NULL );
+
+   s_slist_cursor_start( cursor );
+
+   CU_ASSERT( s_slist_cursor_item_at( cursor ) == s1 );
+
+   s_slist_cursor_forth( cursor );
+
+   CU_ASSERT( s_slist_cursor_item_at( cursor ) == s2 );
+
+   s_slist_deep_dispose( &list );
 
    return;
 }
@@ -103,6 +137,9 @@ add_test_cursor_item_at( void )
 
    // test_cursor_item_at_2
    add_test_to_suite( p_suite, test_cursor_item_at_2, "test_cursor_item_at_2" );
+
+   // test_cursor_item_at_3
+   add_test_to_suite( p_suite, test_cursor_item_at_3, "test_cursor_item_at_3" );
 
    return CUE_SUCCESS;
 

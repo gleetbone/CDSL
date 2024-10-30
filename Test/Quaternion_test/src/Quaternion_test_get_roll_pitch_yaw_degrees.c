@@ -1,8 +1,8 @@
 /**
  @file Quaternion_test_get_roll_pitch_yaw_degrees.c
  @author Greg Lee
- @version 1.0.0
- @brief: "tests for Quaternion_make"
+ @version 2.0.0
+ @brief: "tests for Quaternion_t"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
  @section License
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for Quaternion_make.
+ Unit tests for Quaternion_t
 
 */
 
@@ -49,7 +49,7 @@ void test_get_roll_pitch_yaw_degrees_1( void )
    CU_ASSERT( array[1] == 0.0 );
    CU_ASSERT( array[2] == 0.0 );
 
-   f_quaternion_dispose( fq );
+   f_quaternion_dispose( &fq );
    free( array );
 
    fq = f_quaternion_make_from_roll_degrees( 60.0 );
@@ -61,7 +61,7 @@ void test_get_roll_pitch_yaw_degrees_1( void )
    CU_ASSERT( fabs( array[1] ) < 0.0001 );
    CU_ASSERT( fabs( array[2] ) < 0.0001 );
 
-   f_quaternion_dispose( fq );
+   f_quaternion_dispose( &fq );
    free( array );
 
    fq = f_quaternion_make_from_pitch_degrees( 60.0 );
@@ -73,7 +73,7 @@ void test_get_roll_pitch_yaw_degrees_1( void )
    CU_ASSERT( fabs( array[1] - 60.0 ) < 0.0001 );
    CU_ASSERT( fabs( array[2] ) < 0.0001 );
 
-   f_quaternion_dispose( fq );
+   f_quaternion_dispose( &fq );
    free( array );
 
    fq = f_quaternion_make_from_yaw_degrees( 60.0 );
@@ -85,7 +85,7 @@ void test_get_roll_pitch_yaw_degrees_1( void )
    CU_ASSERT( fabs( array[1] ) < 0.0001 );
    CU_ASSERT( fabs( array[2] - 60.0 ) < 0.0001 );
 
-   f_quaternion_dispose( fq );
+   f_quaternion_dispose( &fq );
    free( array );
 
    return;
@@ -108,7 +108,7 @@ void test_get_roll_pitch_yaw_degrees_2( void )
    CU_ASSERT( array[1] == 0.0 );
    CU_ASSERT( array[2] == 0.0 );
 
-   d_quaternion_dispose( dq );
+   d_quaternion_dispose( &dq );
    free( array );
 
    dq = d_quaternion_make_from_roll_degrees( 60.0 );
@@ -120,7 +120,7 @@ void test_get_roll_pitch_yaw_degrees_2( void )
    CU_ASSERT( fabs( array[1] ) < 0.0001 );
    CU_ASSERT( fabs( array[2] ) < 0.0001 );
 
-   d_quaternion_dispose( dq );
+   d_quaternion_dispose( &dq );
    free( array );
 
    dq = d_quaternion_make_from_pitch_degrees( 60.0 );
@@ -132,7 +132,7 @@ void test_get_roll_pitch_yaw_degrees_2( void )
    CU_ASSERT( fabs( array[1] - 60.0 ) < 0.0001 );
    CU_ASSERT( fabs( array[2] ) < 0.0001 );
 
-   d_quaternion_dispose( dq );
+   d_quaternion_dispose( &dq );
    free( array );
 
    dq = d_quaternion_make_from_yaw_degrees( 60.0 );
@@ -144,7 +144,7 @@ void test_get_roll_pitch_yaw_degrees_2( void )
    CU_ASSERT( fabs( array[1] ) < 0.0001 );
    CU_ASSERT( fabs( array[2] - 60.0 ) < 0.0001 );
 
-   d_quaternion_dispose( dq );
+   d_quaternion_dispose( &dq );
    free( array );
 
    return;

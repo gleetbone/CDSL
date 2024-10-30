@@ -1,7 +1,7 @@
 /**
  @file SList_test_dispose.c
  @author Greg Lee
- @version 1.0.0
+ @version 2.0.0
  @brief: "tests for SList_dispose"
  @date: "$Mon Jan 01 15:18:30 PST 2018 @12 /Internet Time/$"
 
@@ -12,7 +12,7 @@
  
  @section Description
 
- Unit tests for SList_dispose.
+ Unit tests for SList_t.
 
 */
 
@@ -26,6 +26,7 @@ extern "C" {
 #include "CUnit/Basic.h"
 
 #include "int_SList.h"
+#include "s_SList.h"
 
 int
 add_test_to_suite( CU_pSuite p_suite, CU_TestFunc test, char *name );
@@ -42,7 +43,7 @@ void test_dispose_1( void )
 
    CU_ASSERT( list != NULL );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
 
    return;
 }
@@ -61,7 +62,31 @@ void test_dispose_2( void )
 
    CU_ASSERT( list != NULL );
 
-   int_slist_dispose( list );
+   int_slist_dispose( &list );
+
+   return;
+}
+
+/**
+   test_dispose_3
+*/
+
+void test_dispose_3( void )
+{
+   s_slist_t *list = NULL;
+
+   string_t *s1 = string_make_from_cstring( "1" );
+   string_t *s2 = string_make_from_cstring( "2" );
+   
+   list = s_slist_make();
+   s_slist_put_last( list, s1 );
+   s_slist_put_last( list, s2 );
+
+   CU_ASSERT( list != NULL );
+
+   s_slist_dispose( &list );
+   string_deep_dispose( &s1 );
+   string_deep_dispose( &s2 );
 
    return;
 }
@@ -86,6 +111,9 @@ add_test_dispose( void )
 
    // test_dispose_2
    add_test_to_suite( p_suite, test_dispose_2, "test_dispose_2" );
+
+   // test_dispose_3
+   add_test_to_suite( p_suite, test_dispose_3, "test_dispose_3" );
 
    return CUE_SUCCESS;
 
